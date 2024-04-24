@@ -109,6 +109,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 #pragma endregion
 
+#pragma region Factoryの生成
 	//DZGIファクトリーの生成
 	IDXGIFactory7* dxgiFactory = nullptr;
 	//HREUSLTはWindouws系のエラーコード
@@ -120,17 +121,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	log("Hello,DirectX\n");
 
-	MSG msg{};
-	//ウィンドウの×ボタンが押されるまでループ
-	while (msg.message != WM_QUIT) {
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		else {
-			//ゲームの処理
-		}
-	}
+#pragma endregion
+
+#pragma region アダプタの作成
 
 	//使用するアダプタ用の変数。最初にnullptrを入れておく
 	IDXGIAdapter4* useAdapter = nullptr;
@@ -149,6 +142,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		useAdapter = nullptr;
 	}
 	//適切なアダプタが見つからないので起動しない
+	//適切なアダプタが見つからなかったら起動できなくする
+	assert(useAdapter != nullptr);
+
+#pragma endregion
+
+#pragma region Deviceの生成
 	ID3D12Device* device = nullptr;
 
 	D3D_FEATURE_LEVEL featureLevels[] = {
@@ -167,7 +166,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(device != nullptr);
 	log("Complete create D3D12Device!!!\n");
 
+#pragma endregion
 
+#pragma region コマンドキュー
+	
 	//コマンドキュー生成
 	ID3D12CommandQueue* commandQueue = nullptr;
 	D3D12_COMMAND_QUEUE_DESC commandQueueDesc{};
@@ -175,22 +177,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//生成できない場合
 	assert(SUCCEEDED(hr));
 
+#pragma endregion
 
+#pragma region コマンドアロケータ
 	//コマンドアロケータ生成
 	ID3D12CommandAllocator* commandAllocator = nullptr;
 	hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&commandAllocator));
 	//生成できない場合
 	assert(SUCCEEDED(hr));
 
+#pragma endregion
 
+#pragma region コマンドリスト
 	//コマンドリスト生成
 	ID3D12GraphicsCommandList* commandList = nullptr;
 	hr = device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, commandAllocator, nullptr, IID_PPV_ARGS(&commandList));
 	//生成できない場合
 	assert(SUCCEEDED(hr));
+#pragma endregion
 
-
-
+#pragma region Swap Chainの生成
 	//スワップチェイン生成
 	IDXGISwapChain4* swapChain = nullptr;
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
@@ -204,9 +210,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	hr = dxgiFactory->CreateSwapChainForHwnd(commandQueue, hwnd, &swapChainDesc, nullptr, nullptr, reinterpret_cast<IDXGISwapChain1**>(&swapChain));
 	assert(SUCCEEDED(hr));
+#pragma endregion
 
-
-
+#pragma region ディスクリプターヒープの生成
 	//ディスクリプターヒープの生成
 	ID3D12DescriptorHeap* rtvDescriptorHeap = nullptr;
 	D3D12_DESCRIPTOR_HEAP_DESC rtvDescriptorHeapDesc{};
@@ -226,7 +232,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(hr));
 
 
-	//RTY
+	//RTV
 	D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 	rtvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 	rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
@@ -245,8 +251,45 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-	//適切なアダプタが見つからなかったら起動できなくする
-	assert(useAdapter != nullptr);
+	//　これから書き込みバックバッファのインデックスを取得
+	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
+	// 描画先のRTVの設定をする
+	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
+	//指定した色で画面をクリアする
+	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
+	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex],clearColor,0,nullptr);
+	//コマンドリストの内容を確定させる。全てのコマンドを積んでからclearする
+	hr = commandList->Close();
+	assert(SUCCEEDED(hr));
+
+
+	//GPUにコマンドリストの実行を行わせる
+	ID3D12CommandList* commandLists[] = { commandList };
+	commandQueue->ExecuteCommandLists(1, commandLists);
+	//GPUとOSに画面の交換を行うように通知する
+	swapChain->Present(1, 0);
+	//次のフレームのコマンドリストを準備
+	hr = commandAllocator->Reset();
+	assert(SUCCEEDED(hr));
+	hr = commandList->Reset(commandAllocator, nullptr);
+	assert(SUCCEEDED(hr));
+
+
+
+
+	MSG msg{};
+	//ウィンドウの×ボタンが押されるまでループ
+	while (msg.message != WM_QUIT) {
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		else {
+			//ゲームの処理
+		}
+	}
+
+
 
 	// 出力ウィンドウへの文字出力
 	OutputDebugStringA("Hello DirectX!\n");
