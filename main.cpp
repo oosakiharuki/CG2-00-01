@@ -401,6 +401,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	swapChain->Release();
 	commandList->Release();
 	commandAllocator->Release();
+	commandQueue->Release();
 	device->Release();
 	useAdapter->Release();
 	dxgiFactory->Release();
