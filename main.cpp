@@ -8,11 +8,15 @@
 
 #include <dxgidebug.h>
 
+#include <dxcapi.h>
+
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 
 #pragma comment(lib,"dxguid.lib")
 
+
+#pragma command(lib,"dxcompiler.lib")
 
 //std::string str0{ "STRING!!!" };
 //
@@ -49,6 +53,38 @@ std::string ConvertString(const std::wstring& str) {
 void log(const std::string& message) {
 	OutputDebugStringA(message.c_str());
 }
+
+//ComplierShader関数
+IDxcBlob* CompileShader(
+	const std::wstring& filePath,
+	const wchar_t* profile,
+	IDxcUtils* dxcUtils,
+	IDxcCompiler3* dxcCompiler,
+	IDxcIncludeHandler* includeHandler)
+{
+	//1.hlslファイル
+	log(ConvertString(std::format(L"Begin CompileShader,path{},profile:{}\n", filePath, profile)));
+	
+	IDxcBlobEncoding* shaderSource = nullptr;
+	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
+	
+	assert(SUCCEEDED(hr));
+
+	DxcBuffer shaderSourceBuffer;
+	shaderSourceBuffer.Ptr = shaderSource->GetBufferPointer();
+	shaderSourceBuffer.Size = shaderSource->GetBufferSize();
+	shaderSourceBuffer.Encoding = DXC_CP_UTF8;
+	
+	//2.Complie
+	
+	//3.警告エラー
+
+	//4.Complie結果
+}
+
+
+
+
 
 //ウィンドウプロシージャ
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
@@ -352,6 +388,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	assert(fenceEvent != nullptr);
+
+
+	//DXC
+	IDxcUtils* dxcUtils = nullptr;
+	IDxcCompiler3* dxcCompiler = nullptr;
+	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcUtils));
+	assert(SUCCEEDED(hr));
+
+	IDxcIncludeHandler* includeHandler = nullptr;
+	hr = dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
+	assert(SUCCEEDED(hr));
+
+
+
 
 
 	//FENCEを更新する
