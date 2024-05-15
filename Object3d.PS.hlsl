@@ -5,7 +5,7 @@ float4 main() : SV_TARGET
 
 struct PixelShaderOutput
 {
-    float34_t4 color : SV_Target0;
+    float32_t4 color : SV_Target0;
 };
 
 PixelShaderOutput main()
