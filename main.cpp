@@ -16,7 +16,7 @@
 #pragma comment(lib,"dxguid.lib")
 
 
-//#pragma command(lib,"dxcompiler.lib")
+#pragma comment(lib,"dxcompiler.lib")
 
 //std::string str0{ "STRING!!!" };
 //
@@ -63,7 +63,7 @@ IDxcBlob* CompileShader(
 	IDxcIncludeHandler* includeHandler)
 {
 	//1.hlslファイル
-	log(ConvertString(std::format(L"Begin CompileShader,path{},profile:{}\n", filePath, profile)));
+	log(ConvertString(std::format(L"Begin CompileShader,path:{},profile:{}\n", filePath, profile)));
 	
 	IDxcBlobEncoding* shaderSource = nullptr;
 	HRESULT hr = dxcUtils->LoadFile(filePath.c_str(), nullptr, &shaderSource);
@@ -81,7 +81,7 @@ IDxcBlob* CompileShader(
 		L"-E",L"main",
 		L"-T",profile,
 		L"-Zi",L"-Qembed_debug",
-		L"-0d",
+		L"-Od",
 		L"-Zpr",
 	};
 
@@ -118,7 +118,12 @@ IDxcBlob* CompileShader(
 	return shaderBlob;
 }
 
-
+struct Vector4 {
+	float x;
+	float y;
+	float z;
+	float s;
+};
 
 
 
@@ -367,114 +372,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	device->CreateRenderTargetView(swapChainResource[1], &rtvDesc, rtvHandles[1]);
 
 
-
-
-	//　これから書き込みバックバッファのインデックスを取得
-	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
-
-
-	//TransitionBarrierの設定
-	D3D12_RESOURCE_BARRIER barrier{};
-	//今回のバリアはTransition
-	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-	//Noneにしておく
-	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
-	//バリアを貼る対象のリソース。現在のバッファに対して行う
-	barrier.Transition.pResource = swapChainResource[backBufferIndex];
-	//前の(現在の)ResourceState
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
-	//後のResourceState
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	//TransitionBarrierを張る
-	commandList->ResourceBarrier(1, &barrier);
-
-
-
-
-	// 描画先のRTVの設定をする
-	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
-	//指定した色で画面をクリアする
-	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
-	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
-
-	//画面に描く処理はすべて終わり、画面に映すので、状況をそうい
-	//今回はResourceTargetからPresentにする
-	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-	//TransitionBarrierを張る
-	commandList->ResourceBarrier(1, &barrier);
-
-
-	//コマンドリストの内容を確定させる。全てのコマンドを積んでからclearする
-	hr = commandList->Close();
-	assert(SUCCEEDED(hr));
-
-
-	//GPUにコマンドリストの実行を行わせる
-	ID3D12CommandList* commandLists[] = { commandList };
-	commandQueue->ExecuteCommandLists(1, commandLists);
-	//GPUとOSに画面の交換を行うように通知する
-	swapChain->Present(1, 0);
-
-	//初期化で0でFenceを作る
-	ID3D12Fence* fence = nullptr;
-	uint64_t fenceValue = 0;
-	hr = device->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
-	assert(SUCCEEDED(hr));
-
-	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	assert(fenceEvent != nullptr);
-
-
 	//DXC
 	IDxcUtils* dxcUtils = nullptr;
 	IDxcCompiler3* dxcCompiler = nullptr;
-	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcUtils));
+	hr = DxcCreateInstance(CLSID_DxcUtils, IID_PPV_ARGS(&dxcUtils));
 	assert(SUCCEEDED(hr));
+	hr = DxcCreateInstance(CLSID_DxcCompiler, IID_PPV_ARGS(&dxcCompiler));
+	assert(SUCCEEDED(hr));
+
 
 	IDxcIncludeHandler* includeHandler = nullptr;
 	hr = dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
 	assert(SUCCEEDED(hr));
 
-
-
-
-
-	//FENCEを更新する
-	fenceValue++;
-
-	commandQueue->Signal(fence, fenceValue);
-
-	if (fence->GetCompletedValue() < fenceValue) {
-
-		fence->SetEventOnCompletion(fenceValue, fenceEvent);
-
-		WaitForSingleObject(fenceEvent, INFINITE);
-
-	}
-
-
-	//次のフレームのコマンドリストを準備
-	hr = commandAllocator->Reset();
-	assert(SUCCEEDED(hr));
-	hr = commandList->Reset(commandAllocator, nullptr);
-	assert(SUCCEEDED(hr));
-
-
-
-
-	MSG msg{};
-	//ウィンドウの×ボタンが押されるまでループ
-	while (msg.message != WM_QUIT) {
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-		else {
-			//ゲームの処理
-		}
-	}
-
+	//RootSignature
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
 	descriptionRootSignature.Flags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
@@ -492,16 +403,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
 	assert(SUCCEEDED(hr));
 
-
+	
 	//InputLayout
 	D3D12_INPUT_ELEMENT_DESC inputElementDescs[1] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
 	inputElementDescs[0].SemanticIndex = 0;
 	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	inputElementDescs[0].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
-	D3D12_INPUT_LAYOUT_DESC inputLayoutDescs{};
-	inputLayoutDescs.pInputElementDescs = inputElementDescs;
-	inputLayoutDescs.NumElements = _countof(inputElementDescs);
+	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
+	inputLayoutDesc.pInputElementDescs = inputElementDescs;
+	inputLayoutDesc.NumElements = _countof(inputElementDescs);
 
 
 	//BlendState
@@ -517,16 +428,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//shaderのコンパイラ
-	IDxcBlob* vertexShaderBlob = CompileShader(L"Object3D.VS.hlsl",L"vs_6_0",dxcUtils,dxcCompiler,includeHandler);
+	IDxcBlob* vertexShaderBlob = CompileShader(L"Object3d.VS.hlsl",L"vs_6_0",dxcUtils,dxcCompiler,includeHandler);
 	assert(vertexShaderBlob != nullptr);
 
-	IDxcBlob* pixelShaderBlob = CompileShader(L"Object3D.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
+	IDxcBlob* pixelShaderBlob = CompileShader(L"Object3d.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
 	assert(pixelShaderBlob != nullptr);
 
 
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
 	graphicsPipelineStateDesc.pRootSignature = rootSignature;
-	graphicsPipelineStateDesc.InputLayout = inputLayoutDescs;
+	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;
 	graphicsPipelineStateDesc.VS = { vertexShaderBlob->GetBufferPointer(),vertexShaderBlob->GetBufferSize() };
 	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),pixelShaderBlob->GetBufferSize() };
 	graphicsPipelineStateDesc.BlendState = blendDesc;
@@ -543,9 +454,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ID3D12PipelineState* graphicsPipelineState = nullptr;
 	hr = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
 	assert(SUCCEEDED(hr));
+	//ここまでがPSO
 
 
-
+	//VertexResource
 	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
 	uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD;
 
@@ -591,7 +503,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-
 	D3D12_VIEWPORT viewport;
 
 	viewport.Width = kClientWidth;
@@ -609,6 +520,35 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
 
+
+	//　これから書き込みバックバッファのインデックスを取得
+	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
+
+
+	//TransitionBarrierの設定
+	D3D12_RESOURCE_BARRIER barrier{};
+	//今回のバリアはTransition
+	barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	//Noneにしておく
+	barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	//バリアを貼る対象のリソース。現在のバッファに対して行う
+	barrier.Transition.pResource = swapChainResource[backBufferIndex];
+	//前の(現在の)ResourceState
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PRESENT;
+	//後のResourceState
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	//TransitionBarrierを張る
+	commandList->ResourceBarrier(1, &barrier);
+
+
+
+
+	// 描画先のRTVの設定をする
+	commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, nullptr);
+	//指定した色で画面をクリアする
+	float clearColor[] = { 0.1f,0.25f,0.5f,1.0f };
+	commandList->ClearRenderTargetView(rtvHandles[backBufferIndex], clearColor, 0, nullptr);
+	
 	commandList->RSSetViewports(1, &viewport);
 	commandList->RSSetScissorRects(1, &scissorRect);
 
@@ -619,6 +559,78 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	commandList->DrawInstanced(3, 1, 0, 0);
+
+	//画面に描く処理はすべて終わり、画面に映すので、状況をそうい
+	//今回はResourceTargetからPresentにする
+	barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	//TransitionBarrierを張る
+	commandList->ResourceBarrier(1, &barrier);
+
+
+	//コマンドリストの内容を確定させる。全てのコマンドを積んでからclearする
+	hr = commandList->Close();
+	assert(SUCCEEDED(hr));
+
+
+	//GPUにコマンドリストの実行を行わせる
+	ID3D12CommandList* commandLists[] = { commandList };
+	commandQueue->ExecuteCommandLists(1, commandLists);
+	//GPUとOSに画面の交換を行うように通知する
+	swapChain->Present(1, 0);
+
+	//初期化で0でFenceを作る
+	ID3D12Fence* fence = nullptr;
+	uint64_t fenceValue = 0;
+	hr = device->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
+	assert(SUCCEEDED(hr));
+
+	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	assert(fenceEvent != nullptr);
+
+
+
+
+
+
+
+	//FENCEを更新する
+	fenceValue++;
+
+	commandQueue->Signal(fence, fenceValue);
+
+	if (fence->GetCompletedValue() < fenceValue) {
+
+		fence->SetEventOnCompletion(fenceValue, fenceEvent);
+
+		WaitForSingleObject(fenceEvent, INFINITE);
+
+	}
+
+
+	//次のフレームのコマンドリストを準備
+	hr = commandAllocator->Reset();
+	assert(SUCCEEDED(hr));
+	hr = commandList->Reset(commandAllocator, nullptr);
+	assert(SUCCEEDED(hr));
+
+
+
+
+
+
+
+	MSG msg{};
+	//ウィンドウの×ボタンが押されるまでループ
+	while (msg.message != WM_QUIT) {
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+		else {
+			//ゲームの処理
+		}
+	}
 
 
 
