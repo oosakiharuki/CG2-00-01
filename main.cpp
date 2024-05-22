@@ -278,8 +278,180 @@ Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Ve
 }
 #pragma endregion
 
+#pragma region 逆数
+Matrix4x4 Inverse(const Matrix4x4& m) {
+	float A = m.m[0][0] * m.m[1][1] * m.m[2][2] * m.m[3][3]
+		+ m.m[0][0] * m.m[1][2] * m.m[2][3] * m.m[3][1]
+		+ m.m[0][0] * m.m[1][3] * m.m[2][1] * m.m[3][2]
+		- m.m[0][0] * m.m[1][3] * m.m[2][2] * m.m[3][1]
+		- m.m[0][0] * m.m[1][2] * m.m[2][1] * m.m[3][3]
+		- m.m[0][0] * m.m[1][1] * m.m[2][3] * m.m[3][2]
+		- m.m[0][1] * m.m[1][0] * m.m[2][2] * m.m[3][3]
+		- m.m[0][2] * m.m[1][0] * m.m[2][3] * m.m[3][1]
+		- m.m[0][3] * m.m[1][0] * m.m[2][1] * m.m[3][2]
+		+ m.m[0][3] * m.m[1][0] * m.m[2][2] * m.m[3][1]
+		+ m.m[0][2] * m.m[1][0] * m.m[2][1] * m.m[3][3]
+		+ m.m[0][1] * m.m[1][0] * m.m[2][3] * m.m[3][2]
+		+ m.m[0][1] * m.m[1][2] * m.m[2][0] * m.m[3][3]
+		+ m.m[0][2] * m.m[1][3] * m.m[2][0] * m.m[3][1]
+		+ m.m[0][3] * m.m[1][1] * m.m[2][0] * m.m[3][2]
+		- m.m[0][3] * m.m[1][2] * m.m[2][0] * m.m[3][1]
+		- m.m[0][2] * m.m[1][1] * m.m[2][0] * m.m[3][3]
+		- m.m[0][1] * m.m[1][3] * m.m[2][0] * m.m[3][2]
+		- m.m[0][1] * m.m[1][2] * m.m[2][3] * m.m[3][0]
+		- m.m[0][2] * m.m[1][3] * m.m[2][1] * m.m[3][0]
+		- m.m[0][3] * m.m[1][1] * m.m[2][2] * m.m[3][0]
+		+ m.m[0][3] * m.m[1][2] * m.m[2][1] * m.m[3][0]
+		+ m.m[0][2] * m.m[1][1] * m.m[2][3] * m.m[3][0]
+		+ m.m[0][1] * m.m[1][3] * m.m[2][2] * m.m[3][0];
 
 
+	Matrix4x4 result{};
+	result.m[0][0] = (m.m[1][1] * m.m[2][2] * m.m[3][3]
+		+ m.m[1][2] * m.m[2][3] * m.m[3][1]
+		+ m.m[1][3] * m.m[2][1] * m.m[3][2]
+		- m.m[1][3] * m.m[2][2] * m.m[3][1]
+		- m.m[1][2] * m.m[2][1] * m.m[3][3]
+		- m.m[1][1] * m.m[2][3] * m.m[3][2]) / A;
+
+	result.m[0][1] = (-m.m[0][1] * m.m[2][2] * m.m[3][3]
+		- m.m[0][2] * m.m[2][3] * m.m[3][1]
+		- m.m[0][3] * m.m[2][1] * m.m[3][2]
+		+ m.m[0][3] * m.m[2][2] * m.m[3][1]
+		+ m.m[0][2] * m.m[2][1] * m.m[3][3]
+		+ m.m[0][1] * m.m[2][3] * m.m[3][2]) / A;
+
+	result.m[0][2] = (m.m[0][1] * m.m[1][2] * m.m[3][3]
+		+ m.m[0][2] * m.m[1][3] * m.m[3][1]
+		+ m.m[0][3] * m.m[1][1] * m.m[3][2]
+		- m.m[0][3] * m.m[1][2] * m.m[3][1]
+		- m.m[0][2] * m.m[1][1] * m.m[3][3]
+		- m.m[0][1] * m.m[1][3] * m.m[3][2]) / A;
+
+	result.m[0][3] = (-m.m[0][1] * m.m[1][2] * m.m[2][3]
+		- m.m[0][2] * m.m[1][3] * m.m[2][1]
+		- m.m[0][3] * m.m[1][1] * m.m[2][2]
+		+ m.m[0][3] * m.m[1][2] * m.m[2][1]
+		+ m.m[0][2] * m.m[1][1] * m.m[2][3]
+		+ m.m[0][1] * m.m[1][3] * m.m[2][2]) / A;
+
+
+	result.m[1][0] = (-m.m[1][0] * m.m[2][2] * m.m[3][3]
+		- m.m[1][2] * m.m[2][3] * m.m[3][0]
+		- m.m[1][3] * m.m[2][0] * m.m[3][2]
+		+ m.m[1][3] * m.m[2][2] * m.m[3][0]
+		+ m.m[1][2] * m.m[2][0] * m.m[3][3]
+		+ m.m[1][0] * m.m[2][3] * m.m[3][2]) / A;
+
+	result.m[1][1] = (m.m[0][0] * m.m[2][2] * m.m[3][3]
+		+ m.m[0][2] * m.m[2][3] * m.m[3][0]
+		+ m.m[0][3] * m.m[2][0] * m.m[3][2]
+		- m.m[0][3] * m.m[2][2] * m.m[3][0]
+		- m.m[0][2] * m.m[2][0] * m.m[3][3]
+		- m.m[0][0] * m.m[2][3] * m.m[3][2]) / A;
+
+	result.m[1][2] = (-m.m[0][0] * m.m[1][2] * m.m[3][3]
+		- m.m[0][2] * m.m[1][3] * m.m[3][0]
+		- m.m[0][3] * m.m[1][0] * m.m[3][2]
+		+ m.m[0][3] * m.m[1][2] * m.m[3][0]
+		+ m.m[0][2] * m.m[1][0] * m.m[3][3]
+		+ m.m[0][0] * m.m[1][3] * m.m[3][2]) / A;
+
+	result.m[1][3] = (m.m[0][0] * m.m[1][2] * m.m[2][3]
+		+ m.m[0][2] * m.m[1][3] * m.m[2][0]
+		+ m.m[0][3] * m.m[1][0] * m.m[2][2]
+		- m.m[0][3] * m.m[1][2] * m.m[2][0]
+		- m.m[0][2] * m.m[1][0] * m.m[2][3]
+		- m.m[0][0] * m.m[1][3] * m.m[2][2]) / A;
+
+
+	result.m[2][0] = (m.m[1][0] * m.m[2][1] * m.m[3][3]
+		+ m.m[1][1] * m.m[2][3] * m.m[3][0]
+		+ m.m[1][3] * m.m[2][0] * m.m[3][1]
+		- m.m[1][3] * m.m[2][1] * m.m[3][0]
+		- m.m[1][1] * m.m[2][0] * m.m[3][3]
+		- m.m[1][0] * m.m[2][3] * m.m[3][1]) / A;
+
+	result.m[2][1] = (-m.m[0][0] * m.m[2][1] * m.m[3][3]
+		- m.m[0][1] * m.m[2][3] * m.m[3][0]
+		- m.m[0][3] * m.m[2][0] * m.m[3][1]
+		+ m.m[0][3] * m.m[2][1] * m.m[3][0]
+		+ m.m[0][1] * m.m[2][0] * m.m[3][3]
+		+ m.m[0][0] * m.m[2][3] * m.m[3][1]) / A;
+
+	result.m[2][2] = (m.m[0][0] * m.m[1][1] * m.m[3][3]
+		+ m.m[0][1] * m.m[1][3] * m.m[3][0]
+		+ m.m[0][3] * m.m[1][0] * m.m[3][1]
+		- m.m[0][3] * m.m[1][1] * m.m[3][0]
+		- m.m[0][1] * m.m[1][0] * m.m[3][3]
+		- m.m[0][0] * m.m[1][3] * m.m[3][1]) / A;
+
+	result.m[2][3] = (-m.m[0][0] * m.m[1][1] * m.m[2][3]
+		- m.m[0][1] * m.m[1][3] * m.m[2][0]
+		- m.m[0][3] * m.m[1][0] * m.m[2][1]
+		+ m.m[0][3] * m.m[1][1] * m.m[2][0]
+		+ m.m[0][1] * m.m[1][0] * m.m[2][3]
+		+ m.m[0][0] * m.m[1][3] * m.m[2][1]) / A;
+
+
+	result.m[3][0] = (-m.m[1][0] * m.m[2][1] * m.m[3][2]
+		- m.m[1][1] * m.m[2][2] * m.m[3][0]
+		- m.m[1][2] * m.m[2][0] * m.m[3][1]
+		+ m.m[1][2] * m.m[2][1] * m.m[3][0]
+		+ m.m[1][1] * m.m[2][0] * m.m[3][2]
+		+ m.m[1][0] * m.m[2][2] * m.m[3][1]) / A;
+
+	result.m[3][1] = (m.m[0][0] * m.m[2][1] * m.m[3][2]
+		+ m.m[0][1] * m.m[2][2] * m.m[3][0]
+		+ m.m[0][2] * m.m[2][0] * m.m[3][1]
+		- m.m[0][2] * m.m[2][1] * m.m[3][0]
+		- m.m[0][1] * m.m[2][0] * m.m[3][2]
+		- m.m[0][0] * m.m[2][2] * m.m[3][1]) / A;
+
+	result.m[3][2] = (-m.m[0][0] * m.m[1][1] * m.m[3][2]
+		- m.m[0][1] * m.m[1][2] * m.m[3][0]
+		- m.m[0][2] * m.m[1][0] * m.m[3][1]
+		+ m.m[0][2] * m.m[1][1] * m.m[3][0]
+		+ m.m[0][1] * m.m[1][0] * m.m[3][2]
+		+ m.m[0][0] * m.m[1][2] * m.m[3][1]) / A;
+
+	result.m[3][3] = (m.m[0][0] * m.m[1][1] * m.m[2][2]
+		+ m.m[0][1] * m.m[1][2] * m.m[2][0]
+		+ m.m[0][2] * m.m[1][0] * m.m[2][1]
+		- m.m[0][2] * m.m[1][1] * m.m[2][0]
+		- m.m[0][1] * m.m[1][0] * m.m[2][2]
+		- m.m[0][0] * m.m[1][2] * m.m[2][1]) / A;
+
+	return result;
+}
+#pragma endregion
+
+Matrix4x4 MakePerspectiveFovMatrix(float forY, float aspectRatio, float nearClip, float farClip) {
+	Matrix4x4 result;
+	float cot = 1 / std::tan(forY / 2);
+
+	result.m[0][0] = (1 / aspectRatio) * cot;
+	result.m[1][1] = cot;
+	result.m[2][2] = farClip / (farClip - nearClip);
+	result.m[2][3] = 1.0f;
+	result.m[3][2] = (-nearClip * farClip) / (farClip - nearClip);
+
+
+	result.m[0][1] = 0.0f;
+	result.m[0][2] = 0.0f;
+	result.m[0][3] = 0.0f;
+	result.m[1][0] = 0.0f;
+	result.m[1][2] = 0.0f;
+	result.m[1][3] = 0.0f;
+	result.m[2][0] = 0.0f;
+	result.m[2][1] = 0.0f;
+	result.m[3][0] = 0.0f;
+	result.m[3][1] = 0.0f;
+	result.m[3][3] = 0.0f;
+
+
+	return result;
+}
 
 	
 ID3D12Resource* CreateBufferResource(ID3D12Device* device, size_t sizeInBytes) {
@@ -728,10 +900,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				
 
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
+	Transform cameraTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f}, {0.0f,0.0f,-4.5f} };
 
-	//Matrix4x4 cameraMatrix = MakeAffineMatrix();
-	//Matrix4x4 viewMatrix = ()
-
+	
 
 
 
@@ -844,13 +1015,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			assert(SUCCEEDED(hr));
 			hr = commandList->Reset(commandAllocator, nullptr);
 			assert(SUCCEEDED(hr));
+
+
+			transform.rotate.y += 0.03f;	
 			
+			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+			Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
+			Matrix4x4 viewMatrix = Inverse(cameraMatrix);
+			Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 100.0f);
+			Matrix4x4 WorldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 
-			transform.rotate.y += 0.03f;
-			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale,transform.rotate,transform.translate);
-			*wvpDate = worldMatrix;
+			*wvpDate = WorldViewProjectionMatrix;
 
-		}	
+
+		}
 	}
 
 		
