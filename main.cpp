@@ -928,6 +928,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	
 
+
+	float *inputMaterial[3] = { &materialDate->x,&materialDate->y,&materialDate->z };
+	float* inputTransform[3] = { &transform.translate.x,&transform.translate.y,&transform.translate.z };
+	
+	
+	float* inputRotate[3] = { &transform.rotate.x,&transform.rotate.y,&transform.rotate.z };
+
+	float* inputScale[3] = { &transform.scale.x,&transform.scale.y,&transform.scale.z };
+
+
 	//ImGui初期化
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -964,7 +974,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
 
-			transform.rotate.y += 0.03f;	
+			//transform.rotate.y += 0.03f;	
 			
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
@@ -979,6 +989,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::ShowDemoWindow();
 
 			//ここにテキストを入れられる
+			ImGui::Text("ImGuiText");
+
+
+			ImGui::InputFloat3("Material", *inputMaterial);
+			ImGui::SliderFloat3("SliderMaterial",*inputMaterial,0.0f,1.0f);			
+			
+			ImGui::InputFloat3("Vertex", *inputTransform);
+			ImGui::SliderFloat3("SliderVertex", *inputTransform, -5.0f, 5.0f);
+
+			ImGui::InputFloat3("Rotate", *inputRotate);
+			ImGui::SliderFloat3("SliderRotate", *inputRotate, -10.0f, 10.0f);
+			
+			ImGui::InputFloat3("Scale", *inputScale);
+			ImGui::SliderFloat3("SliderScale", *inputScale, 0.5f, 5.0f);
+
+
 
 
 			//ImGuiの内部コマンド
