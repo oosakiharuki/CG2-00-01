@@ -984,16 +984,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 
-	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(Vector4) * 3);
+	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 3);
 
 
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 
-	vertexBufferView.SizeInBytes = sizeof(Vector4) * 3;
+	vertexBufferView.SizeInBytes = sizeof(VertexData) * 3;
 
-	vertexBufferView.StrideInBytes = sizeof(Vector4);
+	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
 	
 	ID3D12Resource* wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
@@ -1029,7 +1029,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//書き込むためのアドレス
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialDate));
 	//色の設定
-	*materialDate = Vector4(1.0f, 0.0f, 0.0f, 1.0f);
+	*materialDate = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
 
 	//ビューポート
@@ -1137,7 +1137,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			*wvpDate = WorldViewProjectionMatrix;
 
-
+			
 			//開発用UIの処理
 			ImGui::ShowDemoWindow();
 
