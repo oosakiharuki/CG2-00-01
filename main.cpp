@@ -589,6 +589,41 @@ void UploadTextureData(ID3D12Resource* texture, const DirectX::ScratchImage& mip
 }
 
 
+ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t width, int32_t height) {
+	
+	D3D12_RESOURCE_DESC resourceDesc{};
+	resourceDesc.Width = width;
+	resourceDesc.Height = height;
+	resourceDesc.MipLevels = 1;
+	resourceDesc.DepthOrArraySize = 1;
+	resourceDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	resourceDesc.SampleDesc.Count = 1;
+	resourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;//二次元
+	resourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;//DepthStrencil
+
+	//利用するHeap
+	D3D12_HEAP_PROPERTIES heapProperties{};
+	heapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;//VRAN上で作る
+
+
+	//深度値のクリア設定
+	D3D12_CLEAR_VALUE depthClearValue{};
+	depthClearValue.DepthStencil.Depth = 1.0f;
+	depthClearValue.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+
+
+	//resourceの生成
+	ID3D12Resource* resource = nullptr;
+	HRESULT hr = device->CreateCommittedResource(
+		&heapProperties,
+		D3D12_HEAP_FLAG_NONE,
+		&resourceDesc,
+		D3D12_RESOURCE_STATE_DEPTH_WRITE,
+		&depthClearValue,
+		IID_PPV_ARGS(&resource));
+	assert(SUCCEEDED(hr));
+	return resource;
+}
 
 //ウィンドウプロシージャ
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
@@ -790,6 +825,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 #pragma region ディスクリプターヒープの生成
+	ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
+
+
+	//DSVようのヒープでディスクリプタの数1、shader内で触らないのでfalse
+	ID3D12DescriptorHeap* dsvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
+
+	//DSV生成
+	D3D12_DEPTH_STENCIL_VIEW_DESC dscDesc{};
+	dscDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	dscDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	//DSVHeapの先頭
+	device->CreateDepthStencilView(depthStencilResource,&dscDesc,dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 	
 	ID3D12DescriptorHeap* rtvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
 
@@ -877,7 +924,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	hr = dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
 	assert(SUCCEEDED(hr));
 	
-	
+
 
 #pragma region PSO
 
@@ -1006,17 +1053,46 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(hr));
 
 
+
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+
+	depthStencilDesc.DepthEnable = true;
+	
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+
+	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+
+
+	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
+	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+
+
+	//bool DepthFunc(float currZ, float prevZ) {
+	//	return currZ <= prevZ;
+
+	//}
+	//bool DepthFunc(float currZ, float prevZ) {
+	//	return currZ >= prevZ;
+	//}
+
+	//if (DepthFunc(currZ, prevZ)) {
+	//	return currZ <= prevZ;
+	//}
+	//else {
+	//	return currZ >= prevZ;
+	//}
+
 #pragma endregion
 
 
-	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 3);
+	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 6);
 
 
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 
-	vertexBufferView.SizeInBytes = sizeof(VertexData) * 3;
+	vertexBufferView.SizeInBytes = sizeof(VertexData) * 6;
 
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
@@ -1045,6 +1121,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//rightBottom
 	vertexData[2].position = { 0.5f, -0.5f,0.0f,1.0f };
 	vertexData[2].texcoord = { 1.0f,1.0f };
+
+
+
+	//leftTop
+	vertexData[3].position = { -0.5f, -0.5f,0.5f,1.0f };
+	vertexData[3].texcoord = { 0.0f,1.0f };
+
+	//Top
+	vertexData[4].position = { 0.0f, 0.0f,0.0f,1.0f };
+	vertexData[4].texcoord = { 0.5f,0.0f };
+
+	//rightBottom
+	vertexData[5].position = { 0.5f, -0.5f,-0.5f,1.0f };
+	vertexData[5].texcoord = { 1.0f,1.0f };
+
 
 	
 	//マテリアル用のリソース
@@ -1126,13 +1217,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		else {
 			//ゲームの処理
-			
+
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
 
-			//transform.rotate.y += 0.03f;	
-			
+			transform.rotate.y += 0.03f;
+
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 			Matrix4x4 viewMatrix = Inverse(cameraMatrix);
@@ -1141,7 +1232,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			*wvpDate = WorldViewProjectionMatrix;
 
-			
+
 			//開発用UIの処理
 			ImGui::ShowDemoWindow();
 
@@ -1150,14 +1241,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			ImGui::InputFloat3("Material", *inputMaterial);
-			ImGui::SliderFloat3("SliderMaterial",*inputMaterial,0.0f,1.0f);			
-			
+			ImGui::SliderFloat3("SliderMaterial", *inputMaterial, 0.0f, 1.0f);
+
 			ImGui::InputFloat3("Vertex", *inputTransform);
 			ImGui::SliderFloat3("SliderVertex", *inputTransform, -5.0f, 5.0f);
 
 			ImGui::InputFloat3("Rotate", *inputRotate);
 			ImGui::SliderFloat3("SliderRotate", *inputRotate, -10.0f, 10.0f);
-			
+
 			ImGui::InputFloat3("Scale", *inputScale);
 			ImGui::SliderFloat3("SliderScale", *inputScale, 0.5f, 5.0f);
 
@@ -1166,7 +1257,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//ImGuiの内部コマンド
 			ImGui::Render();
-		
+
 
 			//　これから書き込みバックバッファのインデックスを取得
 			UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
@@ -1201,8 +1292,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ID3D12DescriptorHeap* descriptorHeaps[] = { srvDescriptorHeap };
 			commandList->SetDescriptorHeaps(1, descriptorHeaps);
 
+			//DSV
+			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);	
 
 
+			
 			commandList->RSSetViewports(1, &viewport);
 			commandList->RSSetScissorRects(1, &scissorRect);
 
@@ -1219,8 +1314,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
+			
 
-			commandList->DrawInstanced(3, 1, 0, 0);//だいたい最後
+			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
+			commandList->DrawInstanced(6, 1, 0, 0);//だいたい最後
 
 			//実際のcommandListのImGui描画コマンドを挟む
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
@@ -1313,6 +1411,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	mipImages.Release();
 	textureResource->Release();
+
+	depthStencilResource->Release();
+	dsvDescriptorHeap->Release();
 
 	CloseWindow(hwnd);
 
