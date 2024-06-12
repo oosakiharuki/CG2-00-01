@@ -825,19 +825,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 #pragma region ディスクリプターヒープの生成
-	ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
 
-
-	//DSVようのヒープでディスクリプタの数1、shader内で触らないのでfalse
-	ID3D12DescriptorHeap* dsvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
-
-	//DSV生成
-	D3D12_DEPTH_STENCIL_VIEW_DESC dscDesc{};
-	dscDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	dscDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-	//DSVHeapの先頭
-	device->CreateDepthStencilView(depthStencilResource,&dscDesc,dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-	
 	ID3D12DescriptorHeap* rtvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
 
 	ID3D12DescriptorHeap* srvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
@@ -875,6 +863,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 	ID3D12Resource* textureResource = CrateTextureResource(device, metadata);
 	UploadTextureData(textureResource, mipImages);
+		
+	ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
+
+	//DSVようのヒープでディスクリプタの数1、shader内で触らないのでfalse
+	ID3D12DescriptorHeap* dsvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
+
+	//DSV生成
+	D3D12_DEPTH_STENCIL_VIEW_DESC dscDesc{};
+	dscDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	dscDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	//DSVHeapの先頭
+	device->CreateDepthStencilView(depthStencilResource, &dscDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
+
 
 	//metadataを基にSRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -1046,41 +1047,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	graphicsPipelineStateDesc.SampleDesc.Count = 1;
 	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
-
-
-	ID3D12PipelineState* graphicsPipelineState = nullptr;
-	hr = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
-	assert(SUCCEEDED(hr));
-
-
-
-	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
-
-	depthStencilDesc.DepthEnable = true;
 	
+
+	//DepthStencilState
+	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
+	depthStencilDesc.DepthEnable = true;
 	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
-
 
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
 	graphicsPipelineStateDesc.DSVFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
-
-	//bool DepthFunc(float currZ, float prevZ) {
-	//	return currZ <= prevZ;
-
-	//}
-	//bool DepthFunc(float currZ, float prevZ) {
-	//	return currZ >= prevZ;
-	//}
-
-	//if (DepthFunc(currZ, prevZ)) {
-	//	return currZ <= prevZ;
-	//}
-	//else {
-	//	return currZ >= prevZ;
-	//}
+	//PSOここ絶対最後
+	ID3D12PipelineState* graphicsPipelineState = nullptr;
+	hr = device->CreateGraphicsPipelineState(&graphicsPipelineStateDesc, IID_PPV_ARGS(&graphicsPipelineState));
+	assert(SUCCEEDED(hr));
 
 #pragma endregion
 
