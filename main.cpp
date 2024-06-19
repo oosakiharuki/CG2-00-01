@@ -1168,7 +1168,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	*transformationMatrixDataSprite = MakeIdentity4x4();
 
-	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 
 	VertexData* vertexDateSprite = nullptr;
@@ -1227,7 +1226,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 	Transform cameraTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f}, {0.0f,0.0f,-4.5f} };
 
-	
+	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
+
 
 
 	float *inputMaterial[3] = { &materialDate->x,&materialDate->y,&materialDate->z };
@@ -1278,7 +1278,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
 
-			//transform.rotate.y += 0.03f;
+			transform.rotate.y += 0.03f;
 
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
@@ -1291,7 +1291,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 			//Matrix4x4 cameraMatrixSprite = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 			Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
 			//Matrix4x4 projectionMatrixSprite = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 100.0f);
@@ -1308,8 +1308,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//ここにテキストを入れられる
 			ImGui::Text("ImGuiText");
-
-
+			
+			
+			ImGui::Text("Traiangle");
 			ImGui::InputFloat3("Material", *inputMaterial);
 			ImGui::SliderFloat3("SliderMaterial", *inputMaterial, 0.0f, 1.0f);
 
@@ -1323,6 +1324,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::SliderFloat3("SliderScale", *inputScale, 0.5f, 5.0f);
 
 
+			ImGui::Text("Sprite");
+			ImGui::InputFloat("SpriteX", &transformSprite.translate.x);
+			ImGui::SliderFloat("SliderSpriteX", &transformSprite.translate.x, 0.0f, 1000.0f);
+
+			ImGui::InputFloat("SpriteY", &transformSprite.translate.y);
+			ImGui::SliderFloat("SliderSpriteY", &transformSprite.translate.y, 0.0f, 600.0f);
+
+			ImGui::InputFloat("SpriteZ", &transformSprite.translate.z);
+			ImGui::SliderFloat("SliderSpriteZ", &transformSprite.translate.z, 0.0f, 0.0f);
 
 
 			//ImGuiの内部コマンド
