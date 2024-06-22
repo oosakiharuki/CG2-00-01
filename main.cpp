@@ -18,6 +18,8 @@
 #include"externals/imgui/imgui_impl_win32.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+#define _USE_MATH_DEFINES
+#include <math.h>
 
 
 #pragma comment(lib,"d3d12.lib")
@@ -495,12 +497,108 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top,float right,float bottom,
 	return result;
 }
 
-	
-
 struct VertexData {
 	Vector4 position;
 	Vector2 texcoord;
 };
+
+struct Sphere {
+	Vector3 center;
+	float radius;
+};
+
+void DrawSphere(VertexData* vertexDataSphere) {
+	
+	const uint32_t kSubdivision = 16;
+	
+	float pi = float(M_PI);
+
+	const float kLonEvery = pi * 2.0f / float(kSubdivision);
+	const float kLatEvery = pi / float(kSubdivision);
+
+
+	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
+		float lat = -pi / 2.0f + kLatEvery * latIndex;//緯度 シ－タ
+
+		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
+		
+			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
+			float lon = lonIndex * kLonEvery;//経度　ファイ
+
+
+			VertexData vertA{};
+			vertA.position =
+			{
+				std::cos(lat) * std::cos(lon),
+				std::sin(lat),
+				std::cos(lat) * std::sin(lon),
+				1.0f
+			};
+			vertA.texcoord =
+			{
+				float(lonIndex) / float(kSubdivision),
+				1.0f - float(latIndex) / float(kSubdivision)
+			};
+
+
+			VertexData vertB{};
+			vertB.position =
+			{
+				std::cos(lat + lat) * std::cos(lon),
+				std::sin(lat + lat),
+				std::cos(lat + lat) * std::sin(lon)
+				,1.0f
+			};
+			vertB.texcoord =
+			{
+				float(lonIndex) / float(kSubdivision),
+				1.0f - float(latIndex + 1) / float(kSubdivision)
+			};
+
+
+			VertexData vertC{};
+			vertC.position =
+			{
+				std::cos(lat) * std::cos(lon + lon),
+				std::sin(lat),
+				std::cos(lat) * std::sin(lon + lon),
+				1.0f
+			};
+			vertC.texcoord =
+			{
+				float(lonIndex + 1) / float(kSubdivision),
+				1.0f - float(latIndex) / float(kSubdivision)
+			};
+
+
+			VertexData vertD{};
+			vertD.position =
+			{
+				std::cos(lat + lat) * std::cos(lon + lon),
+				std::sin(lat + lat),
+				std::cos(lat + lat) * std::sin(lon + lon),
+				1.0f
+			};
+			vertD.texcoord =
+			{
+				float(lonIndex + 1) / float(kSubdivision),
+				1.0f - float(latIndex + 1) / float(kSubdivision)
+			};
+
+
+			vertexDataSphere[start + 0] = vertA;
+			vertexDataSphere[start + 1] = vertC;
+			vertexDataSphere[start + 2] = vertB;
+
+			vertexDataSphere[start + 3] = vertB;
+			vertexDataSphere[start + 4] = vertC;
+			vertexDataSphere[start + 5] = vertD;
+
+
+		}
+	}
+}
+
 
 
 
@@ -1093,14 +1191,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 
-	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 6);
+	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 1536);//ここ変えるかも
 
 
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 
-	vertexBufferView.SizeInBytes = sizeof(VertexData) * 6;
+	vertexBufferView.SizeInBytes = sizeof(VertexData) * 1536;
 
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
@@ -1144,6 +1242,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
+	
 
 
 
@@ -1168,29 +1267,28 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	*transformationMatrixDataSprite = MakeIdentity4x4();
 
-	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f},{0.0f,0.0f,0.0f} };
 
 
-	VertexData* vertexDateSprite = nullptr;
-	vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDateSprite));
+	VertexData* vertexDataSprite = nullptr;
+	vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
 
-	vertexDateSprite[0].position = { 0.0f,360.0f,0.0f,1.0f };
-	vertexDateSprite[0].texcoord = { 0.0f,1.0f };
-	vertexDateSprite[1].position = { 0.0f,0.0f,0.0f,1.0f };
-	vertexDateSprite[1].texcoord = { 0.0f,0.0f };
-	vertexDateSprite[2].position = { 640.0f,360.0f,0.0f,1.0f };
-	vertexDateSprite[2].texcoord = { 1.0f,1.0f };
-
-
-	vertexDateSprite[3].position = { 0.0f,0.0f,0.0f,1.0f };
-	vertexDateSprite[3].texcoord = { 0.0f,0.0f };
-	vertexDateSprite[4].position = { 640.0f,0.0f,0.0f,1.0f };
-	vertexDateSprite[4].texcoord = { 1.0f,0.0f };
-	vertexDateSprite[5].position = { 640.0f,360.0f,0.0f,1.0f };
-	vertexDateSprite[5].texcoord = { 1.0f,1.0f };
+	vertexDataSprite[0].position = { 0.0f,360.0f,0.0f,1.0f };
+	vertexDataSprite[0].texcoord = { 0.0f,1.0f };
+	vertexDataSprite[1].position = { 0.0f,0.0f,0.0f,1.0f };
+	vertexDataSprite[1].texcoord = { 0.0f,0.0f };
+	vertexDataSprite[2].position = { 640.0f,360.0f,0.0f,1.0f };
+	vertexDataSprite[2].texcoord = { 1.0f,1.0f };
 
 
+	vertexDataSprite[3].position = { 0.0f,0.0f,0.0f,1.0f };
+	vertexDataSprite[3].texcoord = { 0.0f,0.0f };
+	vertexDataSprite[4].position = { 640.0f,0.0f,0.0f,1.0f };
+	vertexDataSprite[4].texcoord = { 1.0f,0.0f };
+	vertexDataSprite[5].position = { 640.0f,360.0f,0.0f,1.0f };
+	vertexDataSprite[5].texcoord = { 1.0f,1.0f };
 
+
+	
 
 
 
@@ -1225,9 +1323,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				
 
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
-	Transform cameraTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f}, {0.0f,0.0f,-4.5f} };
+	Transform cameraTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f}, {0.0f,0.0f,-10.5f} };
 
-	
+	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
+
 
 
 	float *inputMaterial[3] = { &materialDate->x,&materialDate->y,&materialDate->z };
@@ -1278,7 +1377,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
 
-			//transform.rotate.y += 0.03f;
+			transform.rotate.y += 0.03f;
 
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
@@ -1291,7 +1390,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
+
+			DrawSphere(vertexData);
+
+
+
+
+			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 			//Matrix4x4 cameraMatrixSprite = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 			Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
 			//Matrix4x4 projectionMatrixSprite = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 100.0f);
@@ -1302,7 +1407,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-
 			//開発用UIの処理
 			ImGui::ShowDemoWindow();
 
@@ -1310,6 +1414,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Text("ImGuiText");
 
 
+			ImGui::Text("Traiangle");
 			ImGui::InputFloat3("Material", *inputMaterial);
 			ImGui::SliderFloat3("SliderMaterial", *inputMaterial, 0.0f, 1.0f);
 
@@ -1323,6 +1428,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::SliderFloat3("SliderScale", *inputScale, 0.5f, 5.0f);
 
 
+			ImGui::Text("Sprite");
+			ImGui::InputFloat("SpriteX", &transformSprite.translate.x);
+			ImGui::SliderFloat("SliderSpriteX", &transformSprite.translate.x, 0.0f, 1000.0f);
+
+			ImGui::InputFloat("SpriteY", &transformSprite.translate.y);
+			ImGui::SliderFloat("SliderSpriteY", &transformSprite.translate.y, 0.0f, 600.0f);
+
+			ImGui::InputFloat("SpriteZ", &transformSprite.translate.z);
+			ImGui::SliderFloat("SliderSpriteZ", &transformSprite.translate.z, 0.0f, 0.0f);
 
 
 			//ImGuiの内部コマンド
@@ -1388,11 +1502,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-			commandList->DrawInstanced(6, 1, 0, 0);//だいたい最後
+			commandList->DrawInstanced(1536, 1, 0, 0);
 
 			commandList->IASetVertexBuffers(0, 1 ,&vertexBufferViewSprite);
-			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
-			commandList->DrawInstanced(6, 1, 0, 0);
+			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());	
+			
+
+			//commandList->DrawInstanced(6, 1, 0, 0);
 
 			//実際のcommandListのImGui描画コマンドを挟む
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
