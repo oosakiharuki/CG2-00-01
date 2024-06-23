@@ -508,15 +508,27 @@ struct Sphere {
 };
 
 
+VertexData AddVert(const VertexData& v1, const VertexData& v2) {
+	VertexData result{};
+
+	result.position.x = v1.position.x + v2.position.x;
+	result.position.y = v1.position.y + v2.position.y;
+	result.position.z = v1.position.z + v2.position.z;
+	result.position.s = v1.position.s + v2.position.s;
+	result.texcoord.x = v1.texcoord.x + v2.texcoord.x;
+	result.texcoord.y = v1.texcoord.y + v2.texcoord.y;
+	return result;
+}
+
 void DrawSphere(VertexData* vertexDataSphere) {
-	
-	const uint32_t kSubdivision = 16;
-	
+
+	const uint32_t kSubdivision = 15;
+
 	float pi = float(M_PI);
 
-	const float kLonEvery = pi * 2.0f / float(kSubdivision);
-	const float kLatEvery = pi / float(kSubdivision);
-	
+	const float kLonEvery = pi * 2.0f / float(kSubdivision - 1);
+	const float kLatEvery = pi / float(kSubdivision - 1);
+
 
 	VertexData vertexDataBkaraA[kSubdivision]{};
 
@@ -524,8 +536,8 @@ void DrawSphere(VertexData* vertexDataSphere) {
 
 	VertexData vertexDataDkaraA[kSubdivision][kSubdivision]{};
 
-	//VertexData vertexDataDkaraC[kSubdivision]{};
-	//VertexData vertexDataDkaraB[kSubdivision]{};
+	VertexData vertexDataDkaraC[kSubdivision]{};
+	VertexData vertexDataDkaraB[kSubdivision]{};
 
 
 
@@ -606,7 +618,7 @@ void DrawSphere(VertexData* vertexDataSphere) {
 
 				vertexDataSphere[start + 3] = vertexDataBkaraA[latIndex];
 				vertexDataSphere[start + 4] = vertexDataCkaraA[lonIndex];
-				vertexDataSphere[start + 5] = vertA;
+				vertexDataSphere[start + 5] = vertexDataDkaraA[lonIndex][lonIndex];
 			}
 			else {
 				//最初点
@@ -623,16 +635,125 @@ void DrawSphere(VertexData* vertexDataSphere) {
 
 			vertexDataCkaraA[lonIndex] = vertexDataSphere[start + 0];
 
-			vertexDataDkaraA[latIndex][lonIndex]  = vertexDataSphere[start + 0];
+			
 
-			//vertexDataDkaraC[latIndex] = vertexDataSphere[start + 4];
-			//
-			//vertexDataDkaraB[lonIndex] = vertexDataSphere[start + 2];
+			vertexDataDkaraC[latIndex] = vertexDataSphere[start + 0];
 			
-			
+			vertexDataDkaraB[lonIndex] = vertexDataSphere[start + 0];
+
+
+			vertexDataDkaraA[lonIndex][lonIndex] = vertA;
+
+
 		}
-		
+
 	}
+
+	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
+		float lat = -pi / 2.0f + kLatEvery * latIndex;//緯度 シ－タ
+
+		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
+
+			uint32_t start = 1536 + (latIndex * kSubdivision + lonIndex) * 6;
+			float lon = lonIndex * kLonEvery;//経度　ファイ
+
+
+			VertexData vertA{};
+			vertA.position =
+			{
+				-std::cos(lat) * std::cos(lon),
+				-std::sin(lat),
+				std::cos(lat) * std::sin(lon),
+				1.0f
+			};
+			vertA.texcoord =
+			{
+				float(lonIndex) / float(kSubdivision),
+				float(latIndex) / float(kSubdivision)
+			};
+
+
+			VertexData vertB{};
+			vertB.position =
+			{
+				-std::cos(lat + lat) * std::cos(lon),
+				-std::sin(lat + lat),
+				std::cos(lat + lat) * std::sin(lon)
+				,1.0f
+			};
+			vertB.texcoord =
+			{
+				1.0f - float(lonIndex) / float(kSubdivision),
+				float(latIndex + 1) / float(kSubdivision)
+			};
+
+
+			VertexData vertC{};
+			vertC.position =
+			{
+				-std::cos(lat) * std::cos(lon + lon),
+				-std::sin(lat),
+				std::cos(lat) * std::sin(lon + lon),
+				1.0f
+			};
+			vertC.texcoord =
+			{
+				1.0f - float(lonIndex + 1) / float(kSubdivision),
+				float(latIndex) / float(kSubdivision)
+			};
+
+
+			VertexData vertD{};
+			vertD.position =
+			{
+				std::cos(lat + lat) * std::cos(lon + lon),
+				std::sin(lat + lat),
+				std::cos(lat + lat) * std::sin(lon + lon),
+				1.0f
+			};
+			vertD.texcoord =
+			{
+				1.0f - float(lonIndex + 1) / float(kSubdivision),
+				float(latIndex + 1) / float(kSubdivision)
+			};
+
+
+
+			if (latIndex != 0 && lonIndex != 0) {
+				vertexDataSphere[start + 0] = vertA;
+				vertexDataSphere[start + 1] = vertexDataCkaraA[lonIndex];
+				vertexDataSphere[start + 2] = vertexDataBkaraA[latIndex];
+
+				vertexDataSphere[start + 3] = vertexDataBkaraA[latIndex];
+				vertexDataSphere[start + 4] = vertexDataCkaraA[lonIndex];
+				vertexDataSphere[start + 5] = vertexDataDkaraA[lonIndex][lonIndex];
+			}
+			else {
+				//最初点
+				vertexDataSphere[start + 0] = vertA;
+				vertexDataSphere[start + 1] = vertC;
+				vertexDataSphere[start + 2] = vertB;
+
+				vertexDataSphere[start + 3] = vertB;
+				vertexDataSphere[start + 4] = vertC;
+				vertexDataSphere[start + 5] = vertA;
+			}
+
+			vertexDataBkaraA[latIndex] = vertexDataSphere[start + 0];
+
+			vertexDataCkaraA[lonIndex] = vertexDataSphere[start + 0];
+
+
+
+			vertexDataDkaraA[lonIndex][lonIndex] = vertA;
+
+
+		}
+
+	}
+
+
+
 }
 
 
@@ -1227,14 +1348,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 
-	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 1536);//ここ変えるかも
+	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 3072);//ここ変えるかも
 
 
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 
-	vertexBufferView.SizeInBytes = sizeof(VertexData) * 1536;
+	vertexBufferView.SizeInBytes = sizeof(VertexData) * 3072;
 
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
@@ -1538,7 +1659,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-			commandList->DrawInstanced(1536, 1, 0, 0);
+			commandList->DrawInstanced(3072, 1, 0, 0);
 
 			commandList->IASetVertexBuffers(0, 1 ,&vertexBufferViewSprite);
 			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());	
