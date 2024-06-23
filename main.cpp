@@ -507,6 +507,7 @@ struct Sphere {
 	float radius;
 };
 
+
 void DrawSphere(VertexData* vertexDataSphere) {
 	
 	const uint32_t kSubdivision = 16;
@@ -515,13 +516,24 @@ void DrawSphere(VertexData* vertexDataSphere) {
 
 	const float kLonEvery = pi * 2.0f / float(kSubdivision);
 	const float kLatEvery = pi / float(kSubdivision);
+	
+
+	VertexData vertexDataBkaraA[kSubdivision]{};
+
+	VertexData vertexDataCkaraA[kSubdivision]{};
+
+	VertexData vertexDataDkaraA[kSubdivision][kSubdivision]{};
+
+	//VertexData vertexDataDkaraC[kSubdivision]{};
+	//VertexData vertexDataDkaraB[kSubdivision]{};
+
 
 
 	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
 		float lat = -pi / 2.0f + kLatEvery * latIndex;//緯度 シ－タ
 
 		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-		
+
 			uint32_t start = (latIndex * kSubdivision + lonIndex) * 6;
 			float lon = lonIndex * kLonEvery;//経度　ファイ
 
@@ -586,16 +598,40 @@ void DrawSphere(VertexData* vertexDataSphere) {
 			};
 
 
-			vertexDataSphere[start + 0] = vertA;
-			vertexDataSphere[start + 1] = vertC;
-			vertexDataSphere[start + 2] = vertB;
 
-			vertexDataSphere[start + 3] = vertB;
-			vertexDataSphere[start + 4] = vertC;
-			vertexDataSphere[start + 5] = vertD;
+			if (latIndex != 0 && lonIndex != 0) {
+				vertexDataSphere[start + 0] = vertA;
+				vertexDataSphere[start + 1] = vertexDataCkaraA[lonIndex];
+				vertexDataSphere[start + 2] = vertexDataBkaraA[latIndex];
 
+				vertexDataSphere[start + 3] = vertexDataBkaraA[latIndex];
+				vertexDataSphere[start + 4] = vertexDataCkaraA[lonIndex];
+				vertexDataSphere[start + 5] = vertA;
+			}
+			else {
+				//最初点
+				vertexDataSphere[start + 0] = vertA;
+				vertexDataSphere[start + 1] = vertC;
+				vertexDataSphere[start + 2] = vertB;
 
+				vertexDataSphere[start + 3] = vertB;
+				vertexDataSphere[start + 4] = vertC;
+				vertexDataSphere[start + 5] = vertA;
+			}
+
+			vertexDataBkaraA[latIndex] = vertexDataSphere[start + 0];
+
+			vertexDataCkaraA[lonIndex] = vertexDataSphere[start + 0];
+
+			vertexDataDkaraA[latIndex][lonIndex]  = vertexDataSphere[start + 0];
+
+			//vertexDataDkaraC[latIndex] = vertexDataSphere[start + 4];
+			//
+			//vertexDataDkaraB[lonIndex] = vertexDataSphere[start + 2];
+			
+			
 		}
+		
 	}
 }
 
@@ -1145,8 +1181,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//RasterizerState
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
-
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+	
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;//表裏表示
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
 	//shaderのコンパイラ
@@ -1214,32 +1250,32 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	VertexData* vertexData = nullptr;
 
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	//leftTop
-	vertexData[0].position = { -0.5f, -0.5f,0.0f,1.0f };
-	vertexData[0].texcoord = { 0.0f,1.0f };
+	////leftTop
+	//vertexData[0].position = { -0.5f, -0.5f,0.0f,1.0f };
+	//vertexData[0].texcoord = { 0.0f,1.0f };
 
-	//Top
-	vertexData[1].position = { 0.0f, 0.5f,0.0f,1.0f };
-	vertexData[1].texcoord = { 0.5f,0.0f };
+	////Top
+	//vertexData[1].position = { 0.0f, 0.5f,0.0f,1.0f };
+	//vertexData[1].texcoord = { 0.5f,0.0f };
 
-	//rightBottom
-	vertexData[2].position = { 0.5f, -0.5f,0.0f,1.0f };
-	vertexData[2].texcoord = { 1.0f,1.0f };
+	////rightBottom
+	//vertexData[2].position = { 0.5f, -0.5f,0.0f,1.0f };
+	//vertexData[2].texcoord = { 1.0f,1.0f };
 
 
 
-	//leftTop
-	vertexData[3].position = { -0.5f, -0.5f,0.5f,1.0f };
-	vertexData[3].texcoord = { 0.0f,1.0f };
+	////leftTop
+	//vertexData[3].position = { -0.5f, -0.5f,0.5f,1.0f };
+	//vertexData[3].texcoord = { 0.0f,1.0f };
 
-	//Top
-	vertexData[4].position = { 0.0f, 0.0f,0.0f,1.0f };
-	vertexData[4].texcoord = { 0.5f,0.0f };
+	////Top
+	//vertexData[4].position = { 0.0f, 0.0f,0.0f,1.0f };
+	//vertexData[4].texcoord = { 0.5f,0.0f };
 
-	//rightBottom
-	vertexData[5].position = { 0.5f, -0.5f,-0.5f,1.0f };
-	vertexData[5].texcoord = { 1.0f,1.0f };
-
+	////rightBottom
+	//vertexData[5].position = { 0.5f, -0.5f,-0.5f,1.0f };
+	//vertexData[5].texcoord = { 1.0f,1.0f };
+	
 
 
 	
@@ -1377,7 +1413,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
 
-			transform.rotate.y += 0.03f;
+			//transform.rotate.y += 0.03f;
 
 			Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
 			Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
