@@ -1653,7 +1653,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			DrawSphere(vertexDataSphere);
 
-
+			float textureChange = 0;
 
 
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
@@ -1700,7 +1700,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::InputFloat("SphereZ", &transformSphere.translate.z);
 			ImGui::SliderFloat("SliderSphereZ", &transformSphere.translate.z, 0.0f, 0.0f);
 
-
+			ImGui::InputFloat("SphereTexture", &textureChange);
 
 
 
@@ -1793,7 +1793,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceSphere->GetGPUVirtualAddress());
 
-			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+
+			if (textureChange == 0) {
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+			}
+			else {
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+			}
+
 
 			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
