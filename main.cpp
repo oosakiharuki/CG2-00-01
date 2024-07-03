@@ -1574,17 +1574,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//色の設定
 	*materialDate = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	////球体用マテリアル
-	////マテリアル用のリソース
-	//ID3D12Resource* materialResourceSphere = CreateBufferResource(device, sizeof(Vector4));
-	////マテリアルにデータを書き込む
-	//Material* materialDateSphere = nullptr;
-	////書き込むためのアドレス
-	//materialResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&materialDateSphere));
-	////色の設定
-	//*materialDateSphere = {Vector4(1.0f, 1.0f, 1.0f, 1.0f)};
+	//球体用マテリアル
+	//マテリアル用のリソース
+	ID3D12Resource* materialResourceSphere = CreateBufferResource(device, sizeof(Material));
+	//マテリアルにデータを書き込む
+	Material* materialDateSphere = nullptr;
+	//書き込むためのアドレス
+	materialResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&materialDateSphere));
+	//色の設定
+	*materialDateSphere = {Vector4(1.0f, 1.0f, 1.0f, 1.0f)};
 
-	//materialDateSphere->enableLighting = false;
+	materialDateSphere->enableLighting = false;
 
 
 
@@ -1619,11 +1619,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	float *inputMaterial[3] = { &materialDate->x,&materialDate->y,&materialDate->z };
 	float* inputTransform[3] = { &transform.translate.x,&transform.translate.y,&transform.translate.z };
-	
-	
 	float* inputRotate[3] = { &transform.rotate.x,&transform.rotate.y,&transform.rotate.z };
-
 	float* inputScale[3] = { &transform.scale.x,&transform.scale.y,&transform.scale.z };
+
+
+	float* inputMaterialSphere[3] = { &materialDateSphere->color.x,&materialDateSphere->color.y,&materialDateSphere->color.z };
+	float* inputTransformSphere[3] = { &transformSphere.translate.x,&transformSphere.translate.y,&transformSphere.translate.z };
+	float* inputRotateSphere[3] = { &transformSphere.rotate.x,&transformSphere.rotate.y,&transformSphere.rotate.z };
+	float* inputScaleSphere[3] = { &transformSphere.scale.x,&transformSphere.scale.y,&transformSphere.scale.z };
+	float textureChange = 0;
 
 
 	//ImGui初期化
@@ -1689,7 +1693,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			DrawSphere(vertexDataSphere);
 
-			float textureChange = 0;
 
 
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
@@ -1727,14 +1730,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			ImGui::Text("Sphere");
-			ImGui::InputFloat("SphereX", &transformSphere.translate.x);
-			ImGui::SliderFloat("SliderSphereX", &transformSphere.translate.x, 0.0f, 1000.0f);
+			ImGui::InputFloat3("MaterialSphere", *inputMaterialSphere);
+			ImGui::SliderFloat3("SliderMaterialSphere", *inputMaterialSphere, 0.0f, 1.0f);
 
-			ImGui::InputFloat("SphereY", &transformSphere.translate.y);
-			ImGui::SliderFloat("SliderSphereY", &transformSphere.translate.y, 0.0f, 600.0f);
+			ImGui::InputFloat3("VertexSphere", *inputTransformSphere);
+			ImGui::SliderFloat3("SliderVertexSphere", *inputTransformSphere, -5.0f, 5.0f);
 
-			ImGui::InputFloat("SphereZ", &transformSphere.translate.z);
-			ImGui::SliderFloat("SliderSphereZ", &transformSphere.translate.z, 0.0f, 0.0f);
+			ImGui::InputFloat3("RotateSphere", *inputRotateSphere);
+			ImGui::SliderFloat3("SliderRotateSphere", *inputRotateSphere, -10.0f, 10.0f);
+
+			ImGui::InputFloat3("ScaleSphere", *inputScaleSphere);
+			ImGui::SliderFloat3("SliderScaleSphere", *inputScaleSphere, 0.5f, 5.0f);
 
 			ImGui::InputFloat("SphereTexture", &textureChange);
 
@@ -1824,7 +1830,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSphere);
 
 
-			commandList->SetGraphicsRootConstantBufferView(1, materialResource->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
+			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
 
 
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceSphere->GetGPUVirtualAddress());
@@ -1935,7 +1941,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 	vertexResourceSprite->Release();
 	transformationMatrixResourceSprite->Release();
-
+	
 
 
 	graphicsPipelineState->Release();
@@ -1949,6 +1955,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexShaderBlob->Release();
 
 	materialResource->Release();
+	materialResourceSphere->Release();
 
 #ifdef _DEBUG
 	debugController->Release();
