@@ -500,12 +500,20 @@ Matrix4x4 MakeOrthographicMatrix(float left, float top,float right,float bottom,
 struct VertexData {
 	Vector4 position;
 	Vector2 texcoord;
+	Vector3 normal;
 };
 
 struct Sphere {
 	Vector3 center;
 	float radius;
 };
+
+
+struct Material {
+	Vector4 color;
+	int32_t enableLighting;
+};
+
 
 
 VertexData AddVert(const VertexData& v1, const VertexData& v2) {
@@ -944,7 +952,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
 
 //Windowsアプリのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-	
+
 	CoInitializeEx(0, COINIT_MULTITHREADED);
 
 
@@ -999,7 +1007,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//さらにGPU側でもチェックを行うようにする
 		debugController->SetEnableGPUBasedValidation(TRUE);
 	}
-    
+
 #endif
 
 #pragma region Factoryの生成
@@ -1200,13 +1208,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-	
+
 	//textureを読んで転送
 	DirectX::ScratchImage mipImages = LoadTexture("resource/uvChecker.png");
 	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 	ID3D12Resource* textureResource = CrateTextureResource(device, metadata);
 	UploadTextureData(textureResource, mipImages);
-		
+
 	ID3D12Resource* depthStencilResource = CreateDepthStencilTextureResource(device, kClientWidth, kClientHeight);
 
 	//DSVようのヒープでディスクリプタの数1、shader内で触らないのでfalse
@@ -1238,7 +1246,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//textureSrvHandleCPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	//textureSrvHandleGPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 	//SRVの生成
-	device->CreateShaderResourceView(textureResource , &srvDesc, textureSrvHandleCPU);
+	device->CreateShaderResourceView(textureResource, &srvDesc, textureSrvHandleCPU);
 
 
 
@@ -1272,7 +1280,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	IDxcIncludeHandler* includeHandler = nullptr;
 	hr = dxcUtils->CreateDefaultIncludeHandler(&includeHandler);
 	assert(SUCCEEDED(hr));
-	
+
 
 
 #pragma region PSO
@@ -1280,11 +1288,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//RootSignature
 	D3D12_ROOT_SIGNATURE_DESC descriptionRootSignature{};
-	descriptionRootSignature.Flags = 
+	descriptionRootSignature.Flags =
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
-	
 
-	
+
+
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	descriptorRange[0].BaseShaderRegister = 0;
 	descriptorRange[0].NumDescriptors = 1;
@@ -1303,7 +1311,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	rootParameters[1].Descriptor.ShaderRegister = 0;//Object3d.VS.hlsl の b0
-	
+
 	descriptionRootSignature.pParameters = rootParameters;
 	descriptionRootSignature.NumParameters = _countof(rootParameters);
 
@@ -1342,10 +1350,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ID3D12RootSignature* rootSignature = nullptr;
 	hr = device->CreateRootSignature(0, signatureBlob->GetBufferPointer(), signatureBlob->GetBufferSize(), IID_PPV_ARGS(&rootSignature));
 	assert(SUCCEEDED(hr));
-	
-		
+
+
 	//InputLayout
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs[2] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
 	inputElementDescs[0].SemanticIndex = 0;
 	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -1355,6 +1363,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	inputElementDescs[1].SemanticIndex = 0;
 	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
+	inputElementDescs[2].SemanticName = "NORMAL";
+	inputElementDescs[2].SemanticIndex = 0;
+	inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
 
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
 	inputLayoutDesc.pInputElementDescs = inputElementDescs;
@@ -1368,7 +1382,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//RasterizerState
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
-	
+
 	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;//表裏表示
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
@@ -1395,7 +1409,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	graphicsPipelineStateDesc.SampleDesc.Count = 1;
 	graphicsPipelineStateDesc.SampleMask = D3D12_DEFAULT_SAMPLE_MASK;
-	
+
 
 	//DepthStencilState
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
@@ -1425,7 +1439,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
-	
+
 	ID3D12Resource* wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
 
 	Matrix4x4* wvpDate = nullptr;
@@ -1462,7 +1476,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//rightBottom
 	vertexData[5].position = { 0.5f, -0.5f,-0.5f,1.0f };
 	vertexData[5].texcoord = { 1.0f,1.0f };
-	
+
+
+
+
 
 
 	uint32_t SphereVertexNum = 16 * 16 * 6 * 2;
@@ -1492,10 +1509,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSphere));
 
 
+	for (uint32_t index = 1; index < SphereVertexNum; index++) {
+		vertexDataSphere[index].normal.x = vertexDataSphere[index].position.x;
+		vertexDataSphere[index].normal.y = vertexDataSphere[index].position.y;
+		vertexDataSphere[index].normal.z = vertexDataSphere[index].position.z;
+	}
+	vertexDataSphere[0].normal = { 0.0f,0.0f,-1.0f };
 
 
 
-	
 
 	//Spricte
 	ID3D12Resource* vertexResourceSprite = CreateBufferResource(device, sizeof(VertexData) * 6);
@@ -1508,8 +1530,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferViewSprite.SizeInBytes = sizeof(VertexData) * 6;
 	//頂点サイズ
 	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
-	
-	
+
+
 	ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(Matrix4x4));
 
 	Matrix4x4* transformationMatrixDataSprite = nullptr;
@@ -1539,10 +1561,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexDataSprite[5].texcoord = { 1.0f,1.0f };
 
 
-	
 
 
 
+	//三角用マテリアル
 	//マテリアル用のリソース
 	ID3D12Resource* materialResource = CreateBufferResource(device, sizeof(Vector4));
 	//マテリアルにデータを書き込む
@@ -1551,6 +1573,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialDate));
 	//色の設定
 	*materialDate = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	////球体用マテリアル
+	////マテリアル用のリソース
+	//ID3D12Resource* materialResourceSphere = CreateBufferResource(device, sizeof(Vector4));
+	////マテリアルにデータを書き込む
+	//Material* materialDateSphere = nullptr;
+	////書き込むためのアドレス
+	//materialResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&materialDateSphere));
+	////色の設定
+	//*materialDateSphere = {Vector4(1.0f, 1.0f, 1.0f, 1.0f)};
+
+	//materialDateSphere->enableLighting = false;
+
+
 
 
 	//ビューポート
