@@ -514,7 +514,17 @@ struct Material {
 	int32_t enableLighting;
 };
 
+struct TransformationMatrix {
+	Matrix4x4 WVP;
+	Matrix4x4 World;
+};
 
+
+struct DirectionalLight {
+	Vector4 color;
+	Vector3 direction;
+	float intensity;
+};
 
 VertexData AddVert(const VertexData& v1, const VertexData& v2) {
 	VertexData result{};
@@ -1303,7 +1313,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//RootParameter作成
-	D3D12_ROOT_PARAMETER rootParameters[3] = {};
+	D3D12_ROOT_PARAMETER rootParameters[4] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[0].Descriptor.ShaderRegister = 0;//Object3d.PS.hlsl の b0
@@ -1321,6 +1331,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootParameters[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[2].DescriptorTable.pDescriptorRanges = descriptorRange;
 	rootParameters[2].DescriptorTable.NumDescriptorRanges = _countof(descriptorRange);
+
+	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBV
+	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//plxelshader
+	rootParameters[3].Descriptor.ShaderRegister = 1;//レジスタ番号
+
 	//2でまとめる
 
 	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
@@ -1496,13 +1511,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	vertexBufferViewSphere.StrideInBytes = sizeof(VertexData);
 
-	ID3D12Resource* wvpResourceSphere = CreateBufferResource(device, sizeof(Matrix4x4));
+	ID3D12Resource* wvpResourceSphere = CreateBufferResource(device, sizeof(TransformationMatrix));
 
-	Matrix4x4* wvpDateSphere = nullptr;
+	TransformationMatrix* wvpDateSphere = nullptr;
 
 	wvpResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&wvpDateSphere));
 
-	*wvpDateSphere = MakeIdentity4x4();
+	wvpDateSphere->World = MakeIdentity4x4();
 
 	VertexData* vertexDataSphere = nullptr;
 
@@ -1515,6 +1530,45 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		vertexDataSphere[index].normal.z = vertexDataSphere[index].position.z;
 	}
 	vertexDataSphere[0].normal = { 0.0f,0.0f,-1.0f };
+
+
+
+
+
+	////DirectionalLight//
+	//ID3D12Resource* vertexResourceLight = CreateBufferResource(device, sizeof(VertexData));//ここ変えるかも
+
+
+	//D3D12_VERTEX_BUFFER_VIEW vertexBufferViewLight{};
+
+	//vertexBufferViewLight.BufferLocation = vertexResourceLight->GetGPUVirtualAddress();
+
+	//vertexBufferViewLight.SizeInBytes = sizeof(VertexData);
+
+	//vertexBufferViewLight.StrideInBytes = sizeof(VertexData);
+
+	//ID3D12Resource* wvpResourceLight = CreateBufferResource(device, sizeof(Matrix4x4));
+
+	//DirectionalLight* wvpDateLight = nullptr;
+
+	//wvpResourceLight->Map(0, nullptr, reinterpret_cast<void**>(&wvpDateLight));
+
+	////wvpDateLight->World = MakeIdentity4x4();
+
+	//VertexData* vertexDataLight = nullptr;
+
+	//vertexResourceLight->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataLight));
+
+
+	//wvpDateLight->color = { 1.0f,1.0f,1.0f,1.0f }; 
+	//wvpDateLight->direction = { 0.0f,-1.0f,0.0f };
+	//wvpDateLight->intensity = 1.0f;
+
+
+
+
+
+
 
 
 
@@ -1582,13 +1636,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//書き込むためのアドレス
 	materialResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&materialDateSphere));
 	//色の設定
-	*materialDateSphere = {Vector4(1.0f, 1.0f, 1.0f, 1.0f)};
+	*materialDateSphere = { {1.0f, 1.0f, 1.0f, 1.0f},1 };
 
 	materialDateSphere->enableLighting = false;
 
 
-
-
+		
+		
 	//ビューポート
 	D3D12_VIEWPORT viewport;
 
@@ -1689,12 +1743,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//Matrix4x4 projectionMatrix = MakeOrthographicMatrix((float)scissorRect.left, (float)scissorRect.top, (float)scissorRect.right, (float)scissorRect.bottom, 0.1f, 100.0f);
 			Matrix4x4 WorldViewProjectionMatrixSphere = Multiply(worldMatrixSphere, Multiply(viewMatrix, projectionMatrix));
 
-			*wvpDateSphere = WorldViewProjectionMatrixSphere;
+			wvpDateSphere->WVP = WorldViewProjectionMatrixSphere;
 
 			DrawSphere(vertexDataSphere);
 
-
-
+			
+			
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
 			//Matrix4x4 cameraMatrixSprite = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 			Matrix4x4 viewMatrixSprite = MakeIdentity4x4();
@@ -1830,7 +1884,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSphere);
 
 
-			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
+			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSphere->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
 
 
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceSphere->GetGPUVirtualAddress());
