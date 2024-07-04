@@ -1553,6 +1553,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	*materialDate = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
 
+	//球体用マテリアル
+	//マテリアル用のリソース
+	ID3D12Resource* materialResourceSphere = CreateBufferResource(device, sizeof(Vector4));
+	//マテリアルにデータを書き込む
+	Vector4* materialDateSphere = nullptr;
+	//書き込むためのアドレス
+	materialResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&materialDateSphere));
+	//色の設定
+	*materialDateSphere = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+
+
+
+
 	//ビューポート
 	D3D12_VIEWPORT viewport;
 
@@ -1571,7 +1584,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	scissorRect.top = 0;
 	scissorRect.bottom = kClientHeight;
 
-				
+
 
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 	Transform cameraTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f}, {0.0f,0.0f,-10.5f} };
@@ -1581,13 +1594,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Transform transformSphere{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
 
-	float *inputMaterial[3] = { &materialDate->x,&materialDate->y,&materialDate->z };
+	float* inputMaterial[3] = { &materialDate->x,&materialDate->y,&materialDate->z };
 	float* inputTransform[3] = { &transform.translate.x,&transform.translate.y,&transform.translate.z };
-	
-	
 	float* inputRotate[3] = { &transform.rotate.x,&transform.rotate.y,&transform.rotate.z };
-
 	float* inputScale[3] = { &transform.scale.x,&transform.scale.y,&transform.scale.z };
+
+
+	float* inputMaterialSphere[3] = { &materialDateSphere->x,&materialDateSphere->y,&materialDateSphere->z };
+	float* inputTransformSphere[3] = { &transformSphere.translate.x,&transformSphere.translate.y,&transformSphere.translate.z };
+	float* inputRotateSphere[3] = { &transformSphere.rotate.x,&transformSphere.rotate.y,&transformSphere.rotate.z };
+	float* inputScaleSphere[3] = { &transformSphere.scale.x,&transformSphere.scale.y,&transformSphere.scale.z };
+	float textureChange = 0;
 
 
 	//ImGui初期化
@@ -1653,7 +1670,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			DrawSphere(vertexDataSphere);
 
-			float textureChange = 0;
 
 
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
@@ -1691,14 +1707,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			ImGui::Text("Sphere");
-			ImGui::InputFloat("SphereX", &transformSphere.translate.x);
-			ImGui::SliderFloat("SliderSphereX", &transformSphere.translate.x, 0.0f, 1000.0f);
+			ImGui::InputFloat3("Material", *inputMaterialSphere);
+			ImGui::SliderFloat3("SliderMaterial", *inputMaterialSphere, 0.0f, 1.0f);
 
-			ImGui::InputFloat("SphereY", &transformSphere.translate.y);
-			ImGui::SliderFloat("SliderSphereY", &transformSphere.translate.y, 0.0f, 600.0f);
+			ImGui::InputFloat3("SphereX", *inputTransformSphere);
+			ImGui::SliderFloat3("SliderSphereX", *inputTransformSphere, -5.0f, 5.0f);
 
-			ImGui::InputFloat("SphereZ", &transformSphere.translate.z);
-			ImGui::SliderFloat("SliderSphereZ", &transformSphere.translate.z, 0.0f, 0.0f);
+			ImGui::InputFloat3("SphereY", *inputRotateSphere);
+			ImGui::SliderFloat3("SliderSphereY", *inputRotateSphere, -10.0f, 10.0f);
+
+			ImGui::InputFloat3("SphereZ", *inputScaleSphere);
+			ImGui::SliderFloat3("SliderSphereZ", *inputScaleSphere, 0.5f, 5.0f);
 
 			ImGui::InputFloat("SphereTexture", &textureChange);
 
