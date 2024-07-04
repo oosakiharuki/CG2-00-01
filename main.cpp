@@ -1932,6 +1932,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexShaderBlob->Release();
 
 	materialResource->Release();
+	materialResourceSphere->Release();
 
 #ifdef _DEBUG
 	debugController->Release();
