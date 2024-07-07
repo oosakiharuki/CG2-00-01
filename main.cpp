@@ -526,8 +526,8 @@ void DrawSphere(VertexData* vertexDataSphere) {
 
 	float pi = float(M_PI);
 
-	const float kLonEvery = pi * 2.0f / float(kSubdivision - 1);
-	const float kLatEvery = pi / float(kSubdivision - 1);
+	const float kLonEvery = pi * 2.0f / float(kSubdivision);
+	const float kLatEvery = pi / float(kSubdivision );
 
 
 	VertexData vertexDataBkaraA[kSubdivision]{};
@@ -567,9 +567,9 @@ void DrawSphere(VertexData* vertexDataSphere) {
 			VertexData vertB{};
 			vertB.position =
 			{
-				std::cos(lat + lat) * std::cos(lon),
-				std::sin(lat + lat),
-				std::cos(lat + lat) * std::sin(lon)
+				std::cos(lat + kLatEvery) * std::cos(lon),
+				std::sin(lat + kLatEvery),
+				std::cos(lat + kLatEvery) * std::sin(lon)
 				,1.0f
 			};
 			vertB.texcoord =
@@ -582,9 +582,9 @@ void DrawSphere(VertexData* vertexDataSphere) {
 			VertexData vertC{};
 			vertC.position =
 			{
-				std::cos(lat) * std::cos(lon + lon),
+				std::cos(lat) * std::cos(lon + kLonEvery),
 				std::sin(lat),
-				std::cos(lat) * std::sin(lon + lon),
+				std::cos(lat) * std::sin(lon + kLonEvery),
 				1.0f
 			};
 			vertC.texcoord =
@@ -597,9 +597,9 @@ void DrawSphere(VertexData* vertexDataSphere) {
 			VertexData vertD{};
 			vertD.position =
 			{
-				std::cos(lat + lat) * std::cos(lon + lon),
-				std::sin(lat + lat),
-				std::cos(lat + lat) * std::sin(lon + lon),
+				std::cos(lat + kLatEvery) * std::cos(lon + kLonEvery),
+				std::sin(lat + kLatEvery),
+				std::cos(lat + kLatEvery) * std::sin(lon + kLonEvery),
 				1.0f
 			};
 			vertD.texcoord =
@@ -608,43 +608,18 @@ void DrawSphere(VertexData* vertexDataSphere) {
 				1.0f - float(latIndex + 1) / float(kSubdivision)
 			};
 
-			if (latIndex > 8) {
-				break;
-			}
 
 
-			if (latIndex != 0 && lonIndex != 0) {
-				vertexDataSphere[start + 0] = vertA;
-				vertexDataSphere[start + 1] = vertexDataCkaraA[lonIndex];
-				vertexDataSphere[start + 2] = vertexDataBkaraA[latIndex];
-				vertexDataSphere[start + 3] = vertexDataBkaraA[latIndex];
-				vertexDataSphere[start + 4] = vertexDataCkaraA[lonIndex];
-				vertexDataSphere[start + 5] = vertexDataDkaraA[lonIndex][lonIndex];
-			}
-			else {
+
 				//最初点
 				vertexDataSphere[start + 0] = vertA;
-				vertexDataSphere[start + 1] = vertC;
-				vertexDataSphere[start + 2] = vertB;
+				vertexDataSphere[start + 1] = vertB;
+				vertexDataSphere[start + 2] = vertC;
 
-				vertexDataSphere[start + 3] = vertB;
-				vertexDataSphere[start + 4] = vertC;
-				vertexDataSphere[start + 5] = vertA;
-			}
+				vertexDataSphere[start + 3] = vertC;
+				vertexDataSphere[start + 4] = vertB;
+				vertexDataSphere[start + 5] = vertD;
 
-			vertexDataBkaraA[latIndex] = vertexDataSphere[start + 0];
-			//vertexDataBkaraA[lonIndex] = vertexDataSphere[start + 5];
-
-			vertexDataCkaraA[lonIndex] = vertexDataSphere[start + 5];
-			//vertexDataCkaraA[latIndex] = vertexDataSphere[start + 0];
-
-
-			//vertexDataDkaraC[latIndex] = vertexDataSphere[start + 5];
-			//vertexDataDkaraB[lonIndex] = vertexDataSphere[start + 5];
-
-
-			vertexDataDkaraA[lonIndex][lonIndex] = vertexDataSphere[start + 0];
-			//vertexDataDkaraA[latIndex][latIndex] = vertD;
 		}
 
 	}
