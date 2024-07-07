@@ -588,6 +588,9 @@ void DrawSphere(VertexData* vertexDataSphere) {
 				float(lonIndex) / float(kSubdivision),
 				1.0f - float(latIndex) / float(kSubdivision)
 			};
+			vertA.normal = {
+				0.0f,0.0f,-1.0f 
+			};
 
 
 			VertexData vertB{};
@@ -602,6 +605,9 @@ void DrawSphere(VertexData* vertexDataSphere) {
 			{
 				float(lonIndex) / float(kSubdivision),
 				1.0f - float(latIndex + 1) / float(kSubdivision)
+			};
+			vertB.normal = {
+				0.0f,0.0f,-1.0f
 			};
 
 
@@ -618,6 +624,9 @@ void DrawSphere(VertexData* vertexDataSphere) {
 				float(lonIndex + 1) / float(kSubdivision),
 				1.0f - float(latIndex) / float(kSubdivision)
 			};
+			vertC.normal = {
+				0.0f,0.0f,-1.0f
+			};
 
 
 			VertexData vertD{};
@@ -632,6 +641,9 @@ void DrawSphere(VertexData* vertexDataSphere) {
 			{
 				float(lonIndex + 1) / float(kSubdivision),
 				1.0f - float(latIndex + 1) / float(kSubdivision)
+			};
+			vertD.normal = {
+				0.0f,0.0f,-1.0f
 			};
 
 
@@ -657,7 +669,7 @@ void DrawSphere(VertexData* vertexDataSphere) {
 		vertexDataSphere[index].normal.z = vertexDataSphere[index].position.z;
 	}
 
-	vertexDataSphere[0].normal = { 0.0f,0.0f,-1.0f };
+	
 }
 
 
@@ -1329,54 +1341,54 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 
-	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 6);
+	//ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 6);
 
 
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
+	//D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
 
-	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
+	//vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
 
-	vertexBufferView.SizeInBytes = sizeof(VertexData) * 6;
+	//vertexBufferView.SizeInBytes = sizeof(VertexData) * 6;
 
-	vertexBufferView.StrideInBytes = sizeof(VertexData);
-
-
-	ID3D12Resource* wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
-
-	Matrix4x4* wvpDate = nullptr;
-
-	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpDate));
-
-	*wvpDate = MakeIdentity4x4();
-
-	VertexData* vertexData = nullptr;
-
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	//leftTop
-	vertexData[0].position = { -0.5f, -0.5f,0.0f,1.0f };
-	vertexData[0].texcoord = { 0.0f,1.0f };
-
-	//Top
-	vertexData[1].position = { 0.0f, 0.5f,0.0f,1.0f };
-	vertexData[1].texcoord = { 0.5f,0.0f };
-
-	//rightBottom
-	vertexData[2].position = { 0.5f, -0.5f,0.0f,1.0f };
-	vertexData[2].texcoord = { 1.0f,1.0f };
+	//vertexBufferView.StrideInBytes = sizeof(VertexData);
 
 
+	//ID3D12Resource* wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
 
-	//leftTop
-	vertexData[3].position = { -0.5f, -0.5f,0.5f,1.0f };
-	vertexData[3].texcoord = { 0.0f,1.0f };
+	//Matrix4x4* wvpDate = nullptr;
 
-	//Top
-	vertexData[4].position = { 0.0f, 0.0f,0.0f,1.0f };
-	vertexData[4].texcoord = { 0.5f,0.0f };
+	//wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpDate));
 
-	//rightBottom
-	vertexData[5].position = { 0.5f, -0.5f,-0.5f,1.0f };
-	vertexData[5].texcoord = { 1.0f,1.0f };
+	//*wvpDate = MakeIdentity4x4();
+
+	//VertexData* vertexData = nullptr;
+
+	//vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+	////leftTop
+	//vertexData[0].position = { -0.5f, -0.5f,0.0f,1.0f };
+	//vertexData[0].texcoord = { 0.0f,1.0f };
+
+	////Top
+	//vertexData[1].position = { 0.0f, 0.5f,0.0f,1.0f };
+	//vertexData[1].texcoord = { 0.5f,0.0f };
+
+	////rightBottom
+	//vertexData[2].position = { 0.5f, -0.5f,0.0f,1.0f };
+	//vertexData[2].texcoord = { 1.0f,1.0f };
+
+
+
+	////leftTop
+	//vertexData[3].position = { -0.5f, -0.5f,0.5f,1.0f };
+	//vertexData[3].texcoord = { 0.0f,1.0f };
+
+	////Top
+	//vertexData[4].position = { 0.0f, 0.0f,0.0f,1.0f };
+	//vertexData[4].texcoord = { 0.5f,0.0f };
+
+	////rightBottom
+	//vertexData[5].position = { 0.5f, -0.5f,-0.5f,1.0f };
+	//vertexData[5].texcoord = { 1.0f,1.0f };
 
 
 
@@ -1411,31 +1423,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-	//DirectionalLight//
-	ID3D12Resource* vertexResourceLight = CreateBufferResource(device, sizeof(VertexData) * SphereVertexNum);
-
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewLight{};
-
-	vertexBufferViewLight.BufferLocation = vertexResourceLight->GetGPUVirtualAddress();
-
-	vertexBufferViewLight.SizeInBytes = sizeof(VertexData) * SphereVertexNum;
-
-	vertexBufferViewLight.StrideInBytes = sizeof(VertexData);
-
-	ID3D12Resource* wvpResourceLight = CreateBufferResource(device, sizeof(TransformationMatrix));
-
-	TransformationMatrix* wvpDateLight = nullptr;
-
-	wvpResourceLight->Map(0, nullptr, reinterpret_cast<void**>(&wvpDateLight));
-
-	wvpDateLight->World = MakeIdentity4x4();
-
-	VertexData* vertexDataLight = nullptr;
-
-	vertexResourceLight->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataLight));
-
-
-
 
 
 	//Spricte
@@ -1451,13 +1438,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferViewSprite.StrideInBytes = sizeof(VertexData);
 
 
-	ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(Matrix4x4));
+	ID3D12Resource* transformationMatrixResourceSprite = CreateBufferResource(device, sizeof(TransformationMatrix));
 
-	Matrix4x4* transformationMatrixDataSprite = nullptr;
+	TransformationMatrix* transformationMatrixDataSprite = nullptr;
 
 	transformationMatrixResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&transformationMatrixDataSprite));
 
-	*transformationMatrixDataSprite = MakeIdentity4x4();
+	transformationMatrixDataSprite->World = MakeIdentity4x4();
 
 
 
@@ -1483,34 +1470,42 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-	//三角用マテリアル
-	//マテリアル用のリソース
-	ID3D12Resource* materialResource = CreateBufferResource(device, sizeof(Vector4));
-	//マテリアルにデータを書き込む
-	Vector4* materialDate = nullptr;
-	//書き込むためのアドレス
-	materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialDate));
-	//色の設定
-	*materialDate = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	////三角用マテリアル
+	////マテリアル用のリソース
+	//ID3D12Resource* materialResource = CreateBufferResource(device, sizeof(Vector4));
+	////マテリアルにデータを書き込む
+	//Vector4* materialDate = nullptr;
+	////書き込むためのアドレス
+	//materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialDate));
+	////色の設定
+	//*materialDate = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+
+
 
 
 	//球体用マテリアル
 	//マテリアル用のリソース
-	ID3D12Resource* materialResourceSphere = CreateBufferResource(device, sizeof(DirectionalLight));
+	ID3D12Resource* materialResourceSphere = CreateBufferResource(device, sizeof(Material));
 	//マテリアルにデータを書き込む
-	DirectionalLight* materialDateSphere = nullptr;
+	Material* materialDateSphere = nullptr;
 	//書き込むためのアドレス
 	materialResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&materialDateSphere));
 	//色の設定
-	*materialDateSphere = { Vector4(1.0f, 1.0f, 1.0f, 1.0f) , 1 };
+	materialDateSphere->color =  Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialDateSphere->enableLighting = true;
 
 
 
-
-
-
-
-
+	//球体マテリアルのライト用のリソース
+	ID3D12Resource* directionalLightSphereResource = CreateBufferResource(device, sizeof(DirectionalLight));
+	//マテリアルにデータを書き込む
+	DirectionalLight* directionalLightSphereData = nullptr;
+	//書き込むためのアドレス
+	directionalLightSphereResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightSphereData));
+	//色の設定
+	directionalLightSphereData->color = { 1.0f,1.0f,1.0f,1.0f };
+	directionalLightSphereData->direction = { 0.0f,-1.0f,0.0f };
+	directionalLightSphereData->intensity = 1.0f;
 
 
 
@@ -1523,8 +1518,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//書き込むためのアドレス
 	materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialDateSprite));
 	//色の設定
-	*materialDateSprite = {Vector4(1.0f, 1.0f, 1.0f, 1.0f) , 1};
-		
+	materialDateSprite->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialDateSprite->enableLighting = false;
 		
 	//ビューポート
@@ -1556,16 +1550,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform transformL{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
-	DirectionalLight transformLight{ { 1.0f,1.0f,1.0f,1.0f },{ 0.0f,-1.0f,0.0f } ,1.0f };
 	
-//vertexDataLight->color = { 1.0f,1.0f,1.0f,1.0f };
-//vertexDataLight->direction = { 0.0f,-1.0f,0.0f };
-//vertexDataLight->intensity = 1.0f;
 
-	float *inputMaterial[3] = { &materialDate->x,&materialDate->y,&materialDate->z };
-	float* inputTransform[3] = { &transform.translate.x,&transform.translate.y,&transform.translate.z };
-	float* inputRotate[3] = { &transform.rotate.x,&transform.rotate.y,&transform.rotate.z };
-	float* inputScale[3] = { &transform.scale.x,&transform.scale.y,&transform.scale.z };
+
+	//float *inputMaterial[3] = { &materialDate->x,&materialDate->y,&materialDate->z };
+	//float* inputTransform[3] = { &transform.translate.x,&transform.translate.y,&transform.translate.z };
+	//float* inputRotate[3] = { &transform.rotate.x,&transform.rotate.y,&transform.rotate.z };
+	//float* inputScale[3] = { &transform.scale.x,&transform.scale.y,&transform.scale.z };
 
 
 	float* inputMaterialSphere[3] = { &materialDateSphere->color.x,&materialDateSphere->color.y,&materialDateSphere->color.z };
@@ -1575,9 +1566,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float textureChange = 0;
 
 
-	float* inputMaterialLigth[3] = { &transformLight.color.x,&transformLight.color.y,&transformLight.color.z };
-	float* inputDirectionLight[3] = { &transformLight.direction.x,&transformLight.direction.y,&transformLight.direction.z };
-	float* intensity = &transformLight.intensity;
+	float* inputMaterialLigth[3] = { &directionalLightSphereData->color.x,&directionalLightSphereData->color.y,&directionalLightSphereData->color.z };
+	float* inputDirectionLight[3] = { &directionalLightSphereData->direction.x,&directionalLightSphereData->direction.y,&directionalLightSphereData->direction.z };
+	float* intensity = &directionalLightSphereData->intensity;
 
 
 
@@ -1629,35 +1620,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//Matrix4x4 projectionMatrix = MakeOrthographicMatrix((float)scissorRect.left, (float)scissorRect.top, (float)scissorRect.right, (float)scissorRect.bottom, 0.1f, 100.0f);
 			Matrix4x4 WorldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 
-			*wvpDate = WorldViewProjectionMatrix;
+			//三角
+			//*wvpDate = WorldViewProjectionMatrix;
 
 
+			//球体
 
 			Matrix4x4 worldMatrixSphere = MakeAffineMatrix(transformSphere.scale, transformSphere.rotate, transformSphere.translate);
-			//Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
-			//Matrix4x4 viewMatrix = Inverse(cameraMatrix);
-			//Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 100.0f);
-			//Matrix4x4 projectionMatrix = MakeOrthographicMatrix((float)scissorRect.left, (float)scissorRect.top, (float)scissorRect.right, (float)scissorRect.bottom, 0.1f, 100.0f);
 			Matrix4x4 WorldViewProjectionMatrixSphere = Multiply(worldMatrixSphere, Multiply(viewMatrix, projectionMatrix));
 
 			wvpDateSphere->WVP = WorldViewProjectionMatrixSphere;
 					
 			DrawSphere(vertexDataSphere);
+		
 			
 
-			
-			Matrix4x4 worldMatrixLight = MakeAffineMatrix(transformSphere.scale, transformSphere.rotate, transformSphere.translate);
-			//Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
-			//Matrix4x4 viewMatrix = Inverse(cameraMatrix);
-			//Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 100.0f);
-			//Matrix4x4 projectionMatrix = MakeOrthographicMatrix((float)scissorRect.left, (float)scissorRect.top, (float)scissorRect.right, (float)scissorRect.bottom, 0.1f, 100.0f);
-			Matrix4x4 WorldViewProjectionMatrixLight = Multiply(worldMatrixLight, Multiply(viewMatrix, projectionMatrix));
 
-
-
-			wvpDateLight->WVP = WorldViewProjectionMatrixLight;
-
-			DrawSphere(vertexDataLight);
+			directionalLightSphereData->direction = Normalize(directionalLightSphereData->direction);
 
 		
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
@@ -1667,7 +1646,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 projectionMatrixSprite = MakeOrthographicMatrix(0.0f, 0.0f, (float)kClientWidth, (float)kClientHeight, 0.0f, 100.0f);
 			Matrix4x4 worldViewProjectionMatrixSprite = Multiply(worldMatrixSprite, Multiply(viewMatrixSprite, projectionMatrixSprite));
 
-			*transformationMatrixDataSprite = worldViewProjectionMatrixSprite;
+			transformationMatrixDataSprite->WVP = worldViewProjectionMatrixSprite;
 
 
 
@@ -1717,7 +1696,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::SliderFloat4("SliderMaterialLigth", *inputMaterialLigth, 0.0f, 1.0f);
 
 			ImGui::InputFloat3("VertexLigth", *inputDirectionLight);
-			ImGui::SliderFloat3("SliderVertexLigth", *inputDirectionLight, -5.0f, 5.0f);
+			ImGui::SliderFloat3("SliderVertexLigth", *inputDirectionLight, -1.0f, 1.0f);
 
 
 			ImGui::InputFloat("intensity", intensity);
@@ -1726,15 +1705,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-			//ImGui::Text("Sprite");
-			//ImGui::InputFloat("SpriteX", &transformSprite.translate.x);
-			//ImGui::SliderFloat("SliderSpriteX", &transformSprite.translate.x, 0.0f, 1000.0f);
+			ImGui::Text("Sprite");
+			ImGui::InputFloat("SpriteX", &transformSprite.translate.x);
+			ImGui::SliderFloat("SliderSpriteX", &transformSprite.translate.x, 0.0f, 1000.0f);
 
-			//ImGui::InputFloat("SpriteY", &transformSprite.translate.y);
-			//ImGui::SliderFloat("SliderSpriteY", &transformSprite.translate.y, 0.0f, 600.0f);
+			ImGui::InputFloat("SpriteY", &transformSprite.translate.y);
+			ImGui::SliderFloat("SliderSpriteY", &transformSprite.translate.y, 0.0f, 600.0f);
 
-			//ImGui::InputFloat("SpriteZ", &transformSprite.translate.z);
-			//ImGui::SliderFloat("SliderSpriteZ", &transformSprite.translate.z, 0.0f, 0.0f);
+			ImGui::InputFloat("SpriteZ", &transformSprite.translate.z);
+			ImGui::SliderFloat("SliderSpriteZ", &transformSprite.translate.z, 0.0f, 0.0f);
 
 
 			//ImGuiの内部コマンド
@@ -1785,8 +1764,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			commandList->SetGraphicsRootSignature(rootSignature);
 			commandList->SetPipelineState(graphicsPipelineState);
+			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 			
-			
+			//三角
 			//commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 
 			//commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
@@ -1794,23 +1774,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 
 			//commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);	
-			//
-			//commandList->SetGraphicsRootConstantBufferView(3, wvpResourceLight->GetGPUVirtualAddress());
-			//
-			//commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-			//commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			//commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 			//commandList->DrawInstanced(6, 1, 0, 0);
 
 
 
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSphere);
-			
-			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSphere->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
-
 
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceSphere->GetGPUVirtualAddress());
 
@@ -1822,7 +1795,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
 			}
 
-			commandList->SetGraphicsRootConstantBufferView(3, wvpResourceLight->GetGPUVirtualAddress());
+			commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
 
 
 			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
@@ -1833,42 +1806,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewLight);
-			
-			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-			//commandList->SetGraphicsRootConstantBufferView(0, materialResourceLight->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
-
-
-			//commandList->SetGraphicsRootConstantBufferView(1, wvpResourceLight->GetGPUVirtualAddress());
-
-
-			//if (textureChange == 0) {
-			//	commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-			//}
-			//else {
-			//	commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
-			//}
-
-			commandList->SetGraphicsRootConstantBufferView(3, wvpResourceLight->GetGPUVirtualAddress());
-
-
-			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-
-
-			commandList->DrawInstanced(SphereVertexNum, 1, 0, 0);
-
-
-
-
-
-			//commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
 			//commandList->IASetVertexBuffers(0, 1 ,&vertexBufferViewSprite);
-			//commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());	
-			//
-			//commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
 
+			//commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
+		
+			//commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());		
+
+			//commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 
 			//commandList->DrawInstanced(6, 1, 0, 0);
 
@@ -1942,8 +1887,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	useAdapter->Release();
 	dxgiFactory->Release();
 
-	wvpResource->Release();
-	vertexResource->Release();
+	//wvpResource->Release();
+	//vertexResource->Release();
 	
 	wvpResourceSphere->Release();
 	vertexResourceSphere->Release();
@@ -1951,9 +1896,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexResourceSprite->Release();
 	transformationMatrixResourceSprite->Release();
 	
-	wvpResourceLight->Release();
-	vertexResourceLight->Release();
-
+	directionalLightSphereResource->Release();
 
 
 	graphicsPipelineState->Release();
@@ -1966,8 +1909,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	pixelShaderBlob->Release();
 	vertexShaderBlob->Release();
 
-	materialResource->Release();
+	//materialResource->Release();
 	materialResourceSphere->Release();
+
 	materialResourceSprite->Release();
 
 #ifdef _DEBUG
