@@ -548,12 +548,12 @@ VertexData AddVert(const VertexData& v1, const VertexData& v2) {
 
 void DrawSphere(VertexData* vertexDataSphere) {
 
-	const uint32_t kSubdivision = 15;
+	const uint32_t kSubdivision = 16;
 
 	float pi = float(M_PI);
 
-	const float kLonEvery = pi * 2.0f / float(kSubdivision - 1);
-	const float kLatEvery = pi / float(kSubdivision - 1);
+	const float kLonEvery = pi * 2.0f / float(kSubdivision);
+	const float kLatEvery = pi / float(kSubdivision);
 
 
 	VertexData vertexDataBkaraA[kSubdivision]{};
@@ -564,7 +564,6 @@ void DrawSphere(VertexData* vertexDataSphere) {
 
 	VertexData vertexDataDkaraC[kSubdivision]{};
 	VertexData vertexDataDkaraB[kSubdivision]{};
-
 
 
 	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
@@ -594,9 +593,9 @@ void DrawSphere(VertexData* vertexDataSphere) {
 			VertexData vertB{};
 			vertB.position =
 			{
-				std::cos(lat + lat) * std::cos(lon),
-				std::sin(lat + lat),
-				std::cos(lat + lat) * std::sin(lon)
+				std::cos(lat + kLatEvery) * std::cos(lon),
+				std::sin(lat + kLatEvery),
+				std::cos(lat + kLatEvery) * std::sin(lon)
 				,1.0f
 			};
 			vertB.texcoord =
@@ -609,9 +608,9 @@ void DrawSphere(VertexData* vertexDataSphere) {
 			VertexData vertC{};
 			vertC.position =
 			{
-				std::cos(lat) * std::cos(lon + lon),
+				std::cos(lat) * std::cos(lon + kLonEvery),
 				std::sin(lat),
-				std::cos(lat) * std::sin(lon + lon),
+				std::cos(lat) * std::sin(lon + kLonEvery),
 				1.0f
 			};
 			vertC.texcoord =
@@ -624,9 +623,9 @@ void DrawSphere(VertexData* vertexDataSphere) {
 			VertexData vertD{};
 			vertD.position =
 			{
-				std::cos(lat + lat) * std::cos(lon + lon),
-				std::sin(lat + lat),
-				std::cos(lat + lat) * std::sin(lon + lon),
+				std::cos(lat + kLatEvery) * std::cos(lon + kLonEvery),
+				std::sin(lat + kLatEvery),
+				std::cos(lat + kLatEvery) * std::sin(lon + kLonEvery),
 				1.0f
 			};
 			vertD.texcoord =
@@ -637,157 +636,28 @@ void DrawSphere(VertexData* vertexDataSphere) {
 
 
 
-			if (latIndex != 0 && lonIndex != 0) {
-				vertexDataSphere[start + 0] = vertA;
-				vertexDataSphere[start + 1] = vertexDataCkaraA[lonIndex];
-				vertexDataSphere[start + 2] = vertexDataBkaraA[latIndex];
 
-				vertexDataSphere[start + 3] = vertexDataBkaraA[latIndex];
-				vertexDataSphere[start + 4] = vertexDataCkaraA[lonIndex];
-				vertexDataSphere[start + 5] = vertexDataDkaraA[lonIndex][lonIndex];
-			}
-			else {
-				//最初点
-				vertexDataSphere[start + 0] = vertA;
-				vertexDataSphere[start + 1] = vertC;
-				vertexDataSphere[start + 2] = vertB;
+			//最初点
+			vertexDataSphere[start + 0] = vertA;
+			vertexDataSphere[start + 1] = vertB;
+			vertexDataSphere[start + 2] = vertC;
 
-				vertexDataSphere[start + 3] = vertB;
-				vertexDataSphere[start + 4] = vertC;
-				vertexDataSphere[start + 5] = vertA;
-			}
-
-			vertexDataBkaraA[latIndex] = vertexDataSphere[start + 0];
-
-			vertexDataCkaraA[lonIndex] = vertexDataSphere[start + 0];
-
-			
-
-			vertexDataDkaraC[latIndex] = vertexDataSphere[start + 0];
-			
-			vertexDataDkaraB[lonIndex] = vertexDataSphere[start + 0];
-
-
-			vertexDataDkaraA[lonIndex][lonIndex] = vertA;
-
+			vertexDataSphere[start + 3] = vertC;
+			vertexDataSphere[start + 4] = vertB;
+			vertexDataSphere[start + 5] = vertD;
 
 		}
 
 	}
 
 
-
-
-	for (uint32_t latIndex = 0; latIndex < kSubdivision; ++latIndex) {
-		float lat = -pi / 2.0f + kLatEvery * latIndex;//緯度 シ－タ
-
-		for (uint32_t lonIndex = 0; lonIndex < kSubdivision; ++lonIndex) {
-
-			uint32_t start = 1536 + (latIndex * kSubdivision + lonIndex) * 6;
-			float lon = lonIndex * kLonEvery;//経度　ファイ
-
-
-			VertexData vertA{};
-			vertA.position =
-			{
-				-std::cos(lat) * std::cos(lon),
-				-std::sin(lat),
-				std::cos(lat) * std::sin(lon),
-				1.0f
-			};
-			vertA.texcoord =
-			{
-				float(lonIndex) / float(kSubdivision),
-				float(latIndex) / float(kSubdivision)
-			};
-
-
-			VertexData vertB{};
-			vertB.position =
-			{
-				-std::cos(lat + lat) * std::cos(lon),
-				-std::sin(lat + lat),
-				std::cos(lat + lat) * std::sin(lon)
-				,1.0f
-			};
-			vertB.texcoord =
-			{
-				1.0f - float(lonIndex) / float(kSubdivision),
-				float(latIndex + 1) / float(kSubdivision)
-			};
-
-
-			VertexData vertC{};
-			vertC.position =
-			{
-				-std::cos(lat) * std::cos(lon + lon),
-				-std::sin(lat),
-				std::cos(lat) * std::sin(lon + lon),
-				1.0f
-			};
-			vertC.texcoord =
-			{
-				1.0f - float(lonIndex + 1) / float(kSubdivision),
-				float(latIndex) / float(kSubdivision)
-			};
-
-
-			VertexData vertD{};
-			vertD.position =
-			{
-				std::cos(lat + lat) * std::cos(lon + lon),
-				std::sin(lat + lat),
-				std::cos(lat + lat) * std::sin(lon + lon),
-				1.0f
-			};
-			vertD.texcoord =
-			{
-				1.0f - float(lonIndex + 1) / float(kSubdivision),
-				float(latIndex + 1) / float(kSubdivision)
-			};
-
-
-
-			if (latIndex != 0 && lonIndex != 0) {
-				vertexDataSphere[start + 0] = vertA;
-				vertexDataSphere[start + 1] = vertexDataCkaraA[lonIndex];
-				vertexDataSphere[start + 2] = vertexDataBkaraA[latIndex];
-
-				vertexDataSphere[start + 3] = vertexDataBkaraA[latIndex];
-				vertexDataSphere[start + 4] = vertexDataCkaraA[lonIndex];
-				vertexDataSphere[start + 5] = vertexDataDkaraA[lonIndex][lonIndex];
-			}
-			else {
-				//最初点
-				vertexDataSphere[start + 0] = vertA;
-				vertexDataSphere[start + 1] = vertC;
-				vertexDataSphere[start + 2] = vertB;
-
-				vertexDataSphere[start + 3] = vertB;
-				vertexDataSphere[start + 4] = vertC;
-				vertexDataSphere[start + 5] = vertA;
-			}
-
-			vertexDataBkaraA[latIndex] = vertexDataSphere[start + 0];
-
-			vertexDataCkaraA[lonIndex] = vertexDataSphere[start + 0];
-
-
-
-			vertexDataDkaraA[lonIndex][lonIndex] = vertA;
-
-
-		}
-
-	}
-
-	for (uint32_t index = 0; index < kSubdivision * kSubdivision * 6 * 2; index++) {
+	for (uint32_t index = 0; index < kSubdivision * kSubdivision * 6; index++) {
 		vertexDataSphere[index].normal.x = vertexDataSphere[index].position.x;
 		vertexDataSphere[index].normal.y = vertexDataSphere[index].position.y;
 		vertexDataSphere[index].normal.z = vertexDataSphere[index].position.z;
 	}
 
-
+	vertexDataSphere[0].normal = { 0.0f,0.0f,-1.0f };
 }
 
 
@@ -1459,7 +1329,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 
 
-	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 6);//ここ変えるかも
+	ID3D12Resource* vertexResource = CreateBufferResource(device, sizeof(VertexData) * 6);
 
 
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
@@ -1508,21 +1378,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexData[5].position = { 0.5f, -0.5f,-0.5f,1.0f };
 	vertexData[5].texcoord = { 1.0f,1.0f };
 
-	//for (uint32_t index = 0; index < 6; index++) {
-	//	vertexData[index].normal.x = vertexData[index].position.x;
-	//	vertexData[index].normal.y = vertexData[index].position.y;
-	//	vertexData[index].normal.z = vertexData[index].position.z;
-	//}
-	//vertexData[0].normal = { 0.0f,0.0f,-1.0f };
 
 
 
 
 
-	uint32_t SphereVertexNum = 16 * 16 * 6 * 2;
+	uint32_t SphereVertexNum = 16 * 16 * 6;
 
 	//Sphere
-	ID3D12Resource* vertexResourceSphere = CreateBufferResource(device, sizeof(VertexData) * SphereVertexNum);//ここ変えるかも
+	ID3D12Resource* vertexResourceSphere = CreateBufferResource(device, sizeof(VertexData) * SphereVertexNum);
 
 
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSphere{};
@@ -1546,15 +1410,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSphere));
 
 
-	for (uint32_t index = 0; index < SphereVertexNum; index++) {
-		vertexDataSphere[index].normal.x = vertexDataSphere[index].position.x;
-		vertexDataSphere[index].normal.y = vertexDataSphere[index].position.y;
-		vertexDataSphere[index].normal.z = vertexDataSphere[index].position.z;
-	}
-	vertexDataSphere[0].normal = { 0.0f,0.0f,-1.0f };
 
 	//DirectionalLight//
-	ID3D12Resource* vertexResourceLight = CreateBufferResource(device, sizeof(VertexData) * SphereVertexNum);//ここ変えるかも
+	ID3D12Resource* vertexResourceLight = CreateBufferResource(device, sizeof(VertexData) * SphereVertexNum);
 
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewLight{};
 
@@ -1564,7 +1422,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	vertexBufferViewLight.StrideInBytes = sizeof(VertexData);
 
-	ID3D12Resource* wvpResourceLight = CreateBufferResource(device, sizeof(DirectionalLight));
+	ID3D12Resource* wvpResourceLight = CreateBufferResource(device, sizeof(TransformationMatrix));
 
 	TransformationMatrix* wvpDateLight = nullptr;
 
@@ -1572,15 +1430,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	wvpDateLight->World = MakeIdentity4x4();
 
-	DirectionalLight* vertexDataLight = nullptr;
+	VertexData* vertexDataLight = nullptr;
 
 	vertexResourceLight->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataLight));
-
-	vertexDataLight->color = { 1.0f,1.0f,1.0f,1.0f };
-	vertexDataLight->direction = { 0.0f,-1.0f,0.0f };
-	vertexDataLight->intensity = 1.0f;
-
-
 
 
 
@@ -1644,22 +1496,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//球体用マテリアル
 	//マテリアル用のリソース
-	ID3D12Resource* materialResourceSphere = CreateBufferResource(device, sizeof(Material));
+	ID3D12Resource* materialResourceSphere = CreateBufferResource(device, sizeof(DirectionalLight));
 	//マテリアルにデータを書き込む
-	Material* materialDateSphere = nullptr;
+	DirectionalLight* materialDateSphere = nullptr;
 	//書き込むためのアドレス
 	materialResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&materialDateSphere));
 	//色の設定
 	*materialDateSphere = { Vector4(1.0f, 1.0f, 1.0f, 1.0f) , 1 };
 
 
-	//ID3D12Resource* materialResourceLight = CreateBufferResource(device, sizeof(Material));
-	////マテリアルにデータを書き込む
-	//Material* materialDateLight = nullptr;
-	////書き込むためのアドレス
-	//materialResourceLight->Map(0, nullptr, reinterpret_cast<void**>(&materialDateLight));
-	////色の設定
-	//*materialDateLight = { Vector4(1.0f, 1.0f, 1.0f, 1.0f) , 1 };
+
+
+
 
 
 
@@ -1706,8 +1554,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform transformSphere{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
-	Transform transformLight{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
+	Transform transformL{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
+	DirectionalLight transformLight{ { 1.0f,1.0f,1.0f,1.0f },{ 0.0f,-1.0f,0.0f } ,1.0f };
+	
+//vertexDataLight->color = { 1.0f,1.0f,1.0f,1.0f };
+//vertexDataLight->direction = { 0.0f,-1.0f,0.0f };
+//vertexDataLight->intensity = 1.0f;
 
 	float *inputMaterial[3] = { &materialDate->x,&materialDate->y,&materialDate->z };
 	float* inputTransform[3] = { &transform.translate.x,&transform.translate.y,&transform.translate.z };
@@ -1722,9 +1575,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float textureChange = 0;
 
 
-	float* inputMaterialLigth[3] = { &vertexDataLight->color.x,&vertexDataLight->color.y,&vertexDataLight->color.z };
-	float* inputRotateLight[3] = { &vertexDataLight->direction.x,&vertexDataLight->direction.y,&vertexDataLight->direction.z };
-	float intensity = vertexDataLight->intensity;
+	float* inputMaterialLigth[3] = { &transformLight.color.x,&transformLight.color.y,&transformLight.color.z };
+	float* inputDirectionLight[3] = { &transformLight.direction.x,&transformLight.direction.y,&transformLight.direction.z };
+	float* intensity = &transformLight.intensity;
 
 
 
@@ -1791,20 +1644,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					
 			DrawSphere(vertexDataSphere);
 			
-			vertexDataSphere[0].normal = { 0.0f,0.0f,-1.0f };
+
 			
 			Matrix4x4 worldMatrixLight = MakeAffineMatrix(transformSphere.scale, transformSphere.rotate, transformSphere.translate);
 			//Matrix4x4 cameraMatrix = MakeAffineMatrix(cameraTransform.scale, cameraTransform.rotate, cameraTransform.translate);
 			//Matrix4x4 viewMatrix = Inverse(cameraMatrix);
 			//Matrix4x4 projectionMatrix = MakePerspectiveFovMatrix(0.45f, float(1280.0f) / float(720.0f), 0.1f, 100.0f);
 			//Matrix4x4 projectionMatrix = MakeOrthographicMatrix((float)scissorRect.left, (float)scissorRect.top, (float)scissorRect.right, (float)scissorRect.bottom, 0.1f, 100.0f);
-			Matrix4x4 WorldViewProjectionMatrixLight = Multiply(worldMatrixSphere, Multiply(viewMatrix, projectionMatrix));
+			Matrix4x4 WorldViewProjectionMatrixLight = Multiply(worldMatrixLight, Multiply(viewMatrix, projectionMatrix));
 
 
 
 			wvpDateLight->WVP = WorldViewProjectionMatrixLight;
 
-			//DrawSphere(wvpDateLight);
+			DrawSphere(vertexDataLight);
 
 		
 			Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
@@ -1825,18 +1678,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Text("ImGuiText");
 
 
-			ImGui::Text("Traiangle");
-			ImGui::InputFloat3("Material", *inputMaterial);
-			ImGui::SliderFloat3("SliderMaterial", *inputMaterial, 0.0f, 1.0f);
+			//ImGui::Text("Traiangle");
+			//ImGui::InputFloat3("Material", *inputMaterial);
+			//ImGui::SliderFloat3("SliderMaterial", *inputMaterial, 0.0f, 1.0f);
 
-			ImGui::InputFloat3("Vertex", *inputTransform);
-			ImGui::SliderFloat3("SliderVertex", *inputTransform, -5.0f, 5.0f);
+			//ImGui::InputFloat3("Vertex", *inputTransform);
+			//ImGui::SliderFloat3("SliderVertex", *inputTransform, -5.0f, 5.0f);
 
-			ImGui::InputFloat3("Rotate", *inputRotate);
-			ImGui::SliderFloat3("SliderRotate", *inputRotate, -10.0f, 10.0f);
+			//ImGui::InputFloat3("Rotate", *inputRotate);
+			//ImGui::SliderFloat3("SliderRotate", *inputRotate, -10.0f, 10.0f);
 
-			ImGui::InputFloat3("Scale", *inputScale);
-			ImGui::SliderFloat3("SliderScale", *inputScale, 0.5f, 5.0f);
+			//ImGui::InputFloat3("Scale", *inputScale);
+			//ImGui::SliderFloat3("SliderScale", *inputScale, 0.5f, 5.0f);
 
 
 
@@ -1857,35 +1710,31 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::InputFloat("SphereTexture", &textureChange);
 
 
-			//plane.normal = Normalize(plane.normal);
 
 
-			for (uint32_t index = 1; index < SphereVertexNum; index++) {
-				vertexDataSphere[index].normal = Normalize(vertexDataSphere[index].normal);
-			}
 			ImGui::Text("Ligth");
-			ImGui::InputFloat3("MaterialLigth", *inputMaterialLigth);
-			ImGui::SliderFloat3("SliderMaterialLigth", *inputMaterialLigth, 0.0f, 1.0f);
+			ImGui::InputFloat4("MaterialLigth", *inputMaterialLigth);
+			ImGui::SliderFloat4("SliderMaterialLigth", *inputMaterialLigth, 0.0f, 1.0f);
 
-			ImGui::InputFloat3("VertexLigth", *inputRotateLight);
-			ImGui::SliderFloat3("SliderVertexLigth", *inputRotateLight, -5.0f, 5.0f);
-
-
-			ImGui::InputFloat("intensity", &intensity);
+			ImGui::InputFloat3("VertexLigth", *inputDirectionLight);
+			ImGui::SliderFloat3("SliderVertexLigth", *inputDirectionLight, -5.0f, 5.0f);
 
 
+			ImGui::InputFloat("intensity", intensity);
 
 
 
-			ImGui::Text("Sprite");
-			ImGui::InputFloat("SpriteX", &transformSprite.translate.x);
-			ImGui::SliderFloat("SliderSpriteX", &transformSprite.translate.x, 0.0f, 1000.0f);
 
-			ImGui::InputFloat("SpriteY", &transformSprite.translate.y);
-			ImGui::SliderFloat("SliderSpriteY", &transformSprite.translate.y, 0.0f, 600.0f);
 
-			ImGui::InputFloat("SpriteZ", &transformSprite.translate.z);
-			ImGui::SliderFloat("SliderSpriteZ", &transformSprite.translate.z, 0.0f, 0.0f);
+			//ImGui::Text("Sprite");
+			//ImGui::InputFloat("SpriteX", &transformSprite.translate.x);
+			//ImGui::SliderFloat("SliderSpriteX", &transformSprite.translate.x, 0.0f, 1000.0f);
+
+			//ImGui::InputFloat("SpriteY", &transformSprite.translate.y);
+			//ImGui::SliderFloat("SliderSpriteY", &transformSprite.translate.y, 0.0f, 600.0f);
+
+			//ImGui::InputFloat("SpriteZ", &transformSprite.translate.z);
+			//ImGui::SliderFloat("SliderSpriteZ", &transformSprite.translate.z, 0.0f, 0.0f);
 
 
 			//ImGuiの内部コマンド
@@ -1938,26 +1787,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			commandList->SetPipelineState(graphicsPipelineState);
 			
 			
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+			//commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
 
-			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+			//commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
 
-			commandList->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
+			//commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 
-			commandList->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+			//commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);	
+			//
+			//commandList->SetGraphicsRootConstantBufferView(3, wvpResourceLight->GetGPUVirtualAddress());
+			//
+			//commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);	
-			
-			commandList->SetGraphicsRootConstantBufferView(3, wvpResourceLight->GetGPUVirtualAddress());
-			
-			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+			//commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			//commandList->DrawInstanced(6, 1, 0, 0);
 
 
 
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSphere);
-
+			
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSphere->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
@@ -1978,13 +1827,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
+
 			commandList->DrawInstanced(SphereVertexNum, 1, 0, 0);
 
 
 
 
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewLight);
-
+			
 			commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 			//commandList->SetGraphicsRootConstantBufferView(0, materialResourceLight->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
@@ -2004,6 +1854,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+
 
 			commandList->DrawInstanced(SphereVertexNum, 1, 0, 0);
 
