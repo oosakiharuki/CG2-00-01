@@ -777,6 +777,9 @@ ModelData LoadObjFile(const std::string& directoryPath,const std::string& filena
 			Vector4 position;
 			s >> position.x >> position.y >> position.z; //左から順に消費 = 飛ばしたりはできない
 			position.s = 1.0f;
+
+			//反転
+			position.x *= 1.0f;
 			positions.push_back(position);
 		}
 		else if (identifier == "vt") {
@@ -787,9 +790,14 @@ ModelData LoadObjFile(const std::string& directoryPath,const std::string& filena
 		else if (identifier == "vn") {
 			Vector3 normal;
 			s >> normal.x >> normal.y >> normal.z;
+			
+			//反転
+			normal.x *= 1.0f;
 			normals.push_back(normal);
 		}
-		else if (identifier == "f") {
+		else if (identifier == "f") {		
+			VertexData triangle[3];
+			
 			for (int32_t faceVertex = 0; faceVertex < 3; ++faceVertex) {
 				std::string vertexDefinition;
 				s >> vertexDefinition;
@@ -800,13 +808,22 @@ ModelData LoadObjFile(const std::string& directoryPath,const std::string& filena
 					std::string index;
 					std::getline(v,index,'/'); //  "/"でインデックスを区切る
 					elementIndices[element] = std::stoi(index);
+					
 				}
+				
+				
 				Vector4 position = positions[elementIndices[0] - 1];
 				Vector2 texcoord = texcoords[elementIndices[1] - 1];
 				Vector3 normal = normals[elementIndices[2] - 1];
-				VertexData vertex = { position,texcoord,normal };
-				modelData.vertices.push_back(vertex);
+				//VertexData vertex = { position,texcoord,normal };
+				//modelData.vertices.push_back(vertex);
+				
+				triangle[faceVertex] = { position,texcoord,normal };
+
 			}
+			modelData.vertices.push_back(triangle[2]);
+			modelData.vertices.push_back(triangle[1]);
+			modelData.vertices.push_back(triangle[0]);
 		}
 	}
 
