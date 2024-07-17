@@ -749,8 +749,36 @@ void DrawSphere(VertexData* vertexDataSphere) {
 
 
 //model
+struct MaterialData {
+	std::string textureFilePath;
+};
+
+MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
+	MaterialData materialData;
+	std::string line;
+	std::ifstream file(directoryPath + "/" + filename);
+	assert(file.is_open());
+
+	//ファイルを開く
+	while (std::getline(file, line)) {
+		std::string identifier;
+		std::istringstream s(line);
+		s >> identifier;
+
+		if (identifier == "map_Kd") {
+			std::string textureFilename;
+			s >> textureFilename;
+
+			materialData.textureFilePath = directoryPath + "/" + textureFilename;
+		}
+	}
+	return materialData;
+};
+
+
 struct ModelData {
 	std::vector<VertexData> vertices;
+	MaterialData material;
 };
 
 ModelData LoadObjFile(const std::string& directoryPath,const std::string& filename) {
@@ -769,22 +797,26 @@ ModelData LoadObjFile(const std::string& directoryPath,const std::string& filena
 	//構築
 	while (std::getline(file, line)) {
 		std::string identifier;
-		std::istringstream s(line);
-		s >> identifier; //先頭の義別子 (v ,vt, vn, f) を読み取る	
+		std::istringstream s(line);		
+		s >> identifier; //先頭の義別子 (v ,vt, vn, f) を読み取る
 
 		//modeldataの建築
 		if (identifier == "v") {
 			Vector4 position;
-			s >> position.x >> position.y >> position.z; //左から順に消費 = 飛ばしたりはできない
+			s >> position.x >> position.y >> position.z;//左から順に消費 = 飛ばしたり、もう一度使うことはできない	
 			position.s = 1.0f;
 
 			//反転
-			position.x *= 1.0f;
+			position.x *= -1.0f;
 			positions.push_back(position);
 		}
 		else if (identifier == "vt") {
 			Vector2 texcoord;
 			s >> texcoord.x >> texcoord.y;
+
+			//原点変更
+			texcoord.y = 1.0f - texcoord.y;
+
 			texcoords.push_back(texcoord);
 		}
 		else if (identifier == "vn") {
@@ -792,7 +824,7 @@ ModelData LoadObjFile(const std::string& directoryPath,const std::string& filena
 			s >> normal.x >> normal.y >> normal.z;
 			
 			//反転
-			normal.x *= 1.0f;
+			normal.x *= -1.0f;
 			normals.push_back(normal);
 		}
 		else if (identifier == "f") {		
@@ -824,6 +856,13 @@ ModelData LoadObjFile(const std::string& directoryPath,const std::string& filena
 			modelData.vertices.push_back(triangle[2]);
 			modelData.vertices.push_back(triangle[1]);
 			modelData.vertices.push_back(triangle[0]);
+		}
+		else if (identifier == "mtllib") {
+			std::string materialFilename;
+
+			s >> materialFilename;
+			modelData.material = LoadMaterialTemplateFile(directoryPath, materialFilename);
+
 		}
 	}
 
@@ -1232,7 +1271,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//textureを読んで転送
-	DirectX::ScratchImage mipImages2 = LoadTexture("resource/monsterBall.png");
+	DirectX::ScratchImage mipImages2 = LoadTexture("resource/monsterBall.png");//モンスターボール
 	const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
 	ID3D12Resource* textureResource2 = CrateTextureResource(device, metadata2);
 	UploadTextureData(textureResource2, mipImages2);
@@ -1642,7 +1681,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//モデルの読み込み
-	ModelData modelData = LoadObjFile("resource", "plane.obj");
+	//ModelData modelData = LoadObjFile("resource", "plane.obj");	
+	
+	ModelData modelData = LoadObjFile("resource", "axis.obj");
+
+
 	ID3D12Resource* vertexResourceModel = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
 
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewModel{};
@@ -1653,7 +1696,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	VertexData* vertexDataModel = nullptr;
 	vertexResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataModel));
 	std::memcpy(vertexDataModel,modelData.vertices.data(),sizeof(VertexData) * modelData.vertices.size());
-
+	
+	//textureを読んで転送
+	mipImages2 = LoadTexture(modelData.material.textureFilePath);
 
 
 	////三角用マテリアル
@@ -1888,15 +1933,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-			//ImGui::Text("Ligth");
-			//ImGui::InputFloat4("MaterialLigth", *inputMaterialLigth);
-			//ImGui::SliderFloat4("SliderMaterialLigth", *inputMaterialLigth, 0.0f, 1.0f);
+			ImGui::Text("Ligth");
+			ImGui::InputFloat4("MaterialLigth", *inputMaterialLigth);
+			ImGui::SliderFloat4("SliderMaterialLigth", *inputMaterialLigth, 0.0f, 1.0f);
 
-			//ImGui::InputFloat3("VertexLigth", *inputDirectionLight);
-			//ImGui::SliderFloat3("SliderVertexLigth", *inputDirectionLight, -1.0f, 1.0f);
+			ImGui::InputFloat3("VertexLigth", *inputDirectionLight);
+			ImGui::SliderFloat3("SliderVertexLigth", *inputDirectionLight, -1.0f, 1.0f);
 
 
-			//ImGui::InputFloat("intensity", intensity);
+			ImGui::InputFloat("intensity", intensity);
 
 
 
