@@ -1223,7 +1223,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 		//解放
-		infoQueue->Release();
+		//infoQueue->Release();
 	}
 
 
