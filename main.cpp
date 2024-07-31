@@ -1892,7 +1892,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			Matrix4x4 worldMatrixSphere = MakeAffineMatrix(transformSphere.scale, transformSphere.rotate, transformSphere.translate);
 			Matrix4x4 WorldViewProjectionMatrixSphere = Multiply(worldMatrixSphere, Multiply(viewMatrix, projectionMatrix));
-
+			
+			wvpDateSphere->World = worldMatrixSphere;
 			wvpDateSphere->WVP = WorldViewProjectionMatrixSphere;
 					
 			DrawSphere(vertexDataSphere);
