@@ -1576,11 +1576,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource = CreateBufferResource(device, sizeof(Matrix4x4));
 
-	//Matrix4x4* wvpDate = nullptr;
+	//Matrix4x4* wvpData = nullptr;
 
-	//wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpDate));
+	//wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
 
-	//*wvpDate = MakeIdentity4x4();
+	//*wvpData = MakeIdentity4x4();
 
 	//VertexData* vertexData = nullptr;
 
@@ -1632,11 +1632,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceSphere = CreateBufferResource(device, sizeof(TransformationMatrix));
 
-	TransformationMatrix* wvpDateSphere = nullptr;
+	TransformationMatrix* wvpDataSphere = nullptr;
 
-	wvpResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&wvpDateSphere));
+	wvpResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&wvpDataSphere));
 
-	wvpDateSphere->World = MakeIdentity4x4();
+	wvpDataSphere->World = MakeIdentity4x4();
 
 	VertexData* vertexDataSphere = nullptr;
 
@@ -1720,9 +1720,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferViewModel.StrideInBytes = sizeof(VertexData);
 	
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceModel = CreateBufferResource(device, sizeof(TransformationMatrix));
-	TransformationMatrix* wvpDateModel = nullptr;
-	wvpResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&wvpDateModel));
-	wvpDateModel->World = MakeIdentity4x4();
+	TransformationMatrix* wvpDataModel = nullptr;
+	wvpResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&wvpDataModel));
+	wvpDataModel->World = MakeIdentity4x4();
 
 	VertexData* vertexDataModel = nullptr;
 	vertexResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataModel));
@@ -1736,11 +1736,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	////マテリアル用のリソース
 	//Microsoft::WRL::ComPtr<ID3D12Resource> materialResource = CreateBufferResource(device, sizeof(Vector4));
 	////マテリアルにデータを書き込む
-	//Vector4* materialDate = nullptr;
+	//Vector4* materialData = nullptr;
 	////書き込むためのアドレス
-	//materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialDate));
+	//materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
 	////色の設定
-	//*materialDate = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	//*materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 
 
 
@@ -1749,13 +1749,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//マテリアル用のリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceSphere = CreateBufferResource(device, sizeof(Material));
 	//マテリアルにデータを書き込む
-	Material* materialDateSphere = nullptr;
+	Material* materialDataSphere = nullptr;
 	//書き込むためのアドレス
-	materialResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&materialDateSphere));
+	materialResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSphere));
 	//色の設定
-	materialDateSphere->color =  Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialDateSphere->enableLighting = true;
-	materialDateSphere->uvTransform = MakeIdentity4x4();
+	materialDataSphere->color =  Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialDataSphere->enableLighting = true;
+	materialDataSphere->uvTransform = MakeIdentity4x4();
 
 
 
@@ -1763,13 +1763,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 //マテリアル用のリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceModel = CreateBufferResource(device, sizeof(Material));
 	//マテリアルにデータを書き込む
-	Material* materialDateModel = nullptr;
+	Material* materialDataModel = nullptr;
 	//書き込むためのアドレス
-	materialResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&materialDateModel));
+	materialResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&materialDataModel));
 	//色の設定
-	materialDateModel->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialDateModel->enableLighting = true;
-	materialDateModel->uvTransform = MakeIdentity4x4();
+	materialDataModel->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialDataModel->enableLighting = true;
+	materialDataModel->uvTransform = MakeIdentity4x4();
 
 
 
@@ -1791,13 +1791,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//spriteのリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceSprite = CreateBufferResource(device, sizeof(Material));
 	//マテリアルにデータを書き込む
-	Material* materialDateSprite = nullptr;
+	Material* materialDataSprite = nullptr;
 	//書き込むためのアドレス
-	materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialDateSprite));
+	materialResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSprite));
 	//色の設定
-	materialDateSprite->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	materialDateSprite->enableLighting = false;
-	materialDateSprite->uvTransform = MakeIdentity4x4();
+	materialDataSprite->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialDataSprite->enableLighting = false;
+	materialDataSprite->uvTransform = MakeIdentity4x4();
 
 	//ビューポート
 	D3D12_VIEWPORT viewport;
@@ -1838,26 +1838,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	};
 
 
-	//float *inputMaterial[3] = { &materialDate->x,&materialDate->y,&materialDate->z };
+	//float *inputMaterial[3] = { &materialData->x,&materialData->y,&materialData->z };
 	//float* inputTransform[3] = { &transform.translate.x,&transform.translate.y,&transform.translate.z };
 	//float* inputRotate[3] = { &transform.rotate.x,&transform.rotate.y,&transform.rotate.z };
 	//float* inputScale[3] = { &transform.scale.x,&transform.scale.y,&transform.scale.z };
 
 
-	float* inputMaterialSphere[3] = { &materialDateSphere->color.x,&materialDateSphere->color.y,&materialDateSphere->color.z };
+	float* inputMaterialSphere[3] = { &materialDataSphere->color.x,&materialDataSphere->color.y,&materialDataSphere->color.z };
 	float* inputTransformSphere[3] = { &transformSphere.translate.x,&transformSphere.translate.y,&transformSphere.translate.z };
 	float* inputRotateSphere[3] = { &transformSphere.rotate.x,&transformSphere.rotate.y,&transformSphere.rotate.z };
 	float* inputScaleSphere[3] = { &transformSphere.scale.x,&transformSphere.scale.y,&transformSphere.scale.z };
 	bool textureChange = false;
 
-	float* inputMaterialModel[3] = { &materialDateModel->color.x,&materialDateModel->color.y,&materialDateModel->color.z };
+	float* inputMaterialModel[3] = { &materialDataModel->color.x,&materialDataModel->color.y,&materialDataModel->color.z };
 	float* inputTransformModel[3] = { &transformModel.translate.x,&transformModel.translate.y,&transformModel.translate.z };
 	float* inputRotateModel[3] = { &transformModel.rotate.x,&transformModel.rotate.y,&transformModel.rotate.z };
 	float* inputScaleModel[3] = { &transformModel.scale.x,&transformModel.scale.y,&transformModel.scale.z };
 	bool textureChange2 = false;
 
 
-	float* inputMaterialLigth[3] = { &directionalLightSphereData->color.x,&directionalLightSphereData->color.y,&directionalLightSphereData->color.z };
+	float* inputMateriallight[3] = { &directionalLightSphereData->color.x,&directionalLightSphereData->color.y,&directionalLightSphereData->color.z };
 	float* inputDirectionLight[3] = { &directionalLightSphereData->direction.x,&directionalLightSphereData->direction.y,&directionalLightSphereData->direction.z };
 	float* intensity = &directionalLightSphereData->intensity;
 
@@ -1912,7 +1912,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 WorldViewProjectionMatrix = Multiply(worldMatrix, Multiply(viewMatrix, projectionMatrix));
 
 			//三角
-			//*wvpDate = WorldViewProjectionMatrix;
+			//*wvpData = WorldViewProjectionMatrix;
 
 
 			//球体
@@ -1920,7 +1920,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 worldMatrixSphere = MakeAffineMatrix(transformSphere.scale, transformSphere.rotate, transformSphere.translate);
 			Matrix4x4 WorldViewProjectionMatrixSphere = Multiply(worldMatrixSphere, Multiply(viewMatrix, projectionMatrix));
 
-			wvpDateSphere->WVP = WorldViewProjectionMatrixSphere;
+			wvpDataSphere->World = worldMatrixSphere;
+			wvpDataSphere->WVP = WorldViewProjectionMatrixSphere;
 					
 			DrawSphere(vertexDataSphere);
 		
@@ -1928,8 +1929,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//モデル
 			Matrix4x4 worldMatrixModel = MakeAffineMatrix(transformModel.scale, transformModel.rotate, transformModel.translate);
 			Matrix4x4 WorldViewProjectionMatrixModel = Multiply(worldMatrixModel, Multiply(viewMatrix, projectionMatrix));
-
-			wvpDateModel->WVP = WorldViewProjectionMatrixModel;
+			
+			wvpDataModel->World = worldMatrixModel;
+			wvpDataModel->WVP = WorldViewProjectionMatrixModel;
 
 
 
@@ -1951,13 +1953,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			Matrix4x4 uvTransformMatrix = MakeScaleMatrix(uvTransformSprite.scale);
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
-			materialDateSprite->uvTransform = uvTransformMatrix;
+			materialDataSprite->uvTransform = uvTransformMatrix;
 
 			//開発用UIの処理
-			ImGui::ShowDemoWindow();
+			//ImGui::ShowDemoWindow();
 
 			//ここにテキストを入れられる
-			ImGui::Text("ImGuiText");
+			//ImGui::Text("ImGuiText");
 
 
 			//ImGui::Text("Traiangle");
@@ -1975,70 +1977,78 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
+			if (ImGui::TreeNode("Sphere")) {
 
-			ImGui::Text("Sphere");
-			ImGui::InputFloat3("MaterialSphere", *inputMaterialSphere);
-			ImGui::SliderFloat3("SliderMaterialSphere", *inputMaterialSphere, 0.0f, 1.0f);
+				ImGui::InputFloat3("MaterialSphere", *inputMaterialSphere);
+				ImGui::SliderFloat3("SliderMaterialSphere", *inputMaterialSphere, 0.0f, 1.0f);
 
-			ImGui::InputFloat3("VertexSphere", *inputTransformSphere);
-			ImGui::SliderFloat3("SliderVertexSphere", *inputTransformSphere, -5.0f, 5.0f);
+				ImGui::InputFloat3("VertexSphere", *inputTransformSphere);
+				ImGui::SliderFloat3("SliderVertexSphere", *inputTransformSphere, -5.0f, 5.0f);
 
-			ImGui::InputFloat3("RotateSphere", *inputRotateSphere);
-			ImGui::SliderFloat3("SliderRotateSphere", *inputRotateSphere, -10.0f, 10.0f);
+				ImGui::InputFloat3("RotateSphere", *inputRotateSphere);
+				ImGui::SliderFloat3("SliderRotateSphere", *inputRotateSphere, -10.0f, 10.0f);
 
-			ImGui::InputFloat3("ScaleSphere", *inputScaleSphere);
-			ImGui::SliderFloat3("SliderScaleSphere", *inputScaleSphere, 0.5f, 5.0f);
+				ImGui::InputFloat3("ScaleSphere", *inputScaleSphere);
+				ImGui::SliderFloat3("SliderScaleSphere", *inputScaleSphere, 0.5f, 5.0f);
 
-			ImGui::Checkbox("SphereTexture", &textureChange);
+				ImGui::Checkbox("SphereTexture", &textureChange);
 
+				ImGui::TreePop();
+			}
 
+			if (ImGui::TreeNode("Model")) {
 
-			ImGui::Text("Model");
-			ImGui::InputFloat3("MaterialModel", *inputMaterialModel);
-			ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
+				ImGui::InputFloat3("MaterialModel", *inputMaterialModel);
+				ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
 
-			ImGui::InputFloat3("VertexModel", *inputTransformModel);
-			ImGui::SliderFloat3("SliderVertexModel", *inputTransformModel, -5.0f, 5.0f);
+				ImGui::InputFloat3("VertexModel", *inputTransformModel);
+				ImGui::SliderFloat3("SliderVertexModel", *inputTransformModel, -5.0f, 5.0f);
 
-			ImGui::InputFloat3("RotateModel", *inputRotateModel);
-			ImGui::SliderFloat3("SliderRotateModel", *inputRotateModel, -10.0f, 10.0f);
+				ImGui::InputFloat3("RotateModel", *inputRotateModel);
+				ImGui::SliderFloat3("SliderRotateModel", *inputRotateModel, -10.0f, 10.0f);
 
-			ImGui::InputFloat3("ScaleModel", *inputScaleModel);
-			ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
+				ImGui::InputFloat3("ScaleModel", *inputScaleModel);
+				ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
 
-			ImGui::Checkbox("ModelTexture", &textureChange2);
+				ImGui::Checkbox("ModelTexture", &textureChange2);
 
-
-
-
-			ImGui::Text("Ligth");
-			ImGui::InputFloat4("MaterialLigth", *inputMaterialLigth);
-			ImGui::SliderFloat4("SliderMaterialLigth", *inputMaterialLigth, 0.0f, 1.0f);
-
-			ImGui::InputFloat3("VertexLigth", *inputDirectionLight);
-			ImGui::SliderFloat3("SliderVertexLigth", *inputDirectionLight, -1.0f, 1.0f);
+				ImGui::TreePop();
+			}
 
 
-			ImGui::InputFloat("intensity", intensity);
+			if (ImGui::TreeNode("light")) {
+
+				ImGui::InputFloat4("Materiallight", *inputMateriallight);
+				ImGui::SliderFloat4("SliderMateriallight", *inputMateriallight, 0.0f, 1.0f);
+
+				ImGui::InputFloat3("Vertexlight", *inputDirectionLight);
+				ImGui::SliderFloat3("SliderVertexlight", *inputDirectionLight, -1.0f, 1.0f);
 
 
+				ImGui::InputFloat("intensity", intensity);
+
+				ImGui::TreePop();
+			}
+			
+
+			if (ImGui::TreeNode("Sprite")) {
+
+				ImGui::InputFloat("SpriteX", &transformSprite.translate.x);
+				ImGui::SliderFloat("SliderSpriteX", &transformSprite.translate.x, 0.0f, 1000.0f);
+
+				ImGui::InputFloat("SpriteY", &transformSprite.translate.y);
+				ImGui::SliderFloat("SliderSpriteY", &transformSprite.translate.y, 0.0f, 600.0f);
+
+				ImGui::InputFloat("SpriteZ", &transformSprite.translate.z);
+				ImGui::SliderFloat("SliderSpriteZ", &transformSprite.translate.z, 0.0f, 0.0f);
 
 
-			ImGui::Text("Sprite");
-			ImGui::InputFloat("SpriteX", &transformSprite.translate.x);
-			ImGui::SliderFloat("SliderSpriteX", &transformSprite.translate.x, 0.0f, 1000.0f);
+				ImGui::DragFloat2("UVTranlate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
+				ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
+				ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
 
-			ImGui::InputFloat("SpriteY", &transformSprite.translate.y);
-			ImGui::SliderFloat("SliderSpriteY", &transformSprite.translate.y, 0.0f, 600.0f);
-
-			ImGui::InputFloat("SpriteZ", &transformSprite.translate.z);
-			ImGui::SliderFloat("SliderSpriteZ", &transformSprite.translate.z, 0.0f, 0.0f);
-
-
-			ImGui::DragFloat2("UVTranlate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
-			ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
-			ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
-
+				ImGui::TreePop();
+			}
 
 
 			//ImGuiの内部コマンド
@@ -2118,22 +2128,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//モデル
 			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewModel);
-
 			commandList->SetGraphicsRootConstantBufferView(0, materialResourceModel->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
-
 			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel->GetGPUVirtualAddress());
-
-
-			if (textureChange) {
+			if (textureChange2) {
 				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
 			}
 			else {
 				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 			}
-
 			commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
-
-
 			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 			commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
