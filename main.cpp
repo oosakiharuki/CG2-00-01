@@ -1709,8 +1709,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//モデルの読み込み
 	//ModelData modelData = LoadObjFile("resource", "plane.obj");	
 	
-	ModelData modelData = LoadObjFile("resource", "axis.obj");
-
+	//ModelData modelData = LoadObjFile("resource", "axis.obj");
+	
+	ModelData modelData = LoadObjFile("resource", "teapot.obj");
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceModel = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
 
@@ -1861,6 +1862,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float* inputDirectionLight[3] = { &directionalLightSphereData->direction.x,&directionalLightSphereData->direction.y,&directionalLightSphereData->direction.z };
 	float* intensity = &directionalLightSphereData->intensity;
 
+	//描画させるもの
+	bool IsSphere = true;
+	bool IsModel = true;
+	bool IsSprite = true;
 
 
 	//ImGui初期化
@@ -1978,40 +1983,44 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			if (ImGui::TreeNode("Sphere")) {
+				ImGui::Checkbox("IsSphere", &IsSphere);
 
-				ImGui::InputFloat3("MaterialSphere", *inputMaterialSphere);
-				ImGui::SliderFloat3("SliderMaterialSphere", *inputMaterialSphere, 0.0f, 1.0f);
+				if (IsSphere) {
+					ImGui::InputFloat3("MaterialSphere", *inputMaterialSphere);
+					ImGui::SliderFloat3("SliderMaterialSphere", *inputMaterialSphere, 0.0f, 1.0f);
 
-				ImGui::InputFloat3("VertexSphere", *inputTransformSphere);
-				ImGui::SliderFloat3("SliderVertexSphere", *inputTransformSphere, -5.0f, 5.0f);
+					ImGui::InputFloat3("VertexSphere", *inputTransformSphere);
+					ImGui::SliderFloat3("SliderVertexSphere", *inputTransformSphere, -5.0f, 5.0f);
 
-				ImGui::InputFloat3("RotateSphere", *inputRotateSphere);
-				ImGui::SliderFloat3("SliderRotateSphere", *inputRotateSphere, -10.0f, 10.0f);
+					ImGui::InputFloat3("RotateSphere", *inputRotateSphere);
+					ImGui::SliderFloat3("SliderRotateSphere", *inputRotateSphere, -10.0f, 10.0f);
 
-				ImGui::InputFloat3("ScaleSphere", *inputScaleSphere);
-				ImGui::SliderFloat3("SliderScaleSphere", *inputScaleSphere, 0.5f, 5.0f);
+					ImGui::InputFloat3("ScaleSphere", *inputScaleSphere);
+					ImGui::SliderFloat3("SliderScaleSphere", *inputScaleSphere, 0.5f, 5.0f);
 
-				ImGui::Checkbox("SphereTexture", &textureChange);
-
+					ImGui::Checkbox("SphereTexture", &textureChange);
+				}
 				ImGui::TreePop();
 			}
 
 			if (ImGui::TreeNode("Model")) {
+				ImGui::Checkbox("IsModel", &IsModel);
+				
+				if (IsModel) {
+					ImGui::InputFloat3("MaterialModel", *inputMaterialModel);
+					ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
 
-				ImGui::InputFloat3("MaterialModel", *inputMaterialModel);
-				ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
+					ImGui::InputFloat3("VertexModel", *inputTransformModel);
+					ImGui::SliderFloat3("SliderVertexModel", *inputTransformModel, -5.0f, 5.0f);
 
-				ImGui::InputFloat3("VertexModel", *inputTransformModel);
-				ImGui::SliderFloat3("SliderVertexModel", *inputTransformModel, -5.0f, 5.0f);
+					ImGui::InputFloat3("RotateModel", *inputRotateModel);
+					ImGui::SliderFloat3("SliderRotateModel", *inputRotateModel, -10.0f, 10.0f);
 
-				ImGui::InputFloat3("RotateModel", *inputRotateModel);
-				ImGui::SliderFloat3("SliderRotateModel", *inputRotateModel, -10.0f, 10.0f);
+					ImGui::InputFloat3("ScaleModel", *inputScaleModel);
+					ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
 
-				ImGui::InputFloat3("ScaleModel", *inputScaleModel);
-				ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
-
-				ImGui::Checkbox("ModelTexture", &textureChange2);
-
+					ImGui::Checkbox("ModelTexture", &textureChange2);
+				}
 				ImGui::TreePop();
 			}
 
@@ -2032,21 +2041,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			
 
 			if (ImGui::TreeNode("Sprite")) {
+				ImGui::Checkbox("IsSprite", &IsSprite);
 
-				ImGui::InputFloat("SpriteX", &transformSprite.translate.x);
-				ImGui::SliderFloat("SliderSpriteX", &transformSprite.translate.x, 0.0f, 1000.0f);
+				if (IsSprite) {
+					ImGui::InputFloat("SpriteX", &transformSprite.translate.x);
+					ImGui::SliderFloat("SliderSpriteX", &transformSprite.translate.x, 0.0f, 1000.0f);
 
-				ImGui::InputFloat("SpriteY", &transformSprite.translate.y);
-				ImGui::SliderFloat("SliderSpriteY", &transformSprite.translate.y, 0.0f, 600.0f);
+					ImGui::InputFloat("SpriteY", &transformSprite.translate.y);
+					ImGui::SliderFloat("SliderSpriteY", &transformSprite.translate.y, 0.0f, 600.0f);
 
-				ImGui::InputFloat("SpriteZ", &transformSprite.translate.z);
-				ImGui::SliderFloat("SliderSpriteZ", &transformSprite.translate.z, 0.0f, 0.0f);
+					ImGui::InputFloat("SpriteZ", &transformSprite.translate.z);
+					ImGui::SliderFloat("SliderSpriteZ", &transformSprite.translate.z, 0.0f, 0.0f);
 
 
-				ImGui::DragFloat2("UVTranlate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
-				ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
-				ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
-
+					ImGui::DragFloat2("UVTranlate", &uvTransformSprite.translate.x, 0.01f, -10.0f, 10.0f);
+					ImGui::DragFloat2("UVScale", &uvTransformSprite.scale.x, 0.01f, -10.0f, 10.0f);
+					ImGui::SliderAngle("UVRotate", &uvTransformSprite.rotate.z);
+				}
 				ImGui::TreePop();
 			}
 
@@ -2111,48 +2122,54 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			//球体
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSphere);
-			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSphere->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
-			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceSphere->GetGPUVirtualAddress());
 
-			if (textureChange) {
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
-			}
-			else {
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-			}
-			commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
-			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-			commandList->DrawInstanced(SphereVertexNum, 1, 0, 0);
+			if (IsSphere) {
+				commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSphere);
+				commandList->SetGraphicsRootConstantBufferView(0, materialResourceSphere->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
+				commandList->SetGraphicsRootConstantBufferView(1, wvpResourceSphere->GetGPUVirtualAddress());
 
+				if (textureChange) {
+					commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+				}
+				else {
+					commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+				}
+				commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
+				commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+				commandList->DrawInstanced(SphereVertexNum, 1, 0, 0);
+
+			}
 
 			//モデル
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewModel);
-			commandList->SetGraphicsRootConstantBufferView(0, materialResourceModel->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
-			commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel->GetGPUVirtualAddress());
-			if (textureChange2) {
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
-			}
-			else {
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-			}
-			commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
-			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-			commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
+			if (IsModel) {
+				commandList->IASetVertexBuffers(0, 1, &vertexBufferViewModel);
+				commandList->SetGraphicsRootConstantBufferView(0, materialResourceModel->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
+				commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel->GetGPUVirtualAddress());
+				if (textureChange2) {
+					commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+				}
+				else {
+					commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+				}
+				commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
+				commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+				commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
 
-
+			}
 
 			//UI
-			commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
-			commandList->IASetIndexBuffer(&indexBufferViewSprite);
+			if (IsSprite) {
+				commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSprite);
+				commandList->IASetIndexBuffer(&indexBufferViewSprite);
 
-			commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
-		
-			commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());		
+				commandList->SetGraphicsRootConstantBufferView(0, materialResourceSprite->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
 
-			commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+				commandList->SetGraphicsRootConstantBufferView(1, transformationMatrixResourceSprite->GetGPUVirtualAddress());
 
-			commandList->DrawIndexedInstanced(6, 1, 0, 0 ,0);
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+
+				commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
+			}
 
 			//実際のcommandListのImGui描画コマンドを挟む
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList.Get());
