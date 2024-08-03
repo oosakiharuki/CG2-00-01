@@ -1140,7 +1140,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//DZGIファクトリーの生成
 	//Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory = nullptr;
 
-	Microsoft::WRL::ComPtr<ID3D12Resource>* CreateTextureResource(Microsoft::WRL::ComPtr<ID3D12Resource> device , const DirectX::TexMetadata& metadata);
+	Microsoft::WRL::ComPtr<ID3D12Resource>* CreateTextureResource(Microsoft::WRL::ComPtr<ID3D12Resource> device, const DirectX::TexMetadata & metadata);
 
 	//HREUSLTはWindouws系のエラーコード
 	//関数が成功したかどうかをSUCCEEDEDマクロで判定できる
@@ -1671,7 +1671,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	VertexData* vertexDataSprite = nullptr;
 	vertexResourceSprite->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSprite));
-	
+
 	vertexDataSprite[0].position = { 0.0f,360.0f,0.0f,1.0f };//0
 	vertexDataSprite[0].texcoord = { 0.0f,1.0f };
 	vertexDataSprite[1].position = { 0.0f,0.0f,0.0f,1.0f };//1,3
@@ -1707,11 +1707,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//モデルの読み込み
-	//ModelData modelData = LoadObjFile("resource", "plane.obj");	
+	//ModelData modelData = LoadObjFile("resource", "plane.obj");
 	
 	//ModelData modelData = LoadObjFile("resource", "axis.obj");
-	
+
 	ModelData modelData = LoadObjFile("resource", "teapot.obj");
+	
+	static int modelChange = 0;
+
+	//まだ	
+	//ModelData modelData = LoadObjFile("resource", "multiMesh.obj");
+	//ModelData modelData = LoadObjFile("resource", "multiMaterial.obj");
+	//ModelData modelData = LoadObjFile("resource", "stanford-bunny.obj");
+
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceModel = CreateBufferResource(device, sizeof(VertexData) * modelData.vertices.size());
 
@@ -1719,7 +1727,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	vertexBufferViewModel.BufferLocation = vertexResourceModel->GetGPUVirtualAddress();
 	vertexBufferViewModel.SizeInBytes = UINT(sizeof(VertexData) * modelData.vertices.size());
 	vertexBufferViewModel.StrideInBytes = sizeof(VertexData);
-	
+
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceModel = CreateBufferResource(device, sizeof(TransformationMatrix));
 	TransformationMatrix* wvpDataModel = nullptr;
 	wvpResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&wvpDataModel));
@@ -1727,7 +1735,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	VertexData* vertexDataModel = nullptr;
 	vertexResourceModel->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataModel));
-	std::memcpy(vertexDataModel,modelData.vertices.data(),sizeof(VertexData) * modelData.vertices.size());
+	std::memcpy(vertexDataModel, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
 
 	//textureを読んで転送
 	mipImages2 = LoadTexture(modelData.material.textureFilePath);
@@ -1760,8 +1768,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-	//球体用マテリアル
-//マテリアル用のリソース
+	//Model用マテリアル
+	//マテリアル用のリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceModel = CreateBufferResource(device, sizeof(Material));
 	//マテリアルにデータを書き込む
 	Material* materialDataModel = nullptr;
@@ -1774,7 +1782,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-	//球体マテリアルのライト用のリソース
+	//ライト用のリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightSphereResource = CreateBufferResource(device, sizeof(DirectionalLight));
 	//マテリアルにデータを書き込む
 	DirectionalLight* directionalLightSphereData = nullptr;
@@ -1937,7 +1945,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			
 			wvpDataModel->World = worldMatrixModel;
 			wvpDataModel->WVP = WorldViewProjectionMatrixModel;
-
+			
 
 
 
@@ -2005,7 +2013,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			if (ImGui::TreeNode("Model")) {
 				ImGui::Checkbox("IsModel", &IsModel);
-				
+				//ImGui::Combo("combo", &modelChange, "plane\0aixe\0teapot\0\0");
+				//ImGui::RadioButton("plane", &modelChange, 0); ImGui::SameLine();
+				//ImGui::RadioButton("axis", &modelChange, 1); ImGui::SameLine();
+				//ImGui::RadioButton("teapot", &modelChange, 2);
 				if (IsModel) {
 					ImGui::InputFloat3("MaterialModel", *inputMaterialModel);
 					ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
@@ -2019,7 +2030,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					ImGui::InputFloat3("ScaleModel", *inputScaleModel);
 					ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
 
-					ImGui::Checkbox("ModelTexture", &textureChange2);
+					ImGui::Checkbox("ModelTexture", &textureChange2);			
 				}
 				ImGui::TreePop();
 			}
