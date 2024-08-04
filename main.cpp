@@ -1711,12 +1711,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 	//ModelData modelData = LoadObjFile("resource", "axis.obj");
 
-	ModelData modelData = LoadObjFile("resource", "teapot.obj");
+	//ModelData modelData = LoadObjFile("resource", "multiMesh.obj");
 	
-	static int modelChange = 0;
+	ModelData modelData = LoadObjFile("resource", "teapot.obj");
+
+	//static int modelChange = 0;
+
+
 
 	//まだ	
-	//ModelData modelData = LoadObjFile("resource", "multiMesh.obj");
 	//ModelData modelData = LoadObjFile("resource", "multiMaterial.obj");
 	//ModelData modelData = LoadObjFile("resource", "stanford-bunny.obj");
 
