@@ -1349,7 +1349,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//textureを読んで転送
-	DirectX::ScratchImage mipImages = LoadTexture("resource/uvChecker.png");
+	DirectX::ScratchImage mipImages = LoadTexture("resource/fence.png");
 	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource = CrateTextureResource(device, metadata);
 	UploadTextureData(textureResource, mipImages);
@@ -1526,7 +1526,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;// srcClor * scrAlpha
 	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD; // + 
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;// DestColor * (1-SrcAlpha)
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;// DestColor * (1-SrcAlpha)
 	
 	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
@@ -1726,14 +1726,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//モデルの読み込み
-	ModelData modelData = LoadObjFile("resource", "plane.obj");
-	
+	//ModelData modelData = LoadObjFile("resource", "plane.obj");	
 	//ModelData modelData = LoadObjFile("resource", "axis.obj");
-
 	//ModelData modelData = LoadObjFile("resource", "multiMesh.obj");
-	
 	//ModelData modelData = LoadObjFile("resource", "teapot.obj");
-
+	ModelData modelData = LoadObjFile("resource", "fence.obj");
 	//static int modelChange = 0;
 
 
@@ -1812,7 +1809,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	directionalLightSphereResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightSphereData));
 	//色の設定
 	directionalLightSphereData->color = { 1.0f,1.0f,1.0f,1.0f };
-	directionalLightSphereData->direction = { 0.0f,-1.0f,0.0f };
+	directionalLightSphereData->direction = { 0.0f,0.0f,1.0f };
 	directionalLightSphereData->intensity = 1.0f;
 
 
@@ -1857,7 +1854,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform transformSphere{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
-	Transform transformModel{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
+	Transform transformModel{ {1.0f,1.0f,1.0f},{0.5f,3.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
 	Transform transformL{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
