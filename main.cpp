@@ -36,6 +36,15 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 #pragma comment(lib,"dxcompiler.lib")
 
+#define DIRECTINPUT_VERSION 0x0800
+#include <dinput.h>
+
+#pragma comment(lib,"dinput8.lib")
+#pragma comment(lib,"dxguid.lib")
+
+#include "Input.h"
+
+
 //std::string str0{ "STRING!!!" };
 //
 //std::string str1{ std::to_string(10) };
@@ -1121,6 +1130,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		wc.hInstance,
 		nullptr);
 
+
+	//ここにInput作ると良い
+
+	//HRESULT result;
+
+	//IDirectInput8* directInput = nullptr;
+	//result = DirectInput8Create(wc.hInstance, DIRECTINPUT_VERSION,
+	//	IID_IDirectInput8, (void**)&directInput ,nullptr);
+	//assert(SUCCEEDED(result));
+
+	//IDirectInputDevice8* keyboard = nullptr;
+	//result = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
+	//assert(SUCCEEDED(result));
+
+	//result = keyboard->SetDataFormat(&c_dfDIKeyboard);
+	//assert(SUCCEEDED(result));
+
+	//result = keyboard->SetCooperativeLevel(hwnd,DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	//assert(SUCCEEDED(result));
+
+
+
+
+	Input* input_;
+	input_ = new Input();
+	input_->Initialize(wc.hInstance,hwnd);
+
+
 	ShowWindow(hwnd, SW_SHOW);
 
 #pragma endregion
@@ -1892,7 +1929,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//初期化で0でFenceを作る
-	Microsoft::WRL::ComPtr < ID3D12Fence> fence = nullptr;
+	Microsoft::WRL::ComPtr <ID3D12Fence> fence = nullptr;
 	uint64_t fenceValue = 0;
 	hr = device->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 	assert(SUCCEEDED(hr));
@@ -1970,6 +2007,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeRotateZMatrix(uvTransformSprite.rotate.z));
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
 			materialDataSprite->uvTransform = uvTransformMatrix;
+
+			keyboard->Acquire();
+
+			BYTE key[255] = {};
+			keyboard->GetDeviceState(sizeof(key), key);
+
+			if (key[DIK_0]) {
+				OutputDebugStringA("hit 0\n");
+			}
+
+			//input_->Update();
+
 
 			//開発用UIの処理
 			//ImGui::ShowDemoWindow();
@@ -2304,7 +2353,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 //	depthStencilResource2->Release();
 //	dsvDescriptorHeap2->Release();
 
-
+	delete input_;
 
 	CloseWindow(hwnd);
 
