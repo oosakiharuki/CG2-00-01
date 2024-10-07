@@ -1,11 +1,11 @@
 #include "Input.h"
 
 #include <cassert>
-#include <wrl.h>
-using namespace Microsoft::WRL;
+//#include <wrl.h>
+//using namespace Microsoft::WRL;
 
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
+//#define DIRECTINPUT_VERSION 0x0800
+//#include <dinput.h>
 
 #pragma comment(lib,"dinput8.lib")
 #pragma comment(lib,"dxguid.lib")
@@ -31,6 +31,14 @@ void Input::Initialize(HINSTANCE hInstance, HWND hwnd) {
 	assert(SUCCEEDED(result));
 
 }
-void Input::Update() {
 
+void Input::Update() {
+	//keyboard->Acquire();
+
+	//BYTE key[256] = {};
+	//keyboard->GetDeviceState(sizeof(key), key);
+
+	//if (key[DIK_0]) {
+	//	OutputDebugStringA("hit 0\n");
+	//}
 }

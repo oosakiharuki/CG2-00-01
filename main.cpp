@@ -2008,16 +2008,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
 			materialDataSprite->uvTransform = uvTransformMatrix;
 
-			keyboard->Acquire();
-
-			BYTE key[255] = {};
-			keyboard->GetDeviceState(sizeof(key), key);
-
-			if (key[DIK_0]) {
-				OutputDebugStringA("hit 0\n");
-			}
-
-			//input_->Update();
+			input_->Update();
 
 
 			//開発用UIの処理
