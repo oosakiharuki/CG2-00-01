@@ -15,12 +15,10 @@ void Input::Initialize(HINSTANCE hInstance, HWND hwnd) {
 
 	HRESULT result;
 
-	IDirectInput8* directInput = nullptr;
 	result = DirectInput8Create(hInstance, DIRECTINPUT_VERSION,
 		IID_IDirectInput8, (void**)&directInput, nullptr);
 	assert(SUCCEEDED(result));
 
-	IDirectInputDevice8* keyboard = nullptr;
 	result = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
 	assert(SUCCEEDED(result));
 
@@ -33,12 +31,29 @@ void Input::Initialize(HINSTANCE hInstance, HWND hwnd) {
 }
 
 void Input::Update() {
-	//keyboard->Acquire();
+	HRESULT result;
 
-	//BYTE key[256] = {};
-	//keyboard->GetDeviceState(sizeof(key), key);
+	memcpy(keyPre, key, sizeof(key));
 
-	//if (key[DIK_0]) {
-	//	OutputDebugStringA("hit 0\n");
-	//}
+	result = keyboard->Acquire();
+
+	result = keyboard->GetDeviceState(sizeof(key), key);
+}
+
+bool Input::PushKey(BYTE keyNumber) {
+	
+	if (key[keyNumber]) {
+		return true;
+	}
+
+	return false;
+}
+
+bool Input::TriggerKey(BYTE keyNumber) {
+	
+	if (key[keyNumber] && !keyPre[keyNumber]) {
+		return true;
+	}
+
+	return false;
 }

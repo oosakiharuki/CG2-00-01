@@ -2010,6 +2010,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			input_->Update();
 
+			if (input_->PushKey(DIK_0)) {
+				OutputDebugStringA("Hit 0\n");
+			}
+
+			if (input_->TriggerKey(DIK_1)) {
+				OutputDebugStringA("Hit 1\n");
+			}
 
 			//開発用UIの処理
 			//ImGui::ShowDemoWindow();
