@@ -1304,6 +1304,37 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	hr = swapChain->GetBuffer(1, IID_PPV_ARGS(&swapChainResource[1]));
 	assert(SUCCEEDED(hr));
 #pragma endregion
+	
+	//Particle
+	const uint32_t kNumInstance = 10;
+	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource =
+		CreateBufferResource(device, sizeof(TransformationMatrix) * kNumInstance);
+	TransformationMatrix* instancingData = nullptr;
+	instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&instancingData));
+	for (uint32_t index = 0; index < kNumInstance; ++index) {
+		instancingData[index].WVP = MakeIdentity4x4();
+		instancingData[index].World = MakeIdentity4x4();
+	}
+
+	//metadataを基にSRVの設定
+	D3D12_SHADER_RESOURCE_VIEW_DESC instancingSrvDesc{};
+	instancingSrvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	instancingSrvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
+	instancingSrvDesc.Buffer.FirstElement = 0;
+	instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+	instancingSrvDesc.Buffer.NumElements = kNumInstance;
+	instancingSrvDesc.Buffer.StructureByteStride = sizeof(TransformationMatrix);
+
+	//SRVを作成するDescriptorHeap場所決め
+	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
+	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
+	//先頭ImGui
+	//instancingSrvHandleCPU.ptr += descriptorSizeSRV;
+	//instancingSrvHandleGPU.ptr += descriptorSizeSRV;
+	//SRVの生成
+	device->CreateShaderResourceView(instancingResource.Get(), &instancingSrvDesc, instancingSrvHandleCPU);
+
 
 
 	//textureを読んで転送
@@ -1349,7 +1380,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//textureを読んで転送
-	DirectX::ScratchImage mipImages = LoadTexture("resource/fence.png");
+	DirectX::ScratchImage mipImages = LoadTexture("resource/uvChecker.png");
 	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource = CrateTextureResource(device, metadata);
 	UploadTextureData(textureResource, mipImages);
@@ -1432,6 +1463,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
+	D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1] = {};
+	descriptorRangeForInstancing[0].BaseShaderRegister = 0;
+	descriptorRangeForInstancing[0].NumDescriptors = 1;
+	descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+
+	//RootParameter作成__
+	D3D12_ROOT_PARAMETER rootParametersP[2] = {};
+	//Particle
+	rootParametersP[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	rootParametersP[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	rootParametersP[1].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing;
+	rootParametersP[1].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing);
+
+
+
 	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	descriptorRange[0].BaseShaderRegister = 0;
 	descriptorRange[0].NumDescriptors = 1;
@@ -1450,7 +1497,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootParameters[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	rootParameters[1].Descriptor.ShaderRegister = 0;//Object3d.VS.hlsl の b0
-
+	
 	descriptionRootSignature.pParameters = rootParameters;
 	descriptionRootSignature.NumParameters = _countof(rootParameters);
 
@@ -1518,7 +1565,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	inputLayoutDesc.pInputElementDescs = inputElementDescs;
 	inputLayoutDesc.NumElements = _countof(inputElementDescs);
 
-	//aaaaaa
+
 	//BlendState
 	D3D12_BLEND_DESC blendDesc{};
 	blendDesc.RenderTarget[0].RenderTargetWriteMask = D3D12_COLOR_WRITE_ENABLE_ALL;
@@ -1730,8 +1777,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ModelData modelData = LoadObjFile("resource", "axis.obj");
 	//ModelData modelData = LoadObjFile("resource", "multiMesh.obj");
 	//ModelData modelData = LoadObjFile("resource", "teapot.obj");
-	ModelData modelData = LoadObjFile("resource", "fence.obj");
+	//ModelData modelData = LoadObjFile("resource", "fence.obj");
 	//static int modelChange = 0;
+	ModelData modelData;
+	modelData.vertices.push_back({ {1.0f,1.0f,0.0f,1.0f},{0.0f,0.0f},{0.0f,0.0f,1.0f} });
+	modelData.vertices.push_back({ {-1.0f,1.0f,0.0f,1.0f},{1.0f,0.0f},{0.0f,0.0f,1.0f} });
+	modelData.vertices.push_back({ {1.0f,-1.0f,0.0f,1.0f},{0.0f,1.0f},{0.0f,0.0f,1.0f} });
+	modelData.vertices.push_back({ {1.0f,-1.0f,0.0f,1.0f},{0.0f,1.0f},{0.0f,0.0f,1.0f} });
+	modelData.vertices.push_back({ {-1.0f,1.0f,0.0f,1.0f},{1.0f,0.0f},{0.0f,0.0f,1.0f} });
+	modelData.vertices.push_back({ {-1.0f,-1.0f,0.0f,1.0f},{1.0f,1.0f},{0.0f,0.0f,1.0f} }); 
+	modelData.material.textureFilePath = "./resource/uvChecker.png";
 
 
 
@@ -1854,7 +1909,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Transform transformSphere{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
-	Transform transformModel{ {1.0f,1.0f,1.0f},{0.5f,3.0f,0.0f} ,{0.0f,0.0f,0.0f} };
+	Transform transformModels[kNumInstance];
+	for (uint32_t index = 0; index < kNumInstance; ++index) {
+		transformModels[index].scale = { 1.0f,1.0f,1.0f };
+		transformModels[index].rotate = { 0.0f,0.0f,0.0f };
+		transformModels[index].translate = { index * 0.1f,index * 0.1f,index * 0.1f };
+	}
+	//Transform transformModel{ {1.0f,1.0f,1.0f},{0.5f,3.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
 	Transform transformL{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
@@ -1879,9 +1940,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//bool textureChange = false;
 
 	float* inputMaterialModel[3] = { &materialDataModel->color.x,&materialDataModel->color.y,&materialDataModel->color.z };
-	float* inputTransformModel[3] = { &transformModel.translate.x,&transformModel.translate.y,&transformModel.translate.z };
-	float* inputRotateModel[3] = { &transformModel.rotate.x,&transformModel.rotate.y,&transformModel.rotate.z };
-	float* inputScaleModel[3] = { &transformModel.scale.x,&transformModel.scale.y,&transformModel.scale.z };
+	//float* inputTransformModel[3] = { &transformModel.translate.x,&transformModel.translate.y,&transformModel.translate.z };
+	//float* inputRotateModel[3] = { &transformModel.rotate.x,&transformModel.rotate.y,&transformModel.rotate.z };
+	//float* inputScaleModel[3] = { &transformModel.scale.x,&transformModel.scale.y,&transformModel.scale.z };
 	bool textureChange2 = false;
 
 
@@ -1959,12 +2020,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 			
 			//モデル
-			Matrix4x4 worldMatrixModel = MakeAffineMatrix(transformModel.scale, transformModel.rotate, transformModel.translate);
-			Matrix4x4 WorldViewProjectionMatrixModel = Multiply(worldMatrixModel, Multiply(viewMatrix, projectionMatrix));
-			
-			wvpDataModel->World = worldMatrixModel;
-			wvpDataModel->WVP = WorldViewProjectionMatrixModel;
-			
+			for (uint32_t index = 0; index < kNumInstance; ++index) {
+				Matrix4x4 worldMatrixModel = MakeAffineMatrix(transformModels[index].scale, transformModels[index].rotate, transformModels[index].translate);
+				Matrix4x4 WorldViewProjectionMatrixModel = Multiply(worldMatrixModel, Multiply(viewMatrix, projectionMatrix));
+
+				instancingData[index].World = worldMatrixModel;
+				instancingData[index].WVP = WorldViewProjectionMatrixModel;
+			}
 
 
 
@@ -2040,14 +2102,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					ImGui::InputFloat3("MaterialModel", *inputMaterialModel);
 					ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
 
-					ImGui::InputFloat3("VertexModel", *inputTransformModel);
-					ImGui::SliderFloat3("SliderVertexModel", *inputTransformModel, -5.0f, 5.0f);
+					//ImGui::InputFloat3("VertexModel", *inputTransformModel);
+					//ImGui::SliderFloat3("SliderVertexModel", *inputTransformModel, -5.0f, 5.0f);
 
-					ImGui::InputFloat3("RotateModel", *inputRotateModel);
-					ImGui::SliderFloat3("SliderRotateModel", *inputRotateModel, -10.0f, 10.0f);
+					//ImGui::InputFloat3("RotateModel", *inputRotateModel);
+					//ImGui::SliderFloat3("SliderRotateModel", *inputRotateModel, -10.0f, 10.0f);
 
-					ImGui::InputFloat3("ScaleModel", *inputScaleModel);
-					ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
+					//ImGui::InputFloat3("ScaleModel", *inputScaleModel);
+					//ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
 				
 					ImGui::ColorEdit4("Color",*inputMaterialModel);
 
@@ -2177,16 +2239,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				commandList->IASetVertexBuffers(0, 1, &vertexBufferViewModel);
 				commandList->SetGraphicsRootConstantBufferView(0, materialResourceModel->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
 				commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel->GetGPUVirtualAddress());
-				//if (textureChange2) {
-					commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-				//}
-				//else {
-				//	commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-				//}
-				commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
-				commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-				commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
+				
+				commandList->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU);//こいつが怪しい
 
+				commandList->DrawInstanced(UINT(modelData.vertices.size()), kNumInstance, 0, 0);
+				
 			}
 
 			//UI
