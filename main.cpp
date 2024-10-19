@@ -1330,8 +1330,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
 	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU = GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
 	//先頭ImGui
-	//instancingSrvHandleCPU.ptr += descriptorSizeSRV;
-	//instancingSrvHandleGPU.ptr += descriptorSizeSRV;
+	instancingSrvHandleCPU.ptr += descriptorSizeSRV;
+	instancingSrvHandleGPU.ptr += descriptorSizeSRV;
 	//SRVの生成
 	device->CreateShaderResourceView(instancingResource.Get(), &instancingSrvDesc, instancingSrvHandleCPU);
 
@@ -1462,7 +1462,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 
-
+	//パーテイクル
 	D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1] = {};
 	descriptorRangeForInstancing[0].BaseShaderRegister = 0;
 	descriptorRangeForInstancing[0].NumDescriptors = 1;
@@ -1505,7 +1505,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootParameters[3].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBV
 	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//plxelshader
 	rootParameters[3].Descriptor.ShaderRegister = 1;//レジスタ番号
-
+	
 	//パーテイクル
 	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
@@ -2240,7 +2240,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				commandList->SetGraphicsRootConstantBufferView(0, materialResourceModel->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
 				commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel->GetGPUVirtualAddress());
 				
-				commandList->SetGraphicsRootDescriptorTable(1, instancingSrvHandleGPU);
+				commandList->SetGraphicsRootDescriptorTable(4, instancingSrvHandleGPU); //rootParametor 4番目
 
 				commandList->DrawInstanced(UINT(modelData.vertices.size()), kNumInstance, 0, 0);
 				
