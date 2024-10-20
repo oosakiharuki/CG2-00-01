@@ -1940,9 +1940,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//bool textureChange = false;
 
 	float* inputMaterialModel[3] = { &materialDataModel->color.x,&materialDataModel->color.y,&materialDataModel->color.z };
-	//float* inputTransformModel[3] = { &transformModel.translate.x,&transformModel.translate.y,&transformModel.translate.z };
-	//float* inputRotateModel[3] = { &transformModel.rotate.x,&transformModel.rotate.y,&transformModel.rotate.z };
-	//float* inputScaleModel[3] = { &transformModel.scale.x,&transformModel.scale.y,&transformModel.scale.z };
+	float* inputTransformModel[3] = { &transformModels[0].translate.x,&transformModels[0].translate.y,&transformModels[0].translate.z};
+	float* inputRotateModel[3] = { &transformModels[0].rotate.x,&transformModels[0].rotate.y,&transformModels[0].rotate.z };
+	float* inputScaleModel[3] = { &transformModels[0].scale.x,&transformModels[0].scale.y,&transformModels[0].scale.z };
 	bool textureChange2 = false;
 
 
@@ -2102,14 +2102,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					ImGui::InputFloat3("MaterialModel", *inputMaterialModel);
 					ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
 
-					//ImGui::InputFloat3("VertexModel", *inputTransformModel);
-					//ImGui::SliderFloat3("SliderVertexModel", *inputTransformModel, -5.0f, 5.0f);
+					ImGui::InputFloat3("VertexModel", *inputTransformModel);
+					ImGui::SliderFloat3("SliderVertexModel", *inputTransformModel, -5.0f, 5.0f);
 
-					//ImGui::InputFloat3("RotateModel", *inputRotateModel);
-					//ImGui::SliderFloat3("SliderRotateModel", *inputRotateModel, -10.0f, 10.0f);
+					ImGui::InputFloat3("RotateModel", *inputRotateModel);
+					ImGui::SliderFloat3("SliderRotateModel", *inputRotateModel, -10.0f, 10.0f);
 
-					//ImGui::InputFloat3("ScaleModel", *inputScaleModel);
-					//ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
+					ImGui::InputFloat3("ScaleModel", *inputScaleModel);
+					ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
 				
 					ImGui::ColorEdit4("Color",*inputMaterialModel);
 
