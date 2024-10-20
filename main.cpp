@@ -1856,16 +1856,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-	////ライト用のリソース
-	//Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightSphereResource = CreateBufferResource(device, sizeof(DirectionalLight));
-	////マテリアルにデータを書き込む
-	//DirectionalLight* directionalLightSphereData = nullptr;
-	////書き込むためのアドレス
-	//directionalLightSphereResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightSphereData));
-	////色の設定
-	//directionalLightSphereData->color = { 1.0f,1.0f,1.0f,1.0f };
-	//directionalLightSphereData->direction = { 0.0f,0.0f,1.0f };
-	//directionalLightSphereData->intensity = 1.0f;
+	//ライト用のリソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightSphereResource = CreateBufferResource(device, sizeof(DirectionalLight));
+	//マテリアルにデータを書き込む
+	DirectionalLight* directionalLightSphereData = nullptr;
+	//書き込むためのアドレス
+	directionalLightSphereResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightSphereData));
+	//色の設定
+	directionalLightSphereData->color = { 1.0f,1.0f,1.0f,1.0f };
+	directionalLightSphereData->direction = { 0.0f,0.0f,1.0f };
+	directionalLightSphereData->intensity = 1.0f;
 
 
 
@@ -1912,7 +1912,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Transform transformModels[kNumInstance];
 	for (uint32_t index = 0; index < kNumInstance; ++index) {
 		transformModels[index].scale = { 1.0f,1.0f,1.0f };
-		transformModels[index].rotate = { 0.0f,0.0f,0.0f };
+		transformModels[index].rotate = { 0.0f,3.0f,0.0f };
 		transformModels[index].translate = { index * 0.1f,index * 0.1f,index * 0.1f };
 	}
 	//Transform transformModel{ {1.0f,1.0f,1.0f},{0.5f,3.0f,0.0f} ,{0.0f,0.0f,0.0f} };
@@ -1946,9 +1946,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool textureChange2 = false;
 
 
-	//float* inputMateriallight[3] = { &directionalLightSphereData->color.x,&directionalLightSphereData->color.y,&directionalLightSphereData->color.z };
-	//float* inputDirectionLight[3] = { &directionalLightSphereData->direction.x,&directionalLightSphereData->direction.y,&directionalLightSphereData->direction.z };
-	//float* intensity = &directionalLightSphereData->intensity;
+	float* inputMateriallight[3] = { &directionalLightSphereData->color.x,&directionalLightSphereData->color.y,&directionalLightSphereData->color.z };
+	float* inputDirectionLight[3] = { &directionalLightSphereData->direction.x,&directionalLightSphereData->direction.y,&directionalLightSphereData->direction.z };
+	float* intensity = &directionalLightSphereData->intensity;
 
 	//描画させるもの
 	bool IsSphere = true;
@@ -2102,14 +2102,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					ImGui::InputFloat3("MaterialModel", *inputMaterialModel);
 					ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
 
-					ImGui::InputFloat3("VertexModel", *inputTransformModel);
-					ImGui::SliderFloat3("SliderVertexModel", *inputTransformModel, -5.0f, 5.0f);
+					//ImGui::InputFloat3("VertexModel", *inputTransformModel);
+					//ImGui::SliderFloat3("SliderVertexModel", *inputTransformModel, -5.0f, 5.0f);
 
-					ImGui::InputFloat3("RotateModel", *inputRotateModel);
-					ImGui::SliderFloat3("SliderRotateModel", *inputRotateModel, -10.0f, 10.0f);
+					//ImGui::InputFloat3("RotateModel", *inputRotateModel);
+					//ImGui::SliderFloat3("SliderRotateModel", *inputRotateModel, -10.0f, 10.0f);
 
-					ImGui::InputFloat3("ScaleModel", *inputScaleModel);
-					ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
+					//ImGui::InputFloat3("ScaleModel", *inputScaleModel);
+					//ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
 				
 					ImGui::ColorEdit4("Color",*inputMaterialModel);
 
@@ -2119,19 +2119,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 
 
-			//if (ImGui::TreeNode("light")) {
+			if (ImGui::TreeNode("light")) {
 
-			//	ImGui::InputFloat4("Materiallight", *inputMateriallight);
-			//	ImGui::SliderFloat4("SliderMateriallight", *inputMateriallight, 0.0f, 1.0f);
+				ImGui::InputFloat4("Materiallight", *inputMateriallight);
+				ImGui::SliderFloat4("SliderMateriallight", *inputMateriallight, 0.0f, 1.0f);
 
-			//	ImGui::InputFloat3("Vertexlight", *inputDirectionLight);
-			//	ImGui::SliderFloat3("SliderVertexlight", *inputDirectionLight, -1.0f, 1.0f);
+				ImGui::InputFloat3("Vertexlight", *inputDirectionLight);
+				ImGui::SliderFloat3("SliderVertexlight", *inputDirectionLight, -1.0f, 1.0f);
 
 
-			//	ImGui::InputFloat("intensity", intensity);
+				ImGui::InputFloat("intensity", intensity);
 
-			//	ImGui::TreePop();
-			//}
+				ImGui::TreePop();
+			}
 			
 
 			//if (ImGui::TreeNode("Sprite")) {
@@ -2240,8 +2240,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				commandList->SetGraphicsRootConstantBufferView(0, materialResourceModel->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
 				commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel->GetGPUVirtualAddress());
 				
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 				commandList->SetGraphicsRootDescriptorTable(4, instancingSrvHandleGPU); //rootParametor 4番目
 
+				commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
+				commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 				commandList->DrawInstanced(UINT(modelData.vertices.size()), kNumInstance, 0, 0);
 				
 			}
