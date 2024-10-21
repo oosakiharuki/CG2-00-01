@@ -34,11 +34,11 @@ void WinApp::Initialize() {
 
 
 LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
-
+	
 	if (ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam)) {
 		return true;
 	}
-
+	
 	//メッセージに応じてゲーム固有の処理を行う
 	switch (msg) {
 		//ウィンドウが破壊された
@@ -56,7 +56,7 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 
 
 void WinApp::Update() {
-
+	
 	//クライアント領域のサイズ　横　縦
 	const int32_t kClientWidth = 1280;
 	const int32_t kClientHeight = 720;

@@ -1,4 +1,4 @@
-#include<Windows.h>
+#include<Windows.h>//winapp
 #include <cstdint>
 #include <string>
 #include<format>
@@ -2290,6 +2290,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 //	dsvDescriptorHeap2->Release();
 
 	delete input_;
+	delete winApp_;
 
 	CloseWindow(hwnd);
 
