@@ -12,7 +12,14 @@ public://メンバ関数
 	void Update();
 
 
+	//クライアント領域のサイズ　横　縦
+	static const int32_t kClientWidth = 1280;
+	static const int32_t kClientHeight = 720;
+
+	HWND GetHwnd()const { return hwnd; }
+	HINSTANCE GetHInstance() const { return wc.hInstance; }
+
 private:
 	WNDCLASS wc{};
-
+	HWND hwnd = nullptr;
 };
