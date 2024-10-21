@@ -1,4 +1,4 @@
-#include<Windows.h>//winapp
+#include<Windows.h>
 #include <cstdint>
 #include <string>
 #include<format>
@@ -43,7 +43,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #pragma comment(lib,"dxguid.lib")
 
 #include "Input.h"
-#include "WinApp.h"
 
 
 //std::string str0{ "STRING!!!" };
@@ -1085,19 +1084,81 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
 //Windowsアプリのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
-	//旧WinApp
+	D3DResourceLeakChecker leakCheck;
+	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory;
+	Microsoft::WRL::ComPtr<ID3D12Device> device;
 
-	WinApp* winApp_ = nullptr;
-	
-	winApp_ = new WinApp();
-	winApp_->Initialize();
+	CoInitializeEx(0, COINIT_MULTITHREADED);
+
+
+#pragma region Windouの生成
+	WNDCLASS wc{};
+
+	//ウィンドウプロシージャ
+	wc.lpfnWndProc = WindowProc;
+	//ウィンドウクラス名
+	wc.lpszClassName = L"C62WindowClass";
+	//インスタンスハンドル
+	wc.hInstance = GetModuleHandle(nullptr);
+	//カーソル
+	wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+
+	//ウィンドウクラスの登録
+	RegisterClass(&wc);
+
+	//クライアント領域のサイズ　横　縦
+	const int32_t kClientWidth = 1280;
+	const int32_t kClientHeight = 720;
+	//　ウィンドウサイズを表す構造体にクライアント領域を入れる
+	RECT wrc = { 0, 0,kClientWidth,kClientHeight };
+
+
+	//クライアント領域をもとに実際のサイズにwrcを変更してもらう
+	AdjustWindowRect(&wrc, WS_OVERLAPPEDWINDOW, false);
+
+
+	HWND hwnd = CreateWindow(
+		wc.lpszClassName,
+		L"CG2",
+		WS_OVERLAPPEDWINDOW,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		wrc.right - wrc.left,
+		wrc.bottom - wrc.top,
+		nullptr,
+		nullptr,
+		wc.hInstance,
+		nullptr);
+
+
+	//ここにInput作ると良い
+
+	//HRESULT result;
+
+	//IDirectInput8* directInput = nullptr;
+	//result = DirectInput8Create(wc.hInstance, DIRECTINPUT_VERSION,
+	//	IID_IDirectInput8, (void**)&directInput ,nullptr);
+	//assert(SUCCEEDED(result));
+
+	//IDirectInputDevice8* keyboard = nullptr;
+	//result = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
+	//assert(SUCCEEDED(result));
+
+	//result = keyboard->SetDataFormat(&c_dfDIKeyboard);
+	//assert(SUCCEEDED(result));
+
+	//result = keyboard->SetCooperativeLevel(hwnd,DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	//assert(SUCCEEDED(result));
+
+
+
 
 	Input* input_;
 	input_ = new Input();
 	input_->Initialize(wc.hInstance,hwnd);
 
 
-	//ShowWindow(hwnd, SW_SHOW);
+	ShowWindow(hwnd, SW_SHOW);
 
 #pragma endregion
 
@@ -2291,7 +2352,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 //	dsvDescriptorHeap2->Release();
 
 	delete input_;
-	delete winApp_;
 
 	CloseWindow(hwnd);
 
