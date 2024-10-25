@@ -28,6 +28,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include <wrl.h>
 
 
+#include <random>
+
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
 
@@ -605,6 +607,34 @@ struct TransformationMatrix {
 	Matrix4x4 WVP;
 	Matrix4x4 World;
 };
+
+
+struct Particle {
+	Transform transform;
+	Vector3 velocity;
+	Vector4 color;
+};
+
+struct ParticleForGPU {
+	Matrix4x4 WVP;
+	Matrix4x4 World;
+	Vector4 color;
+};
+
+
+Particle MakeNewParticle(std::mt19937& randomEngeine) {
+	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
+	std::uniform_real_distribution<float> distColor(0.0f, 1.0f);
+	Particle particle;
+	particle.transform.scale = { 1.0f,1.0f,1.0f };
+	particle.transform.rotate = { 0.0f,3.0f,0.0f };
+	particle.transform.translate = { distribution(randomEngeine),distribution(randomEngeine) ,distribution(randomEngeine) };
+	particle.velocity = { distribution(randomEngeine),distribution(randomEngeine) ,distribution(randomEngeine) };
+	particle.color = { distColor(randomEngeine),distColor(randomEngeine) ,distColor(randomEngeine),1.0f };
+
+	return particle;
+}
+
 
 
 struct DirectionalLight {
@@ -1308,12 +1338,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//Particle
 	const uint32_t kNumInstance = 10;
 	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource =
-		CreateBufferResource(device, sizeof(TransformationMatrix) * kNumInstance);
-	TransformationMatrix* instancingData = nullptr;
+		CreateBufferResource(device, sizeof(ParticleForGPU) * kNumInstance);
+	ParticleForGPU* instancingData = nullptr;
 	instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&instancingData));
 	for (uint32_t index = 0; index < kNumInstance; ++index) {
 		instancingData[index].WVP = MakeIdentity4x4();
 		instancingData[index].World = MakeIdentity4x4();
+		instancingData[index].color = Vector4{ 1.0f,1.0f,1.0f,1.0f };
 	}
 
 	//metadataを基にSRVの設定
@@ -1324,7 +1355,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	instancingSrvDesc.Buffer.FirstElement = 0;
 	instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 	instancingSrvDesc.Buffer.NumElements = kNumInstance;
-	instancingSrvDesc.Buffer.StructureByteStride = sizeof(TransformationMatrix);
+	instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
 
 	//SRVを作成するDescriptorHeap場所決め
 	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU = GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeSRV, 3);
@@ -1555,9 +1586,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
-	inputElementDescs[2].SemanticName = "NORMAL";
+	inputElementDescs[2].SemanticName = "COLOR";
 	inputElementDescs[2].SemanticIndex = 0;
-	inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
 
@@ -1909,12 +1940,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//Transform transformSphere{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
-	Transform transformModels[kNumInstance];
+	Particle transformModels[kNumInstance];
+
+	std::random_device seedGenerator;
+	std::mt19937 randomEngine(seedGenerator());
+
+	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
+
+
 	for (uint32_t index = 0; index < kNumInstance; ++index) {
-		transformModels[index].scale = { 1.0f,1.0f,1.0f };
-		transformModels[index].rotate = { 0.0f,3.0f,0.0f };
-		transformModels[index].translate = { index * 0.1f,index * 0.1f,index * 0.1f };
+		transformModels[index] = MakeNewParticle(randomEngine);
 	}
+
+	const float deltaTimer = 1.0f / 60.0f;
+
 	//Transform transformModel{ {1.0f,1.0f,1.0f},{0.5f,3.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
 	//Transform transformL{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
@@ -1940,9 +1979,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//bool textureChange = false;
 
 	float* inputMaterialModel[3] = { &materialDataModel->color.x,&materialDataModel->color.y,&materialDataModel->color.z };
-	float* inputTransformModel[3] = { &transformModels[0].translate.x,&transformModels[0].translate.y,&transformModels[0].translate.z};
-	float* inputRotateModel[3] = { &transformModels[0].rotate.x,&transformModels[0].rotate.y,&transformModels[0].rotate.z };
-	float* inputScaleModel[3] = { &transformModels[0].scale.x,&transformModels[0].scale.y,&transformModels[0].scale.z };
+	//float* inputTransformModel[3] = { &transformModels[0].translate.x,&transformModels[0].translate.y,&transformModels[0].translate.z};
+	//float* inputRotateModel[3] = { &transformModels[0].rotate.x,&transformModels[0].rotate.y,&transformModels[0].rotate.z };
+	//float* inputScaleModel[3] = { &transformModels[0].scale.x,&transformModels[0].scale.y,&transformModels[0].scale.z };
 	bool textureChange2 = false;
 
 
@@ -2018,14 +2057,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//		
 			//DrawSphere(vertexDataSphere);
 		
-			
+
 			//モデル
 			for (uint32_t index = 0; index < kNumInstance; ++index) {
-				Matrix4x4 worldMatrixModel = MakeAffineMatrix(transformModels[index].scale, transformModels[index].rotate, transformModels[index].translate);
+				Matrix4x4 worldMatrixModel = MakeAffineMatrix(transformModels[index].transform.scale, transformModels[index].transform.rotate, transformModels[index].transform.translate);
 				Matrix4x4 WorldViewProjectionMatrixModel = Multiply(worldMatrixModel, Multiply(viewMatrix, projectionMatrix));
 
 				instancingData[index].World = worldMatrixModel;
 				instancingData[index].WVP = WorldViewProjectionMatrixModel;
+				instancingData[index].color = transformModels[index].color;
+
+				transformModels[index].transform.translate.x += transformModels[index].velocity.x * deltaTimer;
+				transformModels[index].transform.translate.y += transformModels[index].velocity.y * deltaTimer;
+				transformModels[index].transform.translate.z += transformModels[index].velocity.z * deltaTimer;
+
+				
 			}
 
 
