@@ -613,6 +613,8 @@ struct Particle {
 	Transform transform;
 	Vector3 velocity;
 	Vector4 color;
+	float lifeTime;
+	float currentTime;
 };
 
 struct ParticleForGPU {
@@ -631,6 +633,9 @@ Particle MakeNewParticle(std::mt19937& randomEngeine) {
 	particle.transform.translate = { distribution(randomEngeine),distribution(randomEngeine) ,distribution(randomEngeine) };
 	particle.velocity = { distribution(randomEngeine),distribution(randomEngeine) ,distribution(randomEngeine) };
 	particle.color = { distColor(randomEngeine),distColor(randomEngeine) ,distColor(randomEngeine),1.0f };
+	std::uniform_real_distribution<float> distTime(1.0f, 3.0f);
+	particle.lifeTime = distTime(randomEngeine);
+	particle.currentTime = 0;
 
 	return particle;
 }
@@ -1336,12 +1341,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 #pragma endregion
 	
 	//Particle
-	const uint32_t kNumInstance = 10;
+	const uint32_t kNumMaxInstance = 10;
 	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource =
-		CreateBufferResource(device, sizeof(ParticleForGPU) * kNumInstance);
+		CreateBufferResource(device, sizeof(ParticleForGPU) * kNumMaxInstance);
 	ParticleForGPU* instancingData = nullptr;
 	instancingResource->Map(0, nullptr, reinterpret_cast<void**>(&instancingData));
-	for (uint32_t index = 0; index < kNumInstance; ++index) {
+	for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
 		instancingData[index].WVP = MakeIdentity4x4();
 		instancingData[index].World = MakeIdentity4x4();
 		instancingData[index].color = Vector4{ 1.0f,1.0f,1.0f,1.0f };
@@ -1354,7 +1359,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	instancingSrvDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
 	instancingSrvDesc.Buffer.FirstElement = 0;
 	instancingSrvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
-	instancingSrvDesc.Buffer.NumElements = kNumInstance;
+	instancingSrvDesc.Buffer.NumElements = kNumMaxInstance;
 	instancingSrvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
 
 	//SRVを作成するDescriptorHeap場所決め
@@ -1411,7 +1416,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//textureを読んで転送
-	DirectX::ScratchImage mipImages = LoadTexture("resource/uvChecker.png");
+	DirectX::ScratchImage mipImages = LoadTexture("resource/circle.png");
 	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource = CrateTextureResource(device, metadata);
 	UploadTextureData(textureResource, mipImages);
@@ -1604,7 +1609,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;// srcClor * scrAlpha
 	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD; // + 
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;// DestColor * (1-SrcAlpha)
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;// DestColor * (1-SrcAlpha)
 	
 	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
@@ -1645,7 +1650,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//DepthStencilState
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
 	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
@@ -1817,7 +1822,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	modelData.vertices.push_back({ {1.0f,-1.0f,0.0f,1.0f},{0.0f,1.0f},{0.0f,0.0f,1.0f} });
 	modelData.vertices.push_back({ {-1.0f,1.0f,0.0f,1.0f},{1.0f,0.0f},{0.0f,0.0f,1.0f} });
 	modelData.vertices.push_back({ {-1.0f,-1.0f,0.0f,1.0f},{1.0f,1.0f},{0.0f,0.0f,1.0f} }); 
-	modelData.material.textureFilePath = "./resource/uvChecker.png";
+	modelData.material.textureFilePath = "./resource/circle.png";
 
 
 
@@ -1940,7 +1945,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//Transform transformSphere{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
-	Particle transformModels[kNumInstance];
+	Particle transformModels[kNumMaxInstance];
 
 	std::random_device seedGenerator;
 	std::mt19937 randomEngine(seedGenerator());
@@ -1948,7 +1953,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 
 
-	for (uint32_t index = 0; index < kNumInstance; ++index) {
+	for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
 		transformModels[index] = MakeNewParticle(randomEngine);
 	}
 
@@ -2059,19 +2064,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		
 
 			//モデル
-			for (uint32_t index = 0; index < kNumInstance; ++index) {
+			uint32_t numInstance = 0;
+			for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
+				if (transformModels[index].lifeTime <= transformModels[index].currentTime) {
+					continue;//1～3秒立った時消えるようにする
+				}
+
 				Matrix4x4 worldMatrixModel = MakeAffineMatrix(transformModels[index].transform.scale, transformModels[index].transform.rotate, transformModels[index].transform.translate);
 				Matrix4x4 WorldViewProjectionMatrixModel = Multiply(worldMatrixModel, Multiply(viewMatrix, projectionMatrix));
 
-				instancingData[index].World = worldMatrixModel;
-				instancingData[index].WVP = WorldViewProjectionMatrixModel;
-				instancingData[index].color = transformModels[index].color;
+				//instancingData[index].World = worldMatrixModel;
+				//instancingData[index].WVP = WorldViewProjectionMatrixModel;
+				//instancingData[index].color = transformModels[index].color;
 
 				transformModels[index].transform.translate.x += transformModels[index].velocity.x * deltaTimer;
 				transformModels[index].transform.translate.y += transformModels[index].velocity.y * deltaTimer;
 				transformModels[index].transform.translate.z += transformModels[index].velocity.z * deltaTimer;
 
-				
+				transformModels[index].currentTime += deltaTimer;
+				instancingData[numInstance].WVP = WorldViewProjectionMatrixModel;
+				instancingData[numInstance].World = worldMatrixModel;
+				instancingData[numInstance].color = transformModels[index].color;
+
+				float alpha = 1.0f - (transformModels[index].currentTime / transformModels[index].lifeTime);
+				instancingData[numInstance].color.s = alpha;
+
+
+				++numInstance;
 			}
 
 
@@ -2291,7 +2310,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 				commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
 				commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-				commandList->DrawInstanced(UINT(modelData.vertices.size()), kNumInstance, 0, 0);
+				commandList->DrawInstanced(UINT(modelData.vertices.size()), numInstance, 0, 0);
 				
 			}
 
