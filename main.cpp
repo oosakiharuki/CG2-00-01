@@ -1,10 +1,8 @@
-#include<Windows.h>
 #include <cstdint>
 #include <string>
 #include<format>
 #include<d3d12.h>
 #include<dxgi1_6.h>
-#include<cassert>
 
 #include <dxgidebug.h>
 
@@ -24,8 +22,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-//ComPtr
-#include <wrl.h>
 
 
 #pragma comment(lib,"d3d12.lib")
@@ -36,11 +32,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 #pragma comment(lib,"dxcompiler.lib")
 
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
-
-#pragma comment(lib,"dinput8.lib")
-#pragma comment(lib,"dxguid.lib")
 
 #include "Input.h"
 
@@ -1132,26 +1123,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//ここにInput作ると良い
-
-	//HRESULT result;
-
-	//IDirectInput8* directInput = nullptr;
-	//result = DirectInput8Create(wc.hInstance, DIRECTINPUT_VERSION,
-	//	IID_IDirectInput8, (void**)&directInput ,nullptr);
-	//assert(SUCCEEDED(result));
-
-	//IDirectInputDevice8* keyboard = nullptr;
-	//result = directInput->CreateDevice(GUID_SysKeyboard, &keyboard, NULL);
-	//assert(SUCCEEDED(result));
-
-	//result = keyboard->SetDataFormat(&c_dfDIKeyboard);
-	//assert(SUCCEEDED(result));
-
-	//result = keyboard->SetCooperativeLevel(hwnd,DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
-	//assert(SUCCEEDED(result));
-
-
-
 
 	Input* input_;
 	input_ = new Input();
