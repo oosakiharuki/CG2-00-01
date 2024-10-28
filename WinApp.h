@@ -20,6 +20,7 @@ public://メンバ関数
 
 	HWND GetHwnd()const { return hwnd; }
 	HINSTANCE GetHInstance() const { return wc.hInstance; }
+	bool ProcessMessage();
 
 private:
 	WNDCLASS wc{};
