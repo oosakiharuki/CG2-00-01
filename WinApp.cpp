@@ -1,20 +1,15 @@
 #include "WinApp.h"
-#include <cstdint>
-
 #include"externals/imgui/imgui.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
 void WinApp::Initialize() {
-	//D3DResourceLeakChecker leakCheck;
-	//Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory;
-	//Microsoft::WRL::ComPtr<ID3D12Device> device;
 
 	HRESULT hr = CoInitializeEx(0, COINIT_MULTITHREADED);
 
 
 #pragma region Windouの生成
-	WNDCLASS wc{};
+	//WNDCLASS wc{};
 
 	//ウィンドウプロシージャ
 	wc.lpfnWndProc = WindowProc;
@@ -74,4 +69,9 @@ LRESULT CALLBACK WinApp::WindowProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
 
 void WinApp::Update() {
 	
+}
+
+void WinApp::Finalize(){
+	CloseWindow(hwnd);
+	CoUninitialize();
 }

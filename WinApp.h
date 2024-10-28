@@ -1,4 +1,5 @@
 #include<Windows.h>
+#include <cstdint>
 
 #pragma once
 
@@ -10,6 +11,7 @@ public://静寂メンバ関数
 public://メンバ関数
 	void Initialize();
 	void Update();
+	void Finalize(); //API終了処理　(delete)
 
 
 	//クライアント領域のサイズ　横　縦

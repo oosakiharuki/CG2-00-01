@@ -11,11 +11,14 @@
 #pragma comment(lib,"dxguid.lib")
 
 
-void Input::Initialize(HINSTANCE hInstance, HWND hwnd) {
+void Input::Initialize(WinApp* winApp) {
+
+	//メンバ変数のwinApp <-代入- ローカル変数のwinAppの値
+	this->winApp_ = winApp;
 
 	HRESULT result;
 
-	result = DirectInput8Create(hInstance, DIRECTINPUT_VERSION,
+	result = DirectInput8Create(winApp_->GetHInstance(), DIRECTINPUT_VERSION,
 		IID_IDirectInput8, (void**)&directInput, nullptr);
 	assert(SUCCEEDED(result));
 
@@ -25,7 +28,7 @@ void Input::Initialize(HINSTANCE hInstance, HWND hwnd) {
 	result = keyboard->SetDataFormat(&c_dfDIKeyboard);
 	assert(SUCCEEDED(result));
 
-	result = keyboard->SetCooperativeLevel(hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
+	result = keyboard->SetCooperativeLevel(winApp_->GetHwnd(), DISCL_FOREGROUND | DISCL_NONEXCLUSIVE | DISCL_NOWINKEY);
 	assert(SUCCEEDED(result));
 
 }

@@ -43,7 +43,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #pragma comment(lib,"dxguid.lib")
 
 #include "Input.h"
-#include "WinApp.h"
+//#include "WinApp.h"
 
 //std::string str0{ "STRING!!!" };
 //
@@ -1085,6 +1085,9 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg,
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 	//旧WinApp
+	D3DResourceLeakChecker leakCheck;
+	Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory;
+	Microsoft::WRL::ComPtr<ID3D12Device> device;
 
 	WinApp* winApp_ = nullptr;
 
@@ -1093,7 +1096,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	Input* input_;
 	input_ = new Input();
-	input_->Initialize(winApp_->GetHInstance(), winApp_->GetHwnd());
+	//GetHInstance()GetHwnd()を入れず直接winAppのクラスのものを使える
+	input_->Initialize(winApp_); 
 
 
 	//ShowWindow(hwnd, SW_SHOW);
@@ -2290,16 +2294,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 //	dsvDescriptorHeap2->Release();
 
 	delete input_;
-	delete winApp_;
+	winApp_->Finalize();
 
-	CloseWindow(winApp_->GetHwnd());
-
-
-
-
-
-	CoUninitialize();
-
+	delete winApp_;	
+	winApp_ = nullptr;
 
 	return 0;
 }
