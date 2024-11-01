@@ -651,23 +651,42 @@ struct ParticleForGPU {
 };
 
 
-Particle MakeNewParticle(std::mt19937& randomEngeine) {
+Particle MakeNewParticle(std::mt19937& randomEngine,const Vector3& translate) {
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 	std::uniform_real_distribution<float> distColor(0.0f, 1.0f);
 	Particle particle;
 	particle.transform.scale = { 1.0f,1.0f,1.0f };
 	particle.transform.rotate = { 0.0f,3.0f,0.0f };
-	particle.transform.translate = { distribution(randomEngeine),distribution(randomEngeine) ,distribution(randomEngeine) };
-	particle.velocity = { distribution(randomEngeine),distribution(randomEngeine) ,distribution(randomEngeine) };
-	particle.color = { distColor(randomEngeine),distColor(randomEngeine) ,distColor(randomEngeine),1.0f };
+	particle.transform.translate = { distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
+	particle.velocity = { distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
+	particle.color = { distColor(randomEngine),distColor(randomEngine) ,distColor(randomEngine),1.0f };
 	std::uniform_real_distribution<float> distTime(1.0f, 3.0f);
-	particle.lifeTime = distTime(randomEngeine);
+	particle.lifeTime = distTime(randomEngine);
 	particle.currentTime = 0;
+
+	Vector3 randomTranslate{ distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
+	particle.transform.translate.x = translate.x + randomTranslate.x;
+	particle.transform.translate.y = translate.y + randomTranslate.y;
+	particle.transform.translate.z = translate.z + randomTranslate.z;
 
 	return particle;
 }
 
 
+struct Emitter {
+	Transform transform;
+	uint32_t count;//発生数
+	float frequency;//頻度
+	float frequencyTime;//頻度時間
+};
+
+std::list<Particle> Emit(const Emitter& emitter, std::mt19937& randomEngine) {
+	std::list<Particle> particles;
+	for (uint32_t count = 0; count < emitter.count; ++count) {
+		particles.push_back(MakeNewParticle(randomEngine,emitter.transform.translate));
+	}
+	return particles;
+}
 
 struct DirectionalLight {
 	Vector4 color;
@@ -1367,8 +1386,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	assert(SUCCEEDED(hr));
 #pragma endregion
 	
-	//Particle
-	const uint32_t kNumMaxInstance = 10;
+	//パーティクル
+	const uint32_t kNumMaxInstance = 100;
 	Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource =
 		CreateBufferResource(device, sizeof(ParticleForGPU) * kNumMaxInstance);
 	ParticleForGPU* instancingData = nullptr;
@@ -1534,7 +1553,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//RootParameter作成__
 	//D3D12_ROOT_PARAMETER rootParametersP[2] = {};
-	////Particle
+	////パーティクル
 	//rootParametersP[1].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
 	//rootParametersP[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
 	//rootParametersP[1].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing;
@@ -1980,16 +1999,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//Transform transformSphere{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
-	Particle transformModels[kNumMaxInstance];
+	//Particle transformModels[kNumMaxInstance];
+	std::list<Particle> particles;
 
 	std::random_device seedGenerator;
 	std::mt19937 randomEngine(seedGenerator());
 
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 
+	Emitter emitter{};
+	emitter.count = 3;
+	emitter.frequency = 0.5f;
+	emitter.frequencyTime = 0.0f;
 
-	for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
-		transformModels[index] = MakeNewParticle(randomEngine);
+	bool isBorn = false;
+	
+	//for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
+	//	transformModels[index] = MakeNewParticle(randomEngine);
+	//}
+
+	if (isBorn) { // 敵に当たった、攻撃したの判定を入れる
+		//particles.push_back(MakeNewParticle(randomEngine));
+		//particles.push_back(MakeNewParticle(randomEngine));
+		//particles.push_back(MakeNewParticle(randomEngine));
+		particles.splice(particles.end(), Emit(emitter, randomEngine));
 	}
 
 	const float deltaTimer = 1.0f / 60.0f;
@@ -2004,6 +2037,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{ 0.0f,0.0f,0.0f },
 		{ 0.0f,0.0f,0.0f }
 	};
+
+	emitter.transform.translate = { 0.0f,0.0f,0.0f };
+	emitter.transform.rotate = { 0.0f,0.0f,0.0f };
+	emitter.transform.scale = { 1.0f,1.0f,1.0f };
 
 
 	//float *inputMaterial[3] = { &materialData->x,&materialData->y,&materialData->z };
@@ -2108,42 +2145,48 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//モデル
 			uint32_t numInstance = 0;
-			for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
-				if (transformModels[index].lifeTime <= transformModels[index].currentTime) {
-					continue;//1～3秒立った時消えるようにする
+			for (std::list<Particle>::iterator particleIterator = particles.begin(); particleIterator != particles.end(); ) {
+
+				if (numInstance < kNumMaxInstance) {
+					if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
+						particleIterator = particles.erase(particleIterator); //最初のパーティクルをlistから消す+次のイテレータに
+						continue;//1～3秒立った時消えるようにする
+					}
+
+
+					Matrix4x4 worldMatrixModel = MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate);
+
+					//パーティクル				
+					//if (cameraChange) {
+						worldMatrixModel = Multiply(Multiply(MakeScaleMatrix((*particleIterator).transform.scale), billbordMatrix), MakeTranslateMatrix((*particleIterator).transform.translate));
+					//}
+					Matrix4x4 WorldViewProjectionMatrixModel = Multiply(worldMatrixModel, Multiply(viewMatrix, projectionMatrix));
+
+					//if (isMove) {
+						(*particleIterator).transform.translate.x += (*particleIterator).velocity.x * deltaTimer;
+						(*particleIterator).transform.translate.y += (*particleIterator).velocity.y * deltaTimer;
+						(*particleIterator).transform.translate.z += (*particleIterator).velocity.z * deltaTimer;
+					//}
+
+					(*particleIterator).currentTime += deltaTimer;
+					instancingData[numInstance].WVP = WorldViewProjectionMatrixModel;
+					instancingData[numInstance].World = worldMatrixModel;
+					instancingData[numInstance].color = (*particleIterator).color;
+
+					float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
+					instancingData[numInstance].color.s = alpha;
+
+
+					++numInstance;
 				}
-
-				Matrix4x4 worldMatrixModel = MakeAffineMatrix(transformModels[index].transform.scale, transformModels[index].transform.rotate, transformModels[index].transform.translate);
-				
-				//パーティクル				
-				if (cameraChange) {
-					worldMatrixModel = Multiply(Multiply(MakeScaleMatrix(transformModels[index].transform.scale), billbordMatrix), MakeTranslateMatrix(transformModels[index].transform.translate));
-				}
-				Matrix4x4 WorldViewProjectionMatrixModel = Multiply(worldMatrixModel, Multiply(viewMatrix, projectionMatrix));
-
-				//instancingData[index].World = worldMatrixModel;
-				//instancingData[index].WVP = WorldViewProjectionMatrixModel;
-				//instancingData[index].color = transformModels[index].color;
-
-				if (isMove) {
-					transformModels[index].transform.translate.x += transformModels[index].velocity.x * deltaTimer;
-					transformModels[index].transform.translate.y += transformModels[index].velocity.y * deltaTimer;
-					transformModels[index].transform.translate.z += transformModels[index].velocity.z * deltaTimer;
-				}
-
-				//transformModels[index].currentTime += deltaTimer;
-				instancingData[numInstance].WVP = WorldViewProjectionMatrixModel;
-				instancingData[numInstance].World = worldMatrixModel;
-				instancingData[numInstance].color = transformModels[index].color;
-
-				//float alpha = 1.0f - (transformModels[index].currentTime / transformModels[index].lifeTime);
-				//instancingData[numInstance].color.s = alpha;
-
-
-				++numInstance;
+				++particleIterator;//繰り返し　forの最後のやつ
 			}
 
-
+			emitter.frequencyTime += deltaTimer;
+			if (emitter.frequency <= emitter.frequencyTime) {
+				particles.splice(particles.end(), Emit(emitter, randomEngine));
+				emitter.frequencyTime -= emitter.frequency;
+			}
 
 
 			//directionalLightSphereData->direction = Normalize(directionalLightSphereData->direction);
@@ -2226,29 +2269,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					//ImGui::InputFloat3("ScaleModel", *inputScaleModel);
 					//ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
 				
+					ImGui::DragFloat3("EmitterTranslate", &emitter.transform.translate.x,0.01f,-100.0f,100.0f);
+
+
 					ImGui::ColorEdit4("Color",*inputMaterialModel);
 
 					ImGui::Checkbox("ModelTexture", &textureChange2);	
-					ImGui::Checkbox("move", &isMove);
-					ImGui::Checkbox("camera", &cameraChange);
+					//ImGui::Checkbox("move", &isMove);
+					//ImGui::Checkbox("camera", &cameraChange);
+					ImGui::Checkbox("Add Particle", &isBorn);
 				}
 				ImGui::TreePop();
 			}
 
 
-			if (ImGui::TreeNode("light")) {
+			//if (ImGui::TreeNode("light")) {
 
-				ImGui::InputFloat4("Materiallight", *inputMateriallight);
-				ImGui::SliderFloat4("SliderMateriallight", *inputMateriallight, 0.0f, 1.0f);
+			//	ImGui::InputFloat4("Materiallight", *inputMateriallight);
+			//	ImGui::SliderFloat4("SliderMateriallight", *inputMateriallight, 0.0f, 1.0f);
 
-				ImGui::InputFloat3("Vertexlight", *inputDirectionLight);
-				ImGui::SliderFloat3("SliderVertexlight", *inputDirectionLight, -1.0f, 1.0f);
+			//	ImGui::InputFloat3("Vertexlight", *inputDirectionLight);
+			//	ImGui::SliderFloat3("SliderVertexlight", *inputDirectionLight, -1.0f, 1.0f);
 
 
-				ImGui::InputFloat("intensity", intensity);
+			//	ImGui::InputFloat("intensity", intensity);
 
-				ImGui::TreePop();
-			}
+			//	ImGui::TreePop();
+			//}
 			
 
 			//if (ImGui::TreeNode("Sprite")) {
