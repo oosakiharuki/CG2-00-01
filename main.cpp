@@ -38,6 +38,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 #pragma comment(lib,"dxcompiler.lib")
 
+#include <numbers>
+
 //std::string str0{ "STRING!!!" };
 //
 //std::string str1{ std::to_string(10) };
@@ -239,6 +241,31 @@ Matrix4x4 MakeRotateZMatrix(float radian) {
 
 	return result;
 }
+
+Matrix4x4 MakeRotateYMatrix(float radian) {
+	Matrix4x4 result{};
+
+	result.m[0][0] = std::cos(radian);
+	result.m[0][1] = 0.0f;
+	result.m[0][2] = -(std::sin(radian));
+	result.m[0][3] = 0.0f;
+	result.m[1][0] = 0.0f;
+	result.m[1][1] = 1.0f;
+	result.m[1][2] = 0.0f;
+	result.m[1][3] = 0.0f;
+	result.m[2][0] = std::sin(radian);
+	result.m[2][1] = 0.0f;
+	result.m[2][2] = std::cos(radian);
+	result.m[2][3] = 0.0f;
+	result.m[3][0] = 0.0f;
+	result.m[3][1] = 0.0f;
+	result.m[3][2] = 0.0f;
+	result.m[3][3] = 1.0f;
+
+	return result;
+}
+
+
 Matrix4x4 MakeTranslateMatrix(Vector3 translate) {
 	Matrix4x4 result{};
 
@@ -1619,7 +1646,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//RasterizerState
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;//表裏表示
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;//表裏表示
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
 	//shaderのコンパイラ
@@ -1939,7 +1966,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				
 
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
-	Transform cameraTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f}, {0.0f,0.0f,-10.5f} };
+	//Transform cameraTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f}, {0.0f,0.0f,-10.5f} };
+
+	Transform cameraTransform{
+		{1.0f,1.0f,1.0f},
+		{std::numbers::pi_v<float> / 3.0f,std::numbers::pi_v<float>,0.0f},
+		{0.0f,23.0f,10.0f}
+	};
+	
+	Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
 
 	//Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
@@ -1988,6 +2023,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//float* inputRotateModel[3] = { &transformModels[0].rotate.x,&transformModels[0].rotate.y,&transformModels[0].rotate.z };
 	//float* inputScaleModel[3] = { &transformModels[0].scale.x,&transformModels[0].scale.y,&transformModels[0].scale.z };
 	bool textureChange2 = false;
+	bool isMove = false;
+	bool cameraChange = false;
 
 
 	float* inputMateriallight[3] = { &directionalLightSphereData->color.x,&directionalLightSphereData->color.y,&directionalLightSphereData->color.z };
@@ -2062,6 +2099,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//		
 			//DrawSphere(vertexDataSphere);
 		
+			
+			Matrix4x4 billbordMatrix = Multiply(backToFrontMatrix, cameraMatrix);
+
+			billbordMatrix.m[3][0] = 0.0f;
+			billbordMatrix.m[3][1] = 0.0f;
+			billbordMatrix.m[3][2] = 0.0f;
 
 			//モデル
 			uint32_t numInstance = 0;
@@ -2071,23 +2114,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				}
 
 				Matrix4x4 worldMatrixModel = MakeAffineMatrix(transformModels[index].transform.scale, transformModels[index].transform.rotate, transformModels[index].transform.translate);
+				
+				//パーティクル				
+				if (cameraChange) {
+					worldMatrixModel = Multiply(Multiply(MakeScaleMatrix(transformModels[index].transform.scale), billbordMatrix), MakeTranslateMatrix(transformModels[index].transform.translate));
+				}
 				Matrix4x4 WorldViewProjectionMatrixModel = Multiply(worldMatrixModel, Multiply(viewMatrix, projectionMatrix));
 
 				//instancingData[index].World = worldMatrixModel;
 				//instancingData[index].WVP = WorldViewProjectionMatrixModel;
 				//instancingData[index].color = transformModels[index].color;
 
-				transformModels[index].transform.translate.x += transformModels[index].velocity.x * deltaTimer;
-				transformModels[index].transform.translate.y += transformModels[index].velocity.y * deltaTimer;
-				transformModels[index].transform.translate.z += transformModels[index].velocity.z * deltaTimer;
+				if (isMove) {
+					transformModels[index].transform.translate.x += transformModels[index].velocity.x * deltaTimer;
+					transformModels[index].transform.translate.y += transformModels[index].velocity.y * deltaTimer;
+					transformModels[index].transform.translate.z += transformModels[index].velocity.z * deltaTimer;
+				}
 
-				transformModels[index].currentTime += deltaTimer;
+				//transformModels[index].currentTime += deltaTimer;
 				instancingData[numInstance].WVP = WorldViewProjectionMatrixModel;
 				instancingData[numInstance].World = worldMatrixModel;
 				instancingData[numInstance].color = transformModels[index].color;
 
-				float alpha = 1.0f - (transformModels[index].currentTime / transformModels[index].lifeTime);
-				instancingData[numInstance].color.s = alpha;
+				//float alpha = 1.0f - (transformModels[index].currentTime / transformModels[index].lifeTime);
+				//instancingData[numInstance].color.s = alpha;
 
 
 				++numInstance;
@@ -2178,7 +2228,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				
 					ImGui::ColorEdit4("Color",*inputMaterialModel);
 
-					ImGui::Checkbox("ModelTexture", &textureChange2);			
+					ImGui::Checkbox("ModelTexture", &textureChange2);	
+					ImGui::Checkbox("move", &isMove);
+					ImGui::Checkbox("camera", &cameraChange);
 				}
 				ImGui::TreePop();
 			}
