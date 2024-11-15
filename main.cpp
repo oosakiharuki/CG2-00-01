@@ -688,6 +688,39 @@ std::list<Particle> Emit(const Emitter& emitter, std::mt19937& randomEngine) {
 	return particles;
 }
 
+struct AABB {
+	Vector3 Min;
+	Vector3 Max;
+};
+
+struct AccelerationField {
+	Vector3 acceleration;
+	AABB area;
+};
+bool IsCollision(const AABB& aabb, const Vector3& point) {
+
+	Vector3 t1 = {
+		min(aabb.Min.x,point.x),
+		min(aabb.Min.y,point.y),
+		min(aabb.Min.z,point.z)
+	};
+	
+	Vector3 t2 = {	
+		max(aabb.Max.x,point.x),
+		max(aabb.Max.y,point.y),
+		max(aabb.Max.z,point.z)
+	};
+
+	float tmin = min(min(t1.x, t1.y), t1.z);
+	float tmax = max(max(t1.x, t1.y), t1.z);
+
+	if (tmin <= tmax) {
+		return true;
+	}
+	return false;
+}
+
+
 struct DirectionalLight {
 	Vector4 color;
 	Vector3 direction;
@@ -1655,8 +1688,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;// srcClor * scrAlpha
 	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD; // + 
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;// DestColor * (1-SrcAlpha)
-	
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;// DestColor * (1-SrcAlpha)
+	//DestBlend = D3D12_BLEND_ONE; add
+
 	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
 	blendDesc.RenderTarget[0].BlendOpAlpha = D3D12_BLEND_OP_ADD;
 	blendDesc.RenderTarget[0].DestBlendAlpha = D3D12_BLEND_ZERO;
@@ -2008,12 +2042,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 
 	Emitter emitter{};
-	emitter.count = 3;
-	emitter.frequency = 0.5f;
-	emitter.frequencyTime = 0.0f;
+	emitter.count = 3;//一回に何個生まれるか
+	emitter.frequency = 0.5f;//発生時間
+	emitter.frequencyTime = 0.0f;//時間初期化
 
-	bool isBorn = false;
+	bool isBorn = true;
 	
+	AccelerationField accelerationField;
+	accelerationField.acceleration = { 15.0f,0.0f,0.0f };
+	accelerationField.area.Min = { -1.0f,-1.0f,-1.0f };
+	accelerationField.area.Max = { 1.0f,1.0f,1.0f };
+
 	//for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
 	//	transformModels[index] = MakeNewParticle(randomEngine);
 	//}
@@ -2060,8 +2099,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//float* inputRotateModel[3] = { &transformModels[0].rotate.x,&transformModels[0].rotate.y,&transformModels[0].rotate.z };
 	//float* inputScaleModel[3] = { &transformModels[0].scale.x,&transformModels[0].scale.y,&transformModels[0].scale.z };
 	bool textureChange2 = false;
-	bool isMove = false;
+	bool isMove = true;
 	bool cameraChange = false;
+	bool isWind = false;
 
 
 	float* inputMateriallight[3] = { &directionalLightSphereData->color.x,&directionalLightSphereData->color.y,&directionalLightSphereData->color.z };
@@ -2157,16 +2197,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					Matrix4x4 worldMatrixModel = MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate);
 
 					//パーティクル				
-					//if (cameraChange) {
+					if (cameraChange) {
 						worldMatrixModel = Multiply(Multiply(MakeScaleMatrix((*particleIterator).transform.scale), billbordMatrix), MakeTranslateMatrix((*particleIterator).transform.translate));
-					//}
+					}
 					Matrix4x4 WorldViewProjectionMatrixModel = Multiply(worldMatrixModel, Multiply(viewMatrix, projectionMatrix));
+					
+					if (IsCollision(accelerationField.area, (*particleIterator).transform.translate) && isWind) {
+						(*particleIterator).velocity.x += accelerationField.acceleration.x * deltaTimer;
+						(*particleIterator).velocity.y += accelerationField.acceleration.y * deltaTimer;
+						(*particleIterator).velocity.z += accelerationField.acceleration.z * deltaTimer;
+					}
 
-					//if (isMove) {
+					if (isMove) {
 						(*particleIterator).transform.translate.x += (*particleIterator).velocity.x * deltaTimer;
 						(*particleIterator).transform.translate.y += (*particleIterator).velocity.y * deltaTimer;
 						(*particleIterator).transform.translate.z += (*particleIterator).velocity.z * deltaTimer;
-					//}
+					}
 
 					(*particleIterator).currentTime += deltaTimer;
 					instancingData[numInstance].WVP = WorldViewProjectionMatrixModel;
@@ -2175,17 +2221,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 					float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
 					instancingData[numInstance].color.s = alpha;
-
-
+			
+					
 					++numInstance;
 				}
 				++particleIterator;//繰り返し　forの最後のやつ
 			}
 
-			emitter.frequencyTime += deltaTimer;
-			if (emitter.frequency <= emitter.frequencyTime) {
-				particles.splice(particles.end(), Emit(emitter, randomEngine));
-				emitter.frequencyTime -= emitter.frequency;
+			if (isBorn) {
+				emitter.frequencyTime += deltaTimer;
+				if (emitter.frequency <= emitter.frequencyTime) {
+					particles.splice(particles.end(), Emit(emitter, randomEngine));
+					emitter.frequencyTime -= emitter.frequency;
+				}
 			}
 
 
@@ -2274,9 +2322,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 					ImGui::ColorEdit4("Color",*inputMaterialModel);
 
-					ImGui::Checkbox("ModelTexture", &textureChange2);	
-					//ImGui::Checkbox("move", &isMove);
-					//ImGui::Checkbox("camera", &cameraChange);
+					//ImGui::Checkbox("ModelTexture", &textureChange2);	
+					ImGui::Checkbox("move", &isMove);
+					ImGui::Checkbox("wind", &isWind);
+					ImGui::Checkbox("camera", &cameraChange);
 					ImGui::Checkbox("Add Particle", &isBorn);
 				}
 				ImGui::TreePop();
