@@ -1921,10 +1921,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		else {
 			//ゲームの処理
-
-			ImGui_ImplDX12_NewFrame();
-			ImGui_ImplWin32_NewFrame();
-			ImGui::NewFrame();
 			
 			input_->Update();
 
@@ -1935,6 +1931,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			if (input_->TriggerKey(DIK_1)) {
 				OutputDebugStringA("Hit 1\n");
 			}
+
+			ImGui_ImplDX12_NewFrame();
+			ImGui_ImplWin32_NewFrame();
+			ImGui::NewFrame();
+
 
 			//transform.rotate.y += 0.03f;
 
