@@ -1371,6 +1371,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			input_->Update();
 
+			if (input_->PushKey(DIK_0)) {
+				OutputDebugStringA("Hit 0\n");
+			}
+
+			if (input_->TriggerKey(DIK_1)) {
+				OutputDebugStringA("Hit 1\n");
+			}
+
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
@@ -1428,13 +1436,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			uvTransformMatrix = Multiply(uvTransformMatrix, MakeTranslateMatrix(uvTransformSprite.translate));
 			materialDataSprite->uvTransform = uvTransformMatrix;
 
-			if (input_->PushKey(DIK_0)) {
-				OutputDebugStringA("Hit 0\n");
-			}
-
-			if (input_->TriggerKey(DIK_1)) {
-				OutputDebugStringA("Hit 1\n");
-			}
 
 			//開発用UIの処理
 			//ImGui::ShowDemoWindow();
