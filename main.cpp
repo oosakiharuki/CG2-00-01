@@ -1921,12 +1921,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		else {
 			//ゲームの処理
+			
+			input_->Update();
 
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
 			ImGui::NewFrame();
-			
-			input_->Update();
 
 			if (input_->PushKey(DIK_0)) {
 				OutputDebugStringA("Hit 0\n");
