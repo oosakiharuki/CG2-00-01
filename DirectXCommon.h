@@ -11,8 +11,6 @@
 #include <array>
 #include <dxcapi.h>
 
-#include "externals/DirectXTex/DirectXTex.h"
-
 class DirectXCommon {
 public:
 	void Initialize();
@@ -42,27 +40,22 @@ public:
 	void ViewPort();
 	void Siccer();
 	void DXC();
-	void ImGui();
+	//DXC
+	IDxcUtils* dxcUtils = nullptr;
+
+	IDxcCompiler3* dxcCompiler = nullptr;
+
+	IDxcIncludeHandler* includeHandler = nullptr;
+
+
+	void InGui();
 
 	void SetWinApp(WinApp* winApp) { winApp_ = winApp; }
 
-	void ProDraw();
-	void PostDraw();
-
-	ID3D12Device* GetDevice()const { return device.Get(); }
-	ID3D12GraphicsCommandList* GetCommandList() const { return commandList.Get(); }
-	D3D12_CPU_DESCRIPTOR_HANDLE GetDsvHandle() { return dsvHandle; }
-
-	//コンパイルシェーダ
-	IDxcBlob* CompileShader(const std::wstring& filePath,const wchar_t* profile);
-
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
 
-	Microsoft::WRL::ComPtr<ID3D12Resource> CreateTextureResource(const DirectX::TexMetadata& metadata);
-
-	void UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
-	
-	static DirectX::ScratchImage LoadTexture(const std::string& filePath);
+	void ProDraw();
+	void PostDraw();
 
 private:
 
@@ -130,17 +123,22 @@ private:
 	//シザリング短径(シザー)
 	D3D12_RECT scissorRect{};
 
+
 	//DXC
-	IDxcUtils* dxcUtils = nullptr;
-	IDxcCompiler3* dxcCompiler = nullptr;
-	IDxcIncludeHandler* includeHandler = nullptr;
+	//コンパイルシェーダ
+	IDxcBlob* CompileShader(
+		const std::wstring& filePath,
+		const wchar_t* profile,
+		IDxcUtils* dxcUtils,
+		IDxcCompiler3* dxcCompiler,
+		IDxcIncludeHandler* includeHandler);
 
 	//Update
+
+
 	Microsoft::WRL::ComPtr <ID3D12Fence> fence = nullptr;
 	uint64_t fenceValue = 0;
 	HANDLE fenceEvent;
-
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle;
 
 	//TransitionBarrierの設定
 	D3D12_RESOURCE_BARRIER barrier{};
