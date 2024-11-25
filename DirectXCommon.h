@@ -54,6 +54,9 @@ public:
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
 
+	void ProDraw();
+	void PostDraw();
+
 private:
 
 	HRESULT hr;
@@ -77,8 +80,6 @@ private:
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc{};
 
 	static const uint32_t MaxResource = 2;
-	//Microsoft::WRL::ComPtr<ID3D12Resource> swapChainResource[MaxResource] = { nullptr };
-	//
 	std::array<Microsoft::WRL::ComPtr<ID3D12Resource>, 2> swapChainResources;
 	
 	WinApp* winApp_ = nullptr;
@@ -132,4 +133,13 @@ private:
 		IDxcCompiler3* dxcCompiler,
 		IDxcIncludeHandler* includeHandler);
 
+	//Update
+
+
+	Microsoft::WRL::ComPtr <ID3D12Fence> fence = nullptr;
+	uint64_t fenceValue = 0;
+	HANDLE fenceEvent;
+
+	//TransitionBarrierの設定
+	D3D12_RESOURCE_BARRIER barrier{};
 };
