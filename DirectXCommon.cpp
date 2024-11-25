@@ -290,18 +290,18 @@ D3D12_GPU_DESCRIPTOR_HANDLE  DirectXCommon::GetSRVGPUDescriptorHandle(uint32_t i
 
 //RTVHandle
 D3D12_CPU_DESCRIPTOR_HANDLE  DirectXCommon::GetRTVCPUDescriptorHandle(uint32_t index) {
-	return GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeRTV, index);
+	return GetCPUDescriptorHandle(rtvDescriptorHeap, descriptorSizeRTV, index);
 }
 D3D12_GPU_DESCRIPTOR_HANDLE  DirectXCommon::GetRTVGPUDescriptorHandle(uint32_t index) {
-	return GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeRTV, index);
+	return GetGPUDescriptorHandle(rtvDescriptorHeap, descriptorSizeRTV, index);
 }
 
 //DSVHandle
 D3D12_CPU_DESCRIPTOR_HANDLE  DirectXCommon::GetDSVCPUDescriptorHandle(uint32_t index) {
-	return GetCPUDescriptorHandle(srvDescriptorHeap, descriptorSizeDSV, index);
+	return GetCPUDescriptorHandle(dsvDescriptorHeap, descriptorSizeDSV, index);
 }
 D3D12_GPU_DESCRIPTOR_HANDLE  DirectXCommon::GetDSVGPUDescriptorHandle(uint32_t index) {
-	return GetGPUDescriptorHandle(srvDescriptorHeap, descriptorSizeDSV, index);
+	return GetGPUDescriptorHandle(dsvDescriptorHeap, descriptorSizeDSV, index);
 }
 
 
