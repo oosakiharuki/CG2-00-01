@@ -14,6 +14,7 @@
 #include"externals/imgui/imgui_impl_win32.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+#include <thread>
 
 using namespace Microsoft::WRL;
 using namespace Logger;
@@ -21,6 +22,8 @@ using namespace StringUtility;
 
 
 void DirectXCommon::Initialize() {
+
+	InitializeFixFPS();
 
 	assert(winApp_);
 
@@ -340,8 +343,8 @@ void DirectXCommon::Fence() {
 	HRESULT hr = device->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 	assert(SUCCEEDED(hr));
 
-	fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	assert(fenceEvent != nullptr);
+	//fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	//assert(fenceEvent != nullptr);
 }
 
 void DirectXCommon::ViewPort() {
@@ -625,21 +628,48 @@ void DirectXCommon::PostDraw() {
 	//// 出力ウィンドウへの文字出力
 	//OutputDebugStringA("Hello DirectX!\n");
 	//FENCEを更新する
-	fenceValue++;
 
-	commandQueue->Signal(fence.Get(), fenceValue);
+	//fenceValue++;
+	//コマンドの実行完了まで待つ
+	commandQueue->Signal(fence.Get(), ++fenceValue);
 
-	if (fence->GetCompletedValue() < fenceValue) {
-
-		fence->SetEventOnCompletion(fenceValue, fenceEvent);
-
-		WaitForSingleObject(fenceEvent, INFINITE);
-
+	if (fence->GetCompletedValue() != fenceValue) {
+		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
+		fence->SetEventOnCompletion(fenceValue, event);
+		WaitForSingleObject(event, INFINITE);
+		CloseHandle(event);
 	}
+	// FPS
+	UpdateFixFPS();
 
 	//次のフレームのコマンドリストを準備
 	hr = commandAllocator->Reset();
 	assert(SUCCEEDED(hr));
 	hr = commandList->Reset(commandAllocator.Get(), nullptr);
 	assert(SUCCEEDED(hr));
+}
+
+void DirectXCommon::InitializeFixFPS() {
+	//現在時間を記録
+	reference_ = std::chrono::steady_clock::now();
+}
+
+void DirectXCommon::UpdateFixFPS() {
+	//1/60秒ピッタリ
+	const std::chrono::microseconds kMinTime(uint64_t(1000000.0f / 60.0f));
+	//1/60秒少し短い
+	//vsyncまちの無駄時間軽減に使う
+	const std::chrono::microseconds kMinCheckTime(uint64_t(1000000.0f / 65.0f));
+
+
+	std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
+
+	std::chrono::microseconds elapsed = std::chrono::duration_cast<std::chrono::microseconds>(now - reference_);
+
+	if (elapsed < kMinCheckTime) {
+		while (std::chrono::steady_clock::now() - reference_ < kMinTime) {
+			std::this_thread::sleep_for(std::chrono::microseconds(1));
+		}
+	}
+	reference_ = std::chrono::steady_clock::now();
 }

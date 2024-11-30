@@ -11,8 +11,9 @@
 #include <array>
 #include <dxcapi.h>
 
-
 #include "externals/DirectXTex/DirectXTex.h"
+#include <chrono>
+
 class DirectXCommon {
 public:
 	void Initialize();
@@ -42,14 +43,6 @@ public:
 	void ViewPort();
 	void Siccer();
 	void DXC();
-	//DXC
-	IDxcUtils* dxcUtils = nullptr;
-
-	IDxcCompiler3* dxcCompiler = nullptr;
-
-	IDxcIncludeHandler* includeHandler = nullptr;
-
-
 	void ImGui();
 
 	void SetWinApp(WinApp* winApp) { winApp_ = winApp; }
@@ -71,7 +64,7 @@ public:
 	ID3D12Device* GetDevice()const { return device.Get(); }
 	ID3D12GraphicsCommandList* GetCommandList() const { return commandList.Get(); }
 	D3D12_CPU_DESCRIPTOR_HANDLE GetDsvHandle() { return dsvHandle; }
-	HANDLE GetFenceEvent() { return fenceEvent; }
+	//HANDLE GetFenceEvent() { return fenceEvent; }
 
 
 private:
@@ -142,16 +135,25 @@ private:
 
 
 	//DXC
+	IDxcUtils* dxcUtils = nullptr;
+	IDxcCompiler3* dxcCompiler = nullptr;
+	IDxcIncludeHandler* includeHandler = nullptr;
 
 	//Update
 
 
 	Microsoft::WRL::ComPtr <ID3D12Fence> fence = nullptr;
 	uint64_t fenceValue = 0;
-	HANDLE fenceEvent;
+	//HANDLE fenceEvent;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle;
 
 	//TransitionBarrierの設定
 	D3D12_RESOURCE_BARRIER barrier{};
+
+	//Fix = 固定
+	void InitializeFixFPS();
+	void UpdateFixFPS();
+	//逆行しないタイマー
+	std::chrono::steady_clock::time_point reference_;
 };

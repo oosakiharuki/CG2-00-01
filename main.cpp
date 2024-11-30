@@ -1561,8 +1561,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 
-	//解放処理
-	CloseHandle(dxCommon->GetFenceEvent());
 
 	delete input_;
 	winApp_->Finalize();

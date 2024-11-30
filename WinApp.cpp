@@ -2,6 +2,7 @@
 #include"externals/imgui/imgui.h"
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+#pragma comment(lib,"winmm.lib")
 
 void WinApp::Initialize() {
 
@@ -10,6 +11,9 @@ void WinApp::Initialize() {
 
 #pragma region Windouの生成
 	//WNDCLASS wc{};
+
+	//システムタイマー
+	timeBeginPeriod(1);
 
 	//ウィンドウプロシージャ
 	wc.lpfnWndProc = WindowProc;
