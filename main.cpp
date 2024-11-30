@@ -37,6 +37,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 #include "Input.h"
 //#include "WinApp.h"
 #include "DirectXCommon.h"
+#include "D3DResorceLeakChecker.h"
 
 using namespace Logger;
 using namespace StringUtility;
@@ -782,33 +783,11 @@ ModelData LoadObjFile(const std::string& directoryPath,const std::string& filena
 	return modelData;
 }
 
-
-
-struct D3DResourceLeakChecker {
-	~D3DResourceLeakChecker() {
-		//リソースリークチェック
-		Microsoft::WRL::ComPtr < IDXGIDebug1> debug;
-		if (SUCCEEDED(DXGIGetDebugInterface1(0, IID_PPV_ARGS(&debug)))) {
-			debug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
-			debug->ReportLiveObjects(DXGI_DEBUG_APP, DXGI_DEBUG_RLO_ALL);
-			debug->ReportLiveObjects(DXGI_DEBUG_D3D12, DXGI_DEBUG_RLO_ALL);
-			//debug->Release();
-		}
-	}
-};
-
-
-
-
-
-
 //Windowsアプリのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 	//旧WinApp
 	D3DResourceLeakChecker leakCheck;
-	//Microsoft::WRL::ComPtr<IDXGIFactory7> dxgiFactory;
-	//Microsoft::WRL::ComPtr<ID3D12Device> device;
 
 	WinApp* winApp_ = nullptr;
 
@@ -992,19 +971,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource = dxCommon->CreateTextureResource(metadata);
 	dxCommon->UploadTextureData(textureResource, mipImages);
 
-	//Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource = CreateDepthStencilTextureResource(device, WinApp::kClientWidth, WinApp::kClientHeight);
-
-	////DSVようのヒープでディスクリプタの数1、shader内で触らないのでfalse
-	//Microsoft::WRL::ComPtr < ID3D12DescriptorHeap> dsvDescriptorHeap = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
-
-	////DSV生成
-	//D3D12_DEPTH_STENCIL_VIEW_DESC dscDesc{};
-	//dscDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	//dscDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-	////DSVHeapの先頭
-	//device->CreateDepthStencilView(depthStencilResource.Get(), &dscDesc, dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
-
-
 	//metadataを基にSRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
 	srvDesc.Format = metadata.format;
@@ -1015,14 +981,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	////SRVを作成するDescriptorHeap場所決め
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = dxCommon->GetSRVCPUDescriptorHandle(1);
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = dxCommon->GetSRVGPUDescriptorHandle(1);
-	////D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	////D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
-	////先頭ImGui
-	//textureSrvHandleCPU.ptr += descriptorSizeSRV;
-	//textureSrvHandleGPU.ptr += descriptorSizeSRV;
-	////textureSrvHandleCPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	////textureSrvHandleGPU.ptr += device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-	////SRVの生成
+	//SRVの生成
 	dxCommon->GetDevice()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
 
 
@@ -1034,13 +993,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource2 = dxCommon->CreateTextureResource(metadata2);
 	dxCommon->UploadTextureData(textureResource2, mipImages2);
 
-	//Microsoft::WRL::ComPtr<ID3D12Resource> depthStencilResource2 = CreateDepthStencilTextureResource(device, WinApp::kClientWidth, WinApp::kClientHeight);
-
-	////DSVようのヒープでディスクリプタの数1、shader内で触らないのでfalse
-	//Microsoft::WRL::ComPtr < ID3D12DescriptorHeap> dsvDescriptorHeap2 = CreateDescriptorHeap(device, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
-
-
-
 	//metadataを基にSRVの設定
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
 	srvDesc2.Format = metadata2.format;
@@ -1051,9 +1003,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	////SRVを作成するDescriptorHeap場所決め
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = dxCommon->GetSRVCPUDescriptorHandle(2);
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = dxCommon->GetSRVGPUDescriptorHandle(2);
-	////先頭ImGui
-	//textureSrvHandleCPU2.ptr += descriptorSizeSRV;
-	//textureSrvHandleGPU2.ptr += descriptorSizeSRV;
 	////SRVの生成
 	dxCommon->GetDevice()->CreateShaderResourceView(textureResource2.Get(), &srvDesc2, textureSrvHandleCPU2);
 
@@ -1612,8 +1561,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 
-		
-	//CloseHandle(fenceEvent);	
+	//解放処理
+	CloseHandle(dxCommon->GetFenceEvent());
 
 	delete input_;
 	winApp_->Finalize();

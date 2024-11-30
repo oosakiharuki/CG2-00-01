@@ -637,7 +637,6 @@ void DirectXCommon::PostDraw() {
 
 	}
 
-
 	//次のフレームのコマンドリストを準備
 	hr = commandAllocator->Reset();
 	assert(SUCCEEDED(hr));
