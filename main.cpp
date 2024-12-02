@@ -39,6 +39,7 @@ using namespace MyMath;
 #include "D3DResorceLeakChecker.h"
 #include "SpriteCommon.h"
 #include "Sprite.h"
+#include "TextureManager.h"
 
 using namespace Logger;
 using namespace StringUtility;
@@ -354,57 +355,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dxCommon->SetWinApp(winApp_);
 	dxCommon->Initialize();
 
+	TextureManager::GetInstance()->Initialize(dxCommon);
+
+
+
 	SpriteCommon* spriteCommon = nullptr;
 
 	spriteCommon = new SpriteCommon;
 	spriteCommon->Initialize(dxCommon);
 
+
+	TextureManager::GetInstance()->LoadTexture("resource/uvChecker.png");
+	TextureManager::GetInstance()->LoadTexture("resource/monsterBall.png");
+
+
+
+	//////textureを読んで転送
+	//uint32_t texture1  = TextureManager::GetInstance()->GetTextureIndexByFilePath("resource/uvChecker.png");
+
 	////textureを読んで転送
-	DirectX::ScratchImage mipImages = dxCommon->LoadTexture("resource/uvChecker.png");
-	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
-	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource = dxCommon->CreateTextureResource(metadata);
-	dxCommon->UploadTextureData(textureResource, mipImages);
+	//uint32_t texture2 = TextureManager::GetInstance()->GetTextureIndexByFilePath("resource/monsterBall.png");//モンスターボール
 
-	//metadataを基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
-	srvDesc.Format = metadata.format;
-	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc.Texture2D.MipLevels = UINT(metadata.mipLevels);
-
-	////SRVを作成するDescriptorHeap場所決め
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU = dxCommon->GetSRVCPUDescriptorHandle(1);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU = dxCommon->GetSRVGPUDescriptorHandle(1);
-	//SRVの生成
-	dxCommon->GetDevice()->CreateShaderResourceView(textureResource.Get(), &srvDesc, textureSrvHandleCPU);
-
-
-
-
-	//textureを読んで転送
-	DirectX::ScratchImage mipImages2 = dxCommon->LoadTexture("resource/monsterBall.png");//モンスターボール
-	const DirectX::TexMetadata& metadata2 = mipImages2.GetMetadata();
-	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource2 = dxCommon->CreateTextureResource(metadata2);
-	dxCommon->UploadTextureData(textureResource2, mipImages2);
-
-	//metadataを基にSRVの設定
-	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc2{};
-	srvDesc2.Format = metadata2.format;
-	srvDesc2.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-	srvDesc2.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-	srvDesc2.Texture2D.MipLevels = UINT(metadata2.mipLevels);
-
-	////SRVを作成するDescriptorHeap場所決め
-	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU2 = dxCommon->GetSRVCPUDescriptorHandle(2);
-	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU2 = dxCommon->GetSRVGPUDescriptorHandle(2);
-	////SRVの生成
-	dxCommon->GetDevice()->CreateShaderResourceView(textureResource2.Get(), &srvDesc2, textureSrvHandleCPU2);
 
 	std::vector<Sprite*> sprites;
 
 	for (uint32_t i = 0; i < 5; ++i) {
 		Sprite* sprite = new Sprite();
-		sprite->Initialize(spriteCommon);
+		sprite->Initialize(spriteCommon, "resource/uvChecker.png");
 
 		Vector2 position[5] = {};
 		position[i].x += i * 200.0f;
@@ -903,6 +880,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	winApp_ = nullptr;
 
 	delete dxCommon;
+
+	TextureManager::GetInstance()->Finalize();
 
 	delete spriteCommon;
 	for (Sprite* sprite : sprites) {

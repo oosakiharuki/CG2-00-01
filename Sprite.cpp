@@ -1,14 +1,18 @@
 #include "Sprite.h"
 #include "SpriteCommon.h"
 #include "externals/imgui/imgui.h"
+#include "TextureManager.h"
 
 using namespace MyMath;
 
-void Sprite::Initialize(SpriteCommon* spriteCommon) {
+void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath) {
 	this->spriteCommon_ = spriteCommon;
 
-	textureSrvHandleCPU = spriteCommon_->GetDirectXCommon()->GetSRVCPUDescriptorHandle(1);
-	textureSrvHandleGPU = spriteCommon_->GetDirectXCommon()->GetSRVGPUDescriptorHandle(1);
+
+	textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
+
+	textureSrvHandleCPU = spriteCommon_->GetDirectXCommon()->GetSRVCPUDescriptorHandle(textureIndex);
+	textureSrvHandleGPU = spriteCommon_->GetDirectXCommon()->GetSRVGPUDescriptorHandle(textureIndex);
 
 
 
@@ -26,6 +30,23 @@ void Sprite::Initialize(SpriteCommon* spriteCommon) {
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 
 	
+	vertexData[0].position = { 0.0f,1.0f,0.0f,1.0f };//0
+	vertexData[0].texcoord = { 0.0f,1.0f };
+	vertexData[0].normal = { 0.0f,0.0f,-1.0f };
+
+	vertexData[1].position = { 0.0f,0.0f,0.0f,1.0f };//1,3
+	vertexData[1].texcoord = { 0.0f,0.0f };
+	vertexData[1].normal = { 0.0f,0.0f,-1.0f };
+
+
+	vertexData[2].position = { 1.0f,1.0f,0.0f,1.0f };//2,5
+	vertexData[2].texcoord = { 1.0f,1.0f };
+	vertexData[2].normal = { 0.0f,0.0f,-1.0f };
+
+
+	vertexData[3].position = { 1.0f,0.0f,0.0f,1.0f };//4
+	vertexData[3].texcoord = { 1.0f,0.0f };
+	vertexData[3].normal = { 0.0f,0.0f,-1.0f };
 	
 	//Index
 	indexResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(uint32_t) * 6);
@@ -83,27 +104,6 @@ void Sprite::Update() {
 	transform.translate = { position.x,position.y,0.0f };
 	transform.rotate = { 0.0f,0.0f,rotation };
 
-
-
-	vertexData[0].position = { 0.0f,1.0f,0.0f,1.0f };//0
-	vertexData[0].texcoord = { 0.0f,1.0f };
-	vertexData[0].normal = { 0.0f,0.0f,-1.0f };
-
-	vertexData[1].position = { 0.0f,0.0f,0.0f,1.0f };//1,3
-	vertexData[1].texcoord = { 0.0f,0.0f };
-	vertexData[1].normal = { 0.0f,0.0f,-1.0f };
-
-
-	vertexData[2].position = { 1.0f,1.0f,0.0f,1.0f };//2,5
-	vertexData[2].texcoord = { 1.0f,1.0f };
-	vertexData[2].normal = { 0.0f,0.0f,-1.0f };
-
-
-	vertexData[3].position = { 1.0f,0.0f,0.0f,1.0f };//4
-	vertexData[3].texcoord = { 1.0f,0.0f };
-	vertexData[3].normal = { 0.0f,0.0f,-1.0f };
-
-
 	transform.scale = { size.x,size.y,1.0f };
 
 
@@ -133,7 +133,7 @@ void Sprite::Draw() {
 
 	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
 
-	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex));
 
 	spriteCommon_->GetDirectXCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 

@@ -20,6 +20,7 @@ using namespace Microsoft::WRL;
 using namespace Logger;
 using namespace StringUtility;
 
+const uint32_t DirectXCommon::kMaxSRVCount = 512;
 
 void DirectXCommon::Initialize() {
 
@@ -249,7 +250,7 @@ void DirectXCommon::DescriptorHeap() {
 
 
 	rtvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, 2, false);
-	srvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 128, true);
+	srvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);
 	dsvDescriptorHeap = CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_DSV, 1, false);
 
 #pragma endregion
@@ -454,21 +455,6 @@ Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateBufferResource(size_
 	return vertexResource;
 }
 
-DirectX::ScratchImage DirectXCommon::LoadTexture(const std::string& filePath) {
-	//テクスチャファイル // byte関連
-	DirectX::ScratchImage image{};
-	std::wstring filePathW = ConvertString(filePath);
-	HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
-	assert(SUCCEEDED(hr));
-
-	//ミップマップ　//拡大縮小で使う
-	DirectX::ScratchImage mipImages{};
-	hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 0, mipImages);
-	assert(SUCCEEDED(hr));
-
-	//ミップマップ付きのデータを返す
-	return mipImages;
-}
 
 
 Microsoft::WRL::ComPtr<ID3D12Resource> DirectXCommon::CreateTextureResource(const DirectX::TexMetadata& metadata) {

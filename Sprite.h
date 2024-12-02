@@ -30,7 +30,7 @@ struct TransformationMatrix {
 
 class Sprite{
 public:
-	void Initialize(SpriteCommon* spriteCommon);
+	void Initialize(SpriteCommon* spriteCommon,std::string textureFilePath);
 	void Update();
 	void Draw();
 
@@ -89,4 +89,7 @@ private:
 	float rotation = 0.0f;
 
 	Vector2 size = { 100.0f,100.0f };
+
+
+	uint32_t textureIndex = 0;
 };

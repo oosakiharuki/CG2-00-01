@@ -56,7 +56,6 @@ public:
 
 	void UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
 
-	static DirectX::ScratchImage LoadTexture(const std::string& filePath);
 
 	void ProDraw();
 	void PostDraw();
@@ -66,6 +65,8 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE GetDsvHandle() { return dsvHandle; }
 	//HANDLE GetFenceEvent() { return fenceEvent; }
 
+	//最大SRV数
+	static const uint32_t kMaxSRVCount;
 
 private:
 
