@@ -3,6 +3,9 @@
 
 #pragma once
 
+class SpriteCommon;
+class Sprite;
+
 class WinApp
 {	
 public://静寂メンバ関数
@@ -25,4 +28,6 @@ public://メンバ関数
 private:
 	WNDCLASS wc{};
 	HWND hwnd = nullptr;
+	SpriteCommon* spriteCommon = nullptr;
+	Sprite* sprite = nullptr;
 };
