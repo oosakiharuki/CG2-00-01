@@ -400,9 +400,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	////SRVの生成
 	dxCommon->GetDevice()->CreateShaderResourceView(textureResource2.Get(), &srvDesc2, textureSrvHandleCPU2);
 
+	std::vector<Sprite*> sprites;
 
-	Sprite* sprite = new Sprite();
-	sprite->Initialize(spriteCommon);
+	for (uint32_t i = 0; i < 5; ++i) {
+		Sprite* sprite = new Sprite();
+		sprite->Initialize(spriteCommon);
+
+		Vector2 position[5] = {};
+		position[i].x += i * 200.0f;
+		sprite->SetPosition(position[i]);
+		
+		sprites.push_back(sprite);
+	}
+
+
+
+
+
 
 	//三角
 	//Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource = dxCommon->CreateBufferResource(sizeof(VertexData) * 6);
@@ -621,6 +635,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//描画させるもの
 	bool IsSphere = true;
 	bool IsModel = true;
+	bool IsSprite = true;
 
 
 
@@ -643,7 +658,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				OutputDebugStringA("Hit 1\n");
 			}
 
-			sprite->Update();
+
+			Vector2 position;
+			float rotation;
+			Vector4 color;
+			Vector2 size;
+
+			for (Sprite* sprite : sprites) {
+				sprite->Update();
+
+
+				position = sprite->GetPosition();
+				position.x += 0.1f;
+				position.y += 0.1f;
+				sprite->SetPosition(position);
+
+				rotation = sprite->GetRotate();
+				rotation += 0.01f;
+				sprite->SetRotate(rotation);
+
+				color = sprite->GetColor();
+				color.x += 0.01f;
+				if (color.x > 1.0f) {
+					color.x -= 1.0f;
+				}
+				sprite->SetColor(color);
+
+				size = sprite->GetSize();
+				size.x += 0.1f;
+				size.y += 0.1f;
+				sprite->SetSize(size);
+			}
+
 
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
@@ -706,67 +752,83 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-			if (ImGui::TreeNode("Sphere")) {
-				ImGui::Checkbox("IsSphere", &IsSphere);
+			//if (ImGui::TreeNode("Sphere")) {
+			//	ImGui::Checkbox("IsSphere", &IsSphere);
 
-				if (IsSphere) {
-					ImGui::InputFloat3("MaterialSphere", *inputMaterialSphere);
-					ImGui::SliderFloat3("SliderMaterialSphere", *inputMaterialSphere, 0.0f, 1.0f);
+			//	if (IsSphere) {
+			//		ImGui::InputFloat3("MaterialSphere", *inputMaterialSphere);
+			//		ImGui::SliderFloat3("SliderMaterialSphere", *inputMaterialSphere, 0.0f, 1.0f);
 
-					ImGui::InputFloat3("VertexSphere", *inputTransformSphere);
-					ImGui::SliderFloat3("SliderVertexSphere", *inputTransformSphere, -5.0f, 5.0f);
+			//		ImGui::InputFloat3("VertexSphere", *inputTransformSphere);
+			//		ImGui::SliderFloat3("SliderVertexSphere", *inputTransformSphere, -5.0f, 5.0f);
 
-					ImGui::InputFloat3("RotateSphere", *inputRotateSphere);
-					ImGui::SliderFloat3("SliderRotateSphere", *inputRotateSphere, -10.0f, 10.0f);
+			//		ImGui::InputFloat3("RotateSphere", *inputRotateSphere);
+			//		ImGui::SliderFloat3("SliderRotateSphere", *inputRotateSphere, -10.0f, 10.0f);
 
-					ImGui::InputFloat3("ScaleSphere", *inputScaleSphere);
-					ImGui::SliderFloat3("SliderScaleSphere", *inputScaleSphere, 0.5f, 5.0f);
+			//		ImGui::InputFloat3("ScaleSphere", *inputScaleSphere);
+			//		ImGui::SliderFloat3("SliderScaleSphere", *inputScaleSphere, 0.5f, 5.0f);
 
-					ImGui::Checkbox("SphereTexture", &textureChange);
+			//		ImGui::Checkbox("SphereTexture", &textureChange);
+			//	}
+			//	ImGui::TreePop();
+			//}
+
+			//if (ImGui::TreeNode("Model")) {
+			//	ImGui::Checkbox("IsModel", &IsModel);
+			//	//ImGui::Combo("combo", &modelChange, "plane\0aixe\0teapot\0\0");
+			//	//ImGui::RadioButton("plane", &modelChange, 0); ImGui::SameLine();
+			//	//ImGui::RadioButton("axis", &modelChange, 1); ImGui::SameLine();
+			//	//ImGui::RadioButton("teapot", &modelChange, 2);
+			//	if (IsModel) {
+			//		ImGui::InputFloat3("MaterialModel", *inputMaterialModel);
+			//		ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
+
+			//		ImGui::InputFloat3("VertexModel", *inputTransformModel);
+			//		ImGui::SliderFloat3("SliderVertexModel", *inputTransformModel, -5.0f, 5.0f);
+
+			//		ImGui::InputFloat3("RotateModel", *inputRotateModel);
+			//		ImGui::SliderFloat3("SliderRotateModel", *inputRotateModel, -10.0f, 10.0f);
+
+			//		ImGui::InputFloat3("ScaleModel", *inputScaleModel);
+			//		ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
+
+			//		ImGui::Checkbox("ModelTexture", &textureChange2);			
+			//	}
+			//	ImGui::TreePop();
+			//}
+
+
+			//if (ImGui::TreeNode("light")) {
+
+			//	ImGui::InputFloat4("Materiallight", *inputMateriallight);
+			//	ImGui::SliderFloat4("SliderMateriallight", *inputMateriallight, 0.0f, 1.0f);
+
+			//	ImGui::InputFloat3("Vertexlight", *inputDirectionLight);
+			//	ImGui::SliderFloat3("SliderVertexlight", *inputDirectionLight, -1.0f, 1.0f);
+
+
+			//	ImGui::InputFloat("intensity", intensity);
+
+			//	ImGui::TreePop();
+			//}
+
+			if (ImGui::TreeNode("Sprite")) {
+				ImGui::Checkbox("IsSprite", &IsSprite);
+
+				if (IsSprite) {
+					ImGui::InputFloat("SpriteX", &position.x);
+					ImGui::SliderFloat("SliderSpriteX", &position.x, 0.0f, 1000.0f);
+
+					ImGui::InputFloat("SpriteY", &position.y);
+					ImGui::SliderFloat("SliderSpriteY", &position.y, 0.0f, 600.0f);
+
+					ImGui::DragFloat2("UVTranlate", &position.x, 0.01f, -10.0f, 10.0f);
+					ImGui::DragFloat2("UVScale", &size.x, 0.01f, -10.0f, 10.0f);
+					ImGui::SliderAngle("UVRotate", &rotation);
 				}
 				ImGui::TreePop();
 			}
 
-			if (ImGui::TreeNode("Model")) {
-				ImGui::Checkbox("IsModel", &IsModel);
-				//ImGui::Combo("combo", &modelChange, "plane\0aixe\0teapot\0\0");
-				//ImGui::RadioButton("plane", &modelChange, 0); ImGui::SameLine();
-				//ImGui::RadioButton("axis", &modelChange, 1); ImGui::SameLine();
-				//ImGui::RadioButton("teapot", &modelChange, 2);
-				if (IsModel) {
-					ImGui::InputFloat3("MaterialModel", *inputMaterialModel);
-					ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
-
-					ImGui::InputFloat3("VertexModel", *inputTransformModel);
-					ImGui::SliderFloat3("SliderVertexModel", *inputTransformModel, -5.0f, 5.0f);
-
-					ImGui::InputFloat3("RotateModel", *inputRotateModel);
-					ImGui::SliderFloat3("SliderRotateModel", *inputRotateModel, -10.0f, 10.0f);
-
-					ImGui::InputFloat3("ScaleModel", *inputScaleModel);
-					ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
-
-					ImGui::Checkbox("ModelTexture", &textureChange2);			
-				}
-				ImGui::TreePop();
-			}
-
-
-			if (ImGui::TreeNode("light")) {
-
-				ImGui::InputFloat4("Materiallight", *inputMateriallight);
-				ImGui::SliderFloat4("SliderMateriallight", *inputMateriallight, 0.0f, 1.0f);
-
-				ImGui::InputFloat3("Vertexlight", *inputDirectionLight);
-				ImGui::SliderFloat3("SliderVertexlight", *inputDirectionLight, -1.0f, 1.0f);
-
-
-				ImGui::InputFloat("intensity", intensity);
-
-				ImGui::TreePop();
-			}
-
-			sprite->Imgui();
 			//ImGuiの内部コマンド
 			ImGui::Render();
 
@@ -820,8 +882,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//}
 
 			//UI
-			sprite->Draw();
-
+			for (Sprite* sprite : sprites) {
+				sprite->Draw();
+			}
 			dxCommon->PostDraw();
 		}
 	}
@@ -842,7 +905,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete dxCommon;
 
 	delete spriteCommon;
-	delete sprite;
-
+	for (Sprite* sprite : sprites) {
+		delete sprite;
+	}
 	return 0;
 }

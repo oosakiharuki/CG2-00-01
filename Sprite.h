@@ -34,7 +34,18 @@ public:
 	void Update();
 	void Draw();
 
-	void Imgui();
+
+	const Vector2& GetPosition()const { return position; }
+	void SetPosition(const Vector2& position) { this->position = position; }
+
+	float GetRotate() { return rotation; }
+	void SetRotate(float rotation) { this->rotation = rotation; }
+
+	const Vector4& GetColor()const { return materialData->color; }
+	void SetColor(const Vector4& color) { materialData->color = color; }
+
+	const Vector2& GetSize()const { return size; }
+	void SetSize(const Vector2& size) { this->size = size; }
 
 private:
 	SpriteCommon* spriteCommon_ = nullptr;
@@ -63,13 +74,19 @@ private:
 	D3D12_CPU_DESCRIPTOR_HANDLE textureSrvHandleCPU;
 	D3D12_GPU_DESCRIPTOR_HANDLE textureSrvHandleGPU;
 
-	Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
+	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 	
-	Transform uvTransformSprite{
+	Transform uvTransform{
 	{ 1.0f,1.0f,1.0f },
 	{ 0.0f,0.0f,0.0f },
 	{ 0.0f,0.0f,0.0f }
 	};
 
-	bool IsSprite = true;
+
+	//座標
+	Vector2 position = { 0.0f,0.0f };
+	
+	float rotation = 0.0f;
+
+	Vector2 size = { 100.0f,100.0f };
 };
