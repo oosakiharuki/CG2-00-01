@@ -38,6 +38,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 //#include "WinApp.h"
 #include "DirectXCommon.h"
 #include "D3DResorceLeakChecker.h"
+#include "SpriteCommon.h"
+#include "Sprite.h"
 
 using namespace Logger;
 using namespace StringUtility;
@@ -808,7 +810,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dxCommon->SetWinApp(winApp_);
 	dxCommon->Initialize();
 
+	SpriteCommon* spriteCommon = nullptr;
 
+	spriteCommon = new SpriteCommon;
+	spriteCommon->Initialize();
 
 
 
@@ -961,8 +966,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 #pragma endregion
 
-
-
+	Sprite* sprite = new Sprite();
+	sprite->Initialize();
 
 
 	////textureを読んで転送
@@ -1569,6 +1574,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	winApp_ = nullptr;
 
 	delete dxCommon;
+
+	delete spriteCommon;
+	delete sprite;
 
 	return 0;
 }

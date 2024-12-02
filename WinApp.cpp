@@ -3,8 +3,6 @@
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 #pragma comment(lib,"winmm.lib")
-#include "SpriteCommon.h"
-#include "Sprite.h"
 
 void WinApp::Initialize() {
 
@@ -47,12 +45,6 @@ void WinApp::Initialize() {
 		nullptr);
 
 	ShowWindow(hwnd, SW_SHOW);
-
-	spriteCommon = new SpriteCommon;
-	spriteCommon->Initialize();
-
-	sprite = new Sprite();
-	sprite->Initialize();
 }
 
 
@@ -98,8 +90,6 @@ void WinApp::Update() {
 }
 
 void WinApp::Finalize(){
-	delete spriteCommon;
-	delete sprite;
 	CloseWindow(hwnd);
 	CoUninitialize();
 }
