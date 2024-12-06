@@ -650,6 +650,16 @@ struct ParticleForGPU {
 	Vector4 color;
 };
 
+float deltaTime = 1.0f / 60.0f;
+
+float anglearVelocity = 3.14f;
+float angle = 0.0f;
+
+float r = 0.8f;
+float radius = 0.1f;
+
+
+
 
 Particle MakeNewParticle(std::mt19937& randomEngine,const Vector3& translate) {
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
@@ -657,17 +667,22 @@ Particle MakeNewParticle(std::mt19937& randomEngine,const Vector3& translate) {
 	Particle particle;
 	particle.transform.scale = { 1.0f,1.0f,1.0f };
 	particle.transform.rotate = { 0.0f,3.0f,0.0f };
-	particle.transform.translate = { distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
-	particle.velocity = { distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
+	particle.transform.translate = { 0.0f,std::cos(angle),std::sin(angle) };
+		
+	angle += anglearVelocity * deltaTime * 10;
+
+	particle.velocity = {};
+
+
+
 	particle.color = { distColor(randomEngine),distColor(randomEngine) ,distColor(randomEngine),1.0f };
 	std::uniform_real_distribution<float> distTime(1.0f, 3.0f);
 	particle.lifeTime = distTime(randomEngine);
 	particle.currentTime = 0;
 
-	Vector3 randomTranslate{ distribution(randomEngine),distribution(randomEngine) ,distribution(randomEngine) };
-	particle.transform.translate.x = translate.x + randomTranslate.x;
-	particle.transform.translate.y = translate.y + randomTranslate.y;
-	particle.transform.translate.z = translate.z + randomTranslate.z;
+	particle.transform.translate.x += translate.x;
+	particle.transform.translate.y += translate.y;
+	particle.transform.translate.z += translate.z;
 
 	return particle;
 }
@@ -1234,7 +1249,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	HWND hwnd = CreateWindow(
 		wc.lpszClassName,
-		L"CG2",
+		L"LE2C_05_オオサキ_ハルキ",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
@@ -1688,7 +1703,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_SRC_ALPHA;// srcClor * scrAlpha
 	blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD; // + 
-	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_INV_SRC_ALPHA;// DestColor * (1-SrcAlpha)
+	blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;// DestColor * (1-SrcAlpha)
 	//DestBlend = D3D12_BLEND_ONE; add
 
 	blendDesc.RenderTarget[0].SrcBlendAlpha = D3D12_BLEND_ONE;
@@ -2042,25 +2057,19 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 
 	Emitter emitter{};
-	emitter.count = 3;//一回に何個生まれるか
-	emitter.frequency = 0.5f;//発生時間
+	emitter.count = 1;//一回に何個生まれるか
+	emitter.frequency = 0.1f;//発生時間
 	emitter.frequencyTime = 0.0f;//時間初期化
 
 	bool isBorn = true;
 	
 	AccelerationField accelerationField;
-	accelerationField.acceleration = { 15.0f,0.0f,0.0f };
+	accelerationField.acceleration = { -15.0f,0.0f,0.0f };
 	accelerationField.area.Min = { -1.0f,-1.0f,-1.0f };
 	accelerationField.area.Max = { 1.0f,1.0f,1.0f };
 
-	//for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
-	//	transformModels[index] = MakeNewParticle(randomEngine);
-	//}
 
 	if (isBorn) { // 敵に当たった、攻撃したの判定を入れる
-		//particles.push_back(MakeNewParticle(randomEngine));
-		//particles.push_back(MakeNewParticle(randomEngine));
-		//particles.push_back(MakeNewParticle(randomEngine));
 		particles.splice(particles.end(), Emit(emitter, randomEngine));
 	}
 
@@ -2080,7 +2089,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	emitter.transform.translate = { 0.0f,0.0f,0.0f };
 	emitter.transform.rotate = { 0.0f,0.0f,0.0f };
 	emitter.transform.scale = { 1.0f,1.0f,1.0f };
-
+		
 
 	//float *inputMaterial[3] = { &materialData->x,&materialData->y,&materialData->z };
 	//float* inputTransform[3] = { &transform.translate.x,&transform.translate.y,&transform.translate.z };
@@ -2176,7 +2185,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//		
 			//DrawSphere(vertexDataSphere);
 		
-			
+
 			Matrix4x4 billbordMatrix = Multiply(backToFrontMatrix, cameraMatrix);
 
 			billbordMatrix.m[3][0] = 0.0f;
