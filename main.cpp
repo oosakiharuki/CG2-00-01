@@ -40,6 +40,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 #include <numbers>
 
+#include "Input.h"
+
 //std::string str0{ "STRING!!!" };
 //
 //std::string str1{ std::to_string(10) };
@@ -650,7 +652,7 @@ struct ParticleForGPU {
 	Vector4 color;
 };
 
-float deltaTime = 1.0f / 60.0f;
+const float deltaTimer = 1.0f / 60.0f;
 
 float anglearVelocity = 3.14f;
 float angle = 0.0f;
@@ -659,21 +661,26 @@ float r = 0.8f;
 float radius = 0.1f;
 
 
+bool isWind = false;
 
 
 Particle MakeNewParticle(std::mt19937& randomEngine,const Vector3& translate) {
 	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);
 	std::uniform_real_distribution<float> distColor(0.0f, 1.0f);
 	Particle particle;
-	particle.transform.scale = { 1.0f,1.0f,1.0f };
+	
 	particle.transform.rotate = { 0.0f,3.0f,0.0f };
-	particle.transform.translate = { 0.0f,std::cos(angle),std::sin(angle) };
-		
-	angle += anglearVelocity * deltaTime * 10;
+
+	angle += anglearVelocity * deltaTimer * 10;
+	if (!isWind) {
+		particle.transform.translate = { 0.0f,std::cos(angle) * 2,std::sin(angle) * 2 };
+		particle.transform.scale = { 1.0f,1.0f,1.0f };
+	}
+	else {
+		particle.transform.scale = { 2.0f,2.0f,2.0f };
+	}
 
 	particle.velocity = {};
-
-
 
 	particle.color = { distColor(randomEngine),distColor(randomEngine) ,distColor(randomEngine),1.0f };
 	std::uniform_real_distribution<float> distTime(1.0f, 3.0f);
@@ -1263,6 +1270,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ShowWindow(hwnd, SW_SHOW);
 
 #pragma endregion
+
+	Input* input_ = nullptr;
+	input_ = new Input();
+	input_->Initialize(wc.hInstance,hwnd);
 
 #ifdef _DEBUG
 	Microsoft::WRL::ComPtr <ID3D12Debug1> debugController = nullptr;
@@ -2061,10 +2072,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	emitter.frequency = 0.1f;//発生時間
 	emitter.frequencyTime = 0.0f;//時間初期化
 
-	bool isBorn = true;
+	bool isBorn = false;
 	
+	float ChargeTimer = 0.0f;
+	float BeamTimer = 3.0f;
+
+
 	AccelerationField accelerationField;
-	accelerationField.acceleration = { -15.0f,0.0f,0.0f };
+	accelerationField.acceleration = { -30.0f,0.0f,0.0f };
 	accelerationField.area.Min = { -1.0f,-1.0f,-1.0f };
 	accelerationField.area.Max = { 1.0f,1.0f,1.0f };
 
@@ -2073,8 +2088,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		particles.splice(particles.end(), Emit(emitter, randomEngine));
 	}
 
-	const float deltaTimer = 1.0f / 60.0f;
-
+	
 	//Transform transformModel{ {1.0f,1.0f,1.0f},{0.5f,3.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
 	//Transform transformL{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
@@ -2086,7 +2100,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		{ 0.0f,0.0f,0.0f }
 	};
 
-	emitter.transform.translate = { 0.0f,0.0f,0.0f };
+	emitter.transform.translate = { 8.0f,0.0f,0.0f };
 	emitter.transform.rotate = { 0.0f,0.0f,0.0f };
 	emitter.transform.scale = { 1.0f,1.0f,1.0f };
 		
@@ -2109,8 +2123,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//float* inputScaleModel[3] = { &transformModels[0].scale.x,&transformModels[0].scale.y,&transformModels[0].scale.z };
 	bool textureChange2 = false;
 	bool isMove = true;
-	bool cameraChange = false;
-	bool isWind = false;
+	bool cameraChange = true;
 
 
 	float* inputMateriallight[3] = { &directionalLightSphereData->color.x,&directionalLightSphereData->color.y,&directionalLightSphereData->color.z };
@@ -2157,6 +2170,33 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		else {
 			//ゲームの処理
+
+			input_->Update();
+
+			//ビームが出す処理
+			if (input_->PushKey(DIK_SPACE)) {
+				isBorn = true;
+				ChargeTimer += deltaTimer;
+			}
+			else if (ChargeTimer < 2.0f) {
+				ChargeTimer = 0.0f;
+				isBorn = false;
+			}
+			else if (input_->OutKey(DIK_SPACE) && ChargeTimer > 2.0f) {
+				isWind = true;
+			}
+
+
+			if (isWind) {
+				BeamTimer -= deltaTimer;
+				if (BeamTimer < 0.0f) {
+					isBorn = false;
+					isWind = false;
+					ChargeTimer = 0.0f;
+					BeamTimer = 3.0f;
+				}
+			}
+
 
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
