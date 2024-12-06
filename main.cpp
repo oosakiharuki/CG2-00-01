@@ -2379,7 +2379,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				}
 				ImGui::TreePop();
 			}
+			
 
+			ImGui::Text("SPACEキーを長押しでチャージ");
+			ImGui::Text("離すとビームが出てくる");
 
 			//if (ImGui::TreeNode("light")) {
 
