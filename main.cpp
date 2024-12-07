@@ -2147,6 +2147,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
 
+	ImGuiIO& io = ImGui::GetIO();
+
+	io.Fonts->AddFontFromFileTTF("フォントのパス", 10.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+
+	static ImWchar const glyph_ranges[] = { 0x0020, 0xfffd,0, };
+	ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\meiryo.ttc", 18.0f, NULL, glyph_ranges);
+
 
 	//初期化で0でFenceを作る
 	Microsoft::WRL::ComPtr < ID3D12Fence> fence = nullptr;
@@ -2157,7 +2164,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	HANDLE fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	assert(fenceEvent != nullptr);
 
-
+	
 
 
 
@@ -2379,10 +2386,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				}
 				ImGui::TreePop();
 			}
-			
+
 
 			ImGui::Text("SPACEキーを長押しでチャージ");
-			ImGui::Text("離すとビームが出てくる");
+			ImGui::Text("二秒感チャージして離すとビームが出ます");
 
 			//if (ImGui::TreeNode("light")) {
 
