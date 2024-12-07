@@ -677,7 +677,7 @@ Particle MakeNewParticle(std::mt19937& randomEngine,const Vector3& translate) {
 		particle.transform.scale = { 1.0f,1.0f,1.0f };
 	}
 	else {
-		particle.transform.scale = { 2.0f,2.0f,2.0f };
+		particle.transform.scale = { 4.0f,4.0f,4.0f };
 	}
 
 	particle.velocity = {};
