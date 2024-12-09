@@ -365,7 +365,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	
 	Object3dCommon* object3dCommon = nullptr;
 	object3dCommon = new Object3dCommon();
-	object3dCommon->Initialize();
+	object3dCommon->Initialize(dxCommon);
 
 	std::vector<Sprite*> sprites;
 
@@ -818,6 +818,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			ImGui::Render();
 
 			dxCommon->ProDraw();
+
+			object3dCommon->Command();
 
 			spriteCommon->Command();
 			
