@@ -40,6 +40,8 @@ using namespace MyMath;
 #include "SpriteCommon.h"
 #include "Sprite.h"
 #include "TextureManager.h"
+#include "Object3d.h"
+#include "Object3dCommon.h"
 
 using namespace Logger;
 using namespace StringUtility;
@@ -358,9 +360,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	TextureManager::GetInstance()->Initialize(dxCommon);
 
 	SpriteCommon* spriteCommon = nullptr;
-
 	spriteCommon = new SpriteCommon;
 	spriteCommon->Initialize(dxCommon);
+	
+	Object3dCommon* object3dCommon = nullptr;
+	object3dCommon = new Object3dCommon();
+	object3dCommon->Initialize();
 
 	std::vector<Sprite*> sprites;
 
@@ -380,8 +385,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 
-
-
+	Object3d* object3d = new Object3d();
+	object3d->Initialize();
 
 
 	//三角
@@ -890,5 +895,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	for (Sprite* sprite : sprites) {
 		delete sprite;
 	}
+
+	delete object3dCommon;
+	delete object3d;
+
+
 	return 0;
 }
