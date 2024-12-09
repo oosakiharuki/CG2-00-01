@@ -357,32 +357,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	TextureManager::GetInstance()->Initialize(dxCommon);
 
-
-
 	SpriteCommon* spriteCommon = nullptr;
 
 	spriteCommon = new SpriteCommon;
 	spriteCommon->Initialize(dxCommon);
 
-
-	TextureManager::GetInstance()->LoadTexture("resource/uvChecker.png");
-	TextureManager::GetInstance()->LoadTexture("resource/monsterBall.png");
-
-
-
-	//////textureを読んで転送
-	//uint32_t texture1  = TextureManager::GetInstance()->GetTextureIndexByFilePath("resource/uvChecker.png");
-
-	////textureを読んで転送
-	//uint32_t texture2 = TextureManager::GetInstance()->GetTextureIndexByFilePath("resource/monsterBall.png");//モンスターボール
-
-
 	std::vector<Sprite*> sprites;
 
 	for (uint32_t i = 0; i < 5; ++i) {
 		Sprite* sprite = new Sprite();
-		sprite->Initialize(spriteCommon, "resource/uvChecker.png");
-
+		if (i == 1 || i == 3) {
+			sprite->Initialize(spriteCommon, "resource/monsterBall.png");
+		}
+		else {
+			sprite->Initialize(spriteCommon, "resource/uvChecker.png");
+		}
 		Vector2 position[5] = {};
 		position[i].x += i * 200.0f;
 		sprite->SetPosition(position[i]);
@@ -879,9 +868,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete winApp_;	
 	winApp_ = nullptr;
 
-	delete dxCommon;
-
 	TextureManager::GetInstance()->Finalize();
+
+	delete dxCommon;
 
 	delete spriteCommon;
 	for (Sprite* sprite : sprites) {

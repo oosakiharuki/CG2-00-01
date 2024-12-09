@@ -21,8 +21,6 @@ void TextureManager::Initialize(DirectXCommon* dxCommon) {
 
 
 void TextureManager::Finalize() {
-	delete dxCommon_;
-
 	delete instance;
 	instance = nullptr;
 }
@@ -51,19 +49,20 @@ void TextureManager::LoadTexture(const std::string& filePath) {
 	DirectX::ScratchImage mipImages{};
 	hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 0, mipImages);
 	assert(SUCCEEDED(hr));
-
-
+	
+	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
+	
 	textureDatas.resize(textureDatas.size() + 1);
 
 	//最後尾を取得
 	TextureData& textureData = textureDatas.back();
 
-	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 
 
 	textureData.filePath = filePath;
 	textureData.metadata = metadata;
 	textureData.resoource = dxCommon_->CreateTextureResource(textureData.metadata);
+	dxCommon_->UploadTextureData(textureData.resoource, mipImages);
 
 
 	//SRVを作成するDescriptorHeap場所決め
@@ -102,8 +101,8 @@ uint32_t TextureManager::GetTextureIndexByFilePath(const std::string filePath) {
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE TextureManager::GetSrvHandleGPU(uint32_t textureIndex) {
-	assert(textureIndex);
+	assert(textureIndex < DirectXCommon::kMaxSRVCount);
 
-	TextureData& textureData = textureDatas.back();
+	TextureData& textureData = textureDatas[textureIndex];
 	return textureData.srvHandleGPU;
 }
