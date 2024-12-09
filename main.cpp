@@ -364,14 +364,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	std::vector<Sprite*> sprites;
 
-	for (uint32_t i = 0; i < 5; ++i) {
+	for (uint32_t i = 0; i < 1; ++i) {
 		Sprite* sprite = new Sprite();
-		if (i == 1 || i == 3) {
-			sprite->Initialize(spriteCommon, "resource/monsterBall.png");
-		}
-		else {
+		//if (i == 1 || i == 3) {
+		//	sprite->Initialize(spriteCommon, "resource/monsterBall.png");
+		//}
+		//else {
 			sprite->Initialize(spriteCommon, "resource/uvChecker.png");
-		}
+		//}
 		Vector2 position[5] = {};
 		position[i].x += i * 200.0f;
 		sprite->SetPosition(position[i]);
@@ -634,25 +634,25 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				sprite->Update();
 
 
-				position = sprite->GetPosition();
-				position.x += 0.1f;
-				position.y += 0.1f;
-				sprite->SetPosition(position);
+				//position = sprite->GetPosition();
+				//position.x += 0.1f;
+				//position.y += 0.1f;
+				//sprite->SetPosition(position);
 
-				rotation = sprite->GetRotate();
-				rotation += 0.01f;
-				sprite->SetRotate(rotation);
+				//rotation = sprite->GetRotate();
+				//rotation += 0.01f;
+				//sprite->SetRotate(rotation);
 
 				color = sprite->GetColor();
-				color.x += 0.01f;
-				if (color.x > 1.0f) {
-					color.x -= 1.0f;
-				}
+				//color.x += 0.01f;
+				//if (color.x > 1.0f) {
+				//	color.x -= 1.0f;
+				//}
 				sprite->SetColor(color);
 
 				size = sprite->GetSize();
-				size.x += 0.1f;
-				size.y += 0.1f;
+				//size.x -= 1.1f;
+				//size.y -= 1.1f;
 				sprite->SetSize(size);
 			}
 
@@ -777,24 +777,38 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//	ImGui::TreePop();
 			//}
+			for (Sprite* sprite : sprites) {
+				if (ImGui::TreeNode("Sprite")) {
+					ImGui::Checkbox("IsSprite", &IsSprite);
 
-			if (ImGui::TreeNode("Sprite")) {
-				ImGui::Checkbox("IsSprite", &IsSprite);
+					if (IsSprite) {
 
-				if (IsSprite) {
-					ImGui::InputFloat("SpriteX", &position.x);
-					ImGui::SliderFloat("SliderSpriteX", &position.x, 0.0f, 1000.0f);
+						position = sprite->GetPosition();
+						ImGui::InputFloat("SpriteX", &position.x);
+						ImGui::SliderFloat("SliderSpriteX", &position.x, 0.0f, 1000.0f);
+						ImGui::InputFloat("SpriteY", &position.y);
+						ImGui::SliderFloat("SliderSpriteY", &position.y, 0.0f, 600.0f);
+						sprite->SetPosition(position);
 
-					ImGui::InputFloat("SpriteY", &position.y);
-					ImGui::SliderFloat("SliderSpriteY", &position.y, 0.0f, 600.0f);
+						ImGui::DragFloat2("UVTranlate", &position.x, 0.01f, -10.0f, 10.0f);				
+												
+						size = sprite->GetSize();
+						ImGui::DragFloat2("UVScale", &size.x, 0.1f);
+						sprite->SetSize(size);
 
-					ImGui::DragFloat2("UVTranlate", &position.x, 0.01f, -10.0f, 10.0f);
-					ImGui::DragFloat2("UVScale", &size.x, 0.01f, -10.0f, 10.0f);
-					ImGui::SliderAngle("UVRotate", &rotation);
+						rotation = sprite->GetRotate();
+						ImGui::SliderAngle("UVRotate", &rotation);	
+						sprite->SetRotate(rotation);	
+		
+
+						color = sprite->GetColor();
+						ImGui::SliderFloat4("color", &color.x, 0.0f, 1.0f);
+						sprite->SetColor(color);
+
+					}
+					ImGui::TreePop();
 				}
-				ImGui::TreePop();
 			}
-
 			//ImGuiの内部コマンド
 			ImGui::Render();
 

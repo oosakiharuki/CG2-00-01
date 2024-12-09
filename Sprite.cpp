@@ -26,22 +26,46 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath)
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 
 	
-	vertexData[0].position = { 0.0f,1.0f,0.0f,1.0f };//0
-	vertexData[0].texcoord = { 0.0f,1.0f };
+	float left = 0.0f - anchorPoint.x;
+	float right = 1.0f - anchorPoint.x;
+	float top = 0.0f - anchorPoint.y;
+	float bottom = 1.0f - anchorPoint.y;
+
+	//左右反転
+	if (isFlipX_) {
+		left = -left;
+		right = -right;
+	}
+
+	//上下反転
+	if (isFlipY_) {
+		top = -top;
+		bottom = -bottom;
+	}
+
+	AdjustTextureSize();
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureIndex);
+	float tex_left = textureLeftTop.x / metadata.width;
+	float tex_right = textureLeftTop.x + textureSize.x / metadata.width;
+	float tex_top = textureLeftTop.y / metadata.height;
+	float tex_bottom = textureLeftTop.y + textureSize.y / metadata.height;
+
+	vertexData[0].position = { left,bottom,0.0f,1.0f };//0
+	vertexData[0].texcoord = { tex_left,tex_bottom };
 	vertexData[0].normal = { 0.0f,0.0f,-1.0f };
 
-	vertexData[1].position = { 0.0f,0.0f,0.0f,1.0f };//1,3
-	vertexData[1].texcoord = { 0.0f,0.0f };
+	vertexData[1].position = { left,top,0.0f,1.0f };//1,3
+	vertexData[1].texcoord = { tex_left,tex_top };
 	vertexData[1].normal = { 0.0f,0.0f,-1.0f };
 
 
-	vertexData[2].position = { 1.0f,1.0f,0.0f,1.0f };//2,5
-	vertexData[2].texcoord = { 1.0f,1.0f };
+	vertexData[2].position = { right,bottom,0.0f,1.0f };//2,5
+	vertexData[2].texcoord = { tex_right,tex_bottom };
 	vertexData[2].normal = { 0.0f,0.0f,-1.0f };
 
 
-	vertexData[3].position = { 1.0f,0.0f,0.0f,1.0f };//4
-	vertexData[3].texcoord = { 1.0f,0.0f };
+	vertexData[3].position = { right,top,0.0f,1.0f };//4
+	vertexData[3].texcoord = { tex_right,tex_top };
 	vertexData[3].normal = { 0.0f,0.0f,-1.0f };
 	
 	//Index
@@ -86,6 +110,15 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath)
 	transformationMatrixData->WVP = MakeIdentity4x4();
 	transformationMatrixData->World = MakeIdentity4x4();
 
+}
+
+void Sprite::AdjustTextureSize() {
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureIndex);
+
+	textureSize.x = static_cast<float>(metadata.width);
+	textureSize.y = static_cast<float>(metadata.height);
+
+	size = textureSize;
 }
 
 

@@ -47,6 +47,23 @@ public:
 	const Vector2& GetSize()const { return size; }
 	void SetSize(const Vector2& size) { this->size = size; }
 
+
+	const Vector2& GetAnchorPoint()const { return anchorPoint; }
+	void SetAnchorPoint(const Vector2& anchorPoint) { this->anchorPoint = anchorPoint; }
+
+	const bool& GetFlipX() const { return isFlipX_; }
+	const bool& GetFlipY() const { return isFlipY_; }
+	
+	void SetFlipX(const bool& isFlipX) { this->isFlipX_ = isFlipX; }
+	void SetFlipY(const bool& isFlipY) { this->isFlipY_ = isFlipY; }
+
+
+	const Vector2& GetTextureLT() const { return textureLeftTop; }
+	const Vector2& GetTextureSize() const { return textureSize; }
+
+	void SetTextureLT(const Vector2& textureLeftTop) { this->textureLeftTop = textureLeftTop; }
+	void SetTextureSize(const Vector2& textureSize) { this->textureSize = textureSize; }
+
 private:
 	SpriteCommon* spriteCommon_ = nullptr;
 
@@ -92,4 +109,19 @@ private:
 
 
 	uint32_t textureIndex = 0;
+
+	//アンカーポイント ココが中心点になる
+	Vector2 anchorPoint = { 0.0f,0.0f };
+	
+	//フリップ テクスチャ反転
+	bool isFlipX_ = false;
+	bool isFlipY_ = false;
+
+	//左上から情報を得る
+	Vector2 textureLeftTop = { 0.0f,0.0f };
+	//切り取りサイズ
+	Vector2 textureSize = { 64.0f,64.0f };
+
+	//本来のテクスチャの大きさにする
+	void AdjustTextureSize();
 };

@@ -112,7 +112,7 @@ void SpriteCommon::GraphicsPipeline() {
 	//RasterizerState
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;//表裏表示
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;//表裏表示
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
 	//shaderのコンパイラ
