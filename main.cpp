@@ -612,10 +612,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			dxCommon->ProDraw();
 
-			object3dCommon->Command();
-
-			spriteCommon->Command();
-			
 			//三角
 			//dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
 			//dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
@@ -646,8 +642,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//モデル
 			
+			object3dCommon->Command();
+
 			object3d->Draw();
+			
 			//UI
+			spriteCommon->Command();
+
 			for (Sprite* sprite : sprites) {
 				sprite->Draw();
 			}
