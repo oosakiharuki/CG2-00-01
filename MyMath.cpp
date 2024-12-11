@@ -91,6 +91,20 @@ namespace MyMath {
 	}
 
 
+	Vector3 Normalize(const Vector3& v) {
+		Vector3 result;
+		result.x = v.x / (float)sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+		result.y = v.y / (float)sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+		result.z = v.z / (float)sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
+		return result;
+	}
+
+
+
+
+
+
+
 #pragma region Affine
 
 	Matrix4x4 Multiply(Matrix4x4 m1, Matrix4x4 m2) {

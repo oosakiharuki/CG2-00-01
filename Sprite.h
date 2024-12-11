@@ -10,24 +10,6 @@
 
 class SpriteCommon;
 
-struct VertexData {
-	Vector4 position;
-	Vector2 texcoord;
-	Vector3 normal;
-};
-
-struct Material {
-	Vector4 color;
-	int32_t enableLighting;
-	float padding[3];//枠確保用06-01 9
-	Matrix4x4 uvTransform;
-};
-
-struct TransformationMatrix {
-	Matrix4x4 WVP;
-	Matrix4x4 World;
-};
-
 class Sprite{
 public:
 	void Initialize(SpriteCommon* spriteCommon,std::string textureFilePath);
