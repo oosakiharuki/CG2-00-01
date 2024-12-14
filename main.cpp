@@ -628,6 +628,7 @@ struct Material {
 	int32_t enableLighting;
 	float padding[3];//枠確保用06-01 9
 	Matrix4x4 uvTransform;
+	float shininess;
 };
 
 struct TransformationMatrix {
@@ -996,6 +997,9 @@ ModelData LoadObjFile(const std::string& directoryPath,const std::string& filena
 	return modelData;
 }
 
+struct CameraForGPU {
+	Vector3 worldPosition;
+};
 
 
 struct D3DResourceLeakChecker {
@@ -1578,11 +1582,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//パーテイクル
-	D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1] = {};
-	descriptorRangeForInstancing[0].BaseShaderRegister = 0;
-	descriptorRangeForInstancing[0].NumDescriptors = 1;
-	descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
-	descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+	//D3D12_DESCRIPTOR_RANGE descriptorRangeForInstancing[1] = {};
+	//descriptorRangeForInstancing[0].BaseShaderRegister = 0;
+	//descriptorRangeForInstancing[0].NumDescriptors = 1;
+	//descriptorRangeForInstancing[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+	//descriptorRangeForInstancing[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	//RootParameter作成__
 	//D3D12_ROOT_PARAMETER rootParametersP[2] = {};
@@ -1621,11 +1625,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootParameters[3].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//plxelshader
 	rootParameters[3].Descriptor.ShaderRegister = 1;//レジスタ番号
 	
+	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBV
+	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//plxelshader
+	rootParameters[4].Descriptor.ShaderRegister = 2;//レジスタ番号
+
 	//パーテイクル
-	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
-	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
-	rootParameters[4].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing;
-	rootParameters[4].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing);
+	//rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
+	//rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_VERTEX;
+	//rootParameters[4].DescriptorTable.pDescriptorRanges = descriptorRangeForInstancing;
+	//rootParameters[4].DescriptorTable.NumDescriptorRanges = _countof(descriptorRangeForInstancing);
 
 	//2でまとめる
 
@@ -1659,7 +1667,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//InputLayout
-	D3D12_INPUT_ELEMENT_DESC inputElementDescs[3] = {};
+	D3D12_INPUT_ELEMENT_DESC inputElementDescs[4] = {};
 	inputElementDescs[0].SemanticName = "POSITION";
 	inputElementDescs[0].SemanticIndex = 0;
 	inputElementDescs[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -1670,10 +1678,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	inputElementDescs[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 	inputElementDescs[1].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
-	inputElementDescs[2].SemanticName = "COLOR";
+	inputElementDescs[2].SemanticName = "NORMAL";
 	inputElementDescs[2].SemanticIndex = 0;
-	inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	inputElementDescs[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 	inputElementDescs[2].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
+
+
+	inputElementDescs[3].SemanticName = "WORLDPOSITION";
+	inputElementDescs[3].SemanticIndex = 0;
+	inputElementDescs[3].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	inputElementDescs[3].AlignedByteOffset = D3D12_APPEND_ALIGNED_ELEMENT;
 
 
 	D3D12_INPUT_LAYOUT_DESC inputLayoutDesc{};
@@ -1699,14 +1713,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//RasterizerState
 	D3D12_RASTERIZER_DESC rasterizerDesc{};
 
-	rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;//表裏表示
+	rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;//表裏表示
 	rasterizerDesc.FillMode = D3D12_FILL_MODE_SOLID;
 
 	//shaderのコンパイラ
-	IDxcBlob* vertexShaderBlob = CompileShader(L"resource/shaders/Particle.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
+	IDxcBlob* vertexShaderBlob = CompileShader(L"resource/shaders/Object3d.VS.hlsl", L"vs_6_0", dxcUtils, dxcCompiler, includeHandler);
 	assert(vertexShaderBlob != nullptr);
 
-	IDxcBlob* pixelShaderBlob = CompileShader(L"resource/shaders/Particle.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
+	IDxcBlob* pixelShaderBlob = CompileShader(L"resource/shaders/Object3d.PS.hlsl", L"ps_6_0", dxcUtils, dxcCompiler, includeHandler);
 	assert(pixelShaderBlob != nullptr);
 
 
@@ -1717,7 +1731,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	graphicsPipelineStateDesc.PS = { pixelShaderBlob->GetBufferPointer(),pixelShaderBlob->GetBufferSize() };
 	graphicsPipelineStateDesc.BlendState = blendDesc;
 	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc;
-
+	
 	graphicsPipelineStateDesc.NumRenderTargets = 1;
 	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
 
@@ -1797,7 +1811,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-
 	uint32_t SphereVertexNum = 16 * 16 * 6;
 
 	//Sphere
@@ -1826,7 +1839,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
+	//Phong Reflection Model
+	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource =
+		CreateBufferResource(device, sizeof(CameraForGPU));
 
+	CameraForGPU*  cameraData = nullptr;
+	cameraResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraData));
 
 	//Sprite
 	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceSprite = CreateBufferResource(device, sizeof(VertexData) * 4);
@@ -1944,17 +1962,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-	////球体用マテリアル
-	////マテリアル用のリソース
-	//Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceSphere = CreateBufferResource(device, sizeof(Material));
-	////マテリアルにデータを書き込む
-	//Material* materialDataSphere = nullptr;
-	////書き込むためのアドレス
-	//materialResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSphere));
-	////色の設定
-	//materialDataSphere->color =  Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	//materialDataSphere->enableLighting = true;
-	//materialDataSphere->uvTransform = MakeIdentity4x4();
+	//球体用マテリアル
+	//マテリアル用のリソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceSphere = CreateBufferResource(device, sizeof(Material));
+	//マテリアルにデータを書き込む
+	Material* materialDataSphere = nullptr;
+	//書き込むためのアドレス
+	materialResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSphere));
+	//色の設定
+	materialDataSphere->color =  Vector4(1.0f, 1.0f, 1.0f, 1.0f);
+	materialDataSphere->enableLighting = true;
+	materialDataSphere->uvTransform = MakeIdentity4x4();
+	materialDataSphere->shininess = 70.0f;
 
 
 
@@ -1980,11 +1999,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	directionalLightSphereResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightSphereData));
 	//色の設定
 	directionalLightSphereData->color = { 1.0f,1.0f,1.0f,1.0f };
-	directionalLightSphereData->direction = { 0.0f,0.0f,1.0f };
+	directionalLightSphereData->direction = { 0.0f,-1.0f,1.0f };
 	directionalLightSphereData->intensity = 1.0f;
 
 
-
+	 
 
 
 	////spriteのリソース
@@ -2019,19 +2038,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				
 
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
-	//Transform cameraTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f}, {0.0f,0.0f,-10.5f} };
-
-	Transform cameraTransform{
-		{1.0f,1.0f,1.0f},
-		{std::numbers::pi_v<float> / 3.0f,std::numbers::pi_v<float>,0.0f},
-		{0.0f,23.0f,10.0f}
-	};
+	Transform cameraTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f}, {0.0f,0.0f,-10.5f} };
 	
+	cameraData->worldPosition = { cameraTransform.translate };
+
 	Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
 
 	//Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
-	//Transform transformSphere{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
+	Transform transformSphere{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
 	//Particle transformModels[kNumMaxInstance];
 	std::list<Particle> particles;
@@ -2087,12 +2102,15 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//float* inputRotate[3] = { &transform.rotate.x,&transform.rotate.y,&transform.rotate.z };
 	//float* inputScale[3] = { &transform.scale.x,&transform.scale.y,&transform.scale.z };
 
+	float* inputTransformCamera[3] = { &cameraTransform.translate.x,&cameraTransform.translate.y,&cameraTransform.translate.z };
+	float* inputRotateCamera[3] = { &cameraTransform.rotate.x,&cameraTransform.rotate.y,&cameraTransform.rotate.z };
 
-	//float* inputMaterialSphere[3] = { &materialDataSphere->color.x,&materialDataSphere->color.y,&materialDataSphere->color.z };
-	//float* inputTransformSphere[3] = { &transformSphere.translate.x,&transformSphere.translate.y,&transformSphere.translate.z };
-	//float* inputRotateSphere[3] = { &transformSphere.rotate.x,&transformSphere.rotate.y,&transformSphere.rotate.z };
-	//float* inputScaleSphere[3] = { &transformSphere.scale.x,&transformSphere.scale.y,&transformSphere.scale.z };
-	//bool textureChange = false;
+
+	float* inputMaterialSphere[3] = { &materialDataSphere->color.x,&materialDataSphere->color.y,&materialDataSphere->color.z };
+	float* inputTransformSphere[3] = { &transformSphere.translate.x,&transformSphere.translate.y,&transformSphere.translate.z };
+	float* inputRotateSphere[3] = { &transformSphere.rotate.x,&transformSphere.rotate.y,&transformSphere.rotate.z };
+	float* inputScaleSphere[3] = { &transformSphere.scale.x,&transformSphere.scale.y,&transformSphere.scale.z };
+	bool textureChange = false;
 
 	float* inputMaterialModel[3] = { &materialDataModel->color.x,&materialDataModel->color.y,&materialDataModel->color.z };
 	//float* inputTransformModel[3] = { &transformModels[0].translate.x,&transformModels[0].translate.y,&transformModels[0].translate.z};
@@ -2168,76 +2186,78 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//球体
 
-			//Matrix4x4 worldMatrixSphere = MakeAffineMatrix(transformSphere.scale, transformSphere.rotate, transformSphere.translate);
-			//Matrix4x4 WorldViewProjectionMatrixSphere = Multiply(worldMatrixSphere, Multiply(viewMatrix, projectionMatrix));
+			Matrix4x4 worldMatrixSphere = MakeAffineMatrix(transformSphere.scale, transformSphere.rotate, transformSphere.translate);
+			Matrix4x4 WorldViewProjectionMatrixSphere = Multiply(worldMatrixSphere, Multiply(viewMatrix, projectionMatrix));
 
-			//wvpDataSphere->World = worldMatrixSphere;
-			//wvpDataSphere->WVP = WorldViewProjectionMatrixSphere;
-			//		
-			//DrawSphere(vertexDataSphere);
+			wvpDataSphere->World = worldMatrixSphere;
+			wvpDataSphere->WVP = WorldViewProjectionMatrixSphere;
+					
+			DrawSphere(vertexDataSphere);
 		
+
+
 			
-			Matrix4x4 billbordMatrix = Multiply(backToFrontMatrix, cameraMatrix);
+			//Matrix4x4 billbordMatrix = Multiply(backToFrontMatrix, cameraMatrix);
 
-			billbordMatrix.m[3][0] = 0.0f;
-			billbordMatrix.m[3][1] = 0.0f;
-			billbordMatrix.m[3][2] = 0.0f;
+			//billbordMatrix.m[3][0] = 0.0f;
+			//billbordMatrix.m[3][1] = 0.0f;
+			//billbordMatrix.m[3][2] = 0.0f;
 
-			//モデル
-			uint32_t numInstance = 0;
-			for (std::list<Particle>::iterator particleIterator = particles.begin(); particleIterator != particles.end(); ) {
+			////モデル
+			//uint32_t numInstance = 0;
+			//for (std::list<Particle>::iterator particleIterator = particles.begin(); particleIterator != particles.end(); ) {
 
-				if (numInstance < kNumMaxInstance) {
-					if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
-						particleIterator = particles.erase(particleIterator); //最初のパーティクルをlistから消す+次のイテレータに
-						continue;//1～3秒立った時消えるようにする
-					}
-
-
-					Matrix4x4 worldMatrixModel = MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate);
-
-					//パーティクル				
-					if (cameraChange) {
-						worldMatrixModel = Multiply(Multiply(MakeScaleMatrix((*particleIterator).transform.scale), billbordMatrix), MakeTranslateMatrix((*particleIterator).transform.translate));
-					}
-					Matrix4x4 WorldViewProjectionMatrixModel = Multiply(worldMatrixModel, Multiply(viewMatrix, projectionMatrix));
-					
-					if (IsCollision(accelerationField.area, (*particleIterator).transform.translate) && isWind) {
-						(*particleIterator).velocity.x += accelerationField.acceleration.x * deltaTimer;
-						(*particleIterator).velocity.y += accelerationField.acceleration.y * deltaTimer;
-						(*particleIterator).velocity.z += accelerationField.acceleration.z * deltaTimer;
-					}
-
-					if (isMove) {
-						(*particleIterator).transform.translate.x += (*particleIterator).velocity.x * deltaTimer;
-						(*particleIterator).transform.translate.y += (*particleIterator).velocity.y * deltaTimer;
-						(*particleIterator).transform.translate.z += (*particleIterator).velocity.z * deltaTimer;
-					}
-
-					(*particleIterator).currentTime += deltaTimer;
-					instancingData[numInstance].WVP = WorldViewProjectionMatrixModel;
-					instancingData[numInstance].World = worldMatrixModel;
-					instancingData[numInstance].color = (*particleIterator).color;
-
-					float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
-					instancingData[numInstance].color.s = alpha;
-			
-					
-					++numInstance;
-				}
-				++particleIterator;//繰り返し　forの最後のやつ
-			}
-
-			if (isBorn) {
-				emitter.frequencyTime += deltaTimer;
-				if (emitter.frequency <= emitter.frequencyTime) {
-					particles.splice(particles.end(), Emit(emitter, randomEngine));
-					emitter.frequencyTime -= emitter.frequency;
-				}
-			}
+			//	if (numInstance < kNumMaxInstance) {
+			//		if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
+			//			particleIterator = particles.erase(particleIterator); //最初のパーティクルをlistから消す+次のイテレータに
+			//			continue;//1～3秒立った時消えるようにする
+			//		}
 
 
-			//directionalLightSphereData->direction = Normalize(directionalLightSphereData->direction);
+			//		Matrix4x4 worldMatrixModel = MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate);
+
+			//		//パーティクル				
+			//		if (cameraChange) {
+			//			worldMatrixModel = Multiply(Multiply(MakeScaleMatrix((*particleIterator).transform.scale), billbordMatrix), MakeTranslateMatrix((*particleIterator).transform.translate));
+			//		}
+			//		Matrix4x4 WorldViewProjectionMatrixModel = Multiply(worldMatrixModel, Multiply(viewMatrix, projectionMatrix));
+			//		
+			//		if (IsCollision(accelerationField.area, (*particleIterator).transform.translate) && isWind) {
+			//			(*particleIterator).velocity.x += accelerationField.acceleration.x * deltaTimer;
+			//			(*particleIterator).velocity.y += accelerationField.acceleration.y * deltaTimer;
+			//			(*particleIterator).velocity.z += accelerationField.acceleration.z * deltaTimer;
+			//		}
+
+			//		if (isMove) {
+			//			(*particleIterator).transform.translate.x += (*particleIterator).velocity.x * deltaTimer;
+			//			(*particleIterator).transform.translate.y += (*particleIterator).velocity.y * deltaTimer;
+			//			(*particleIterator).transform.translate.z += (*particleIterator).velocity.z * deltaTimer;
+			//		}
+
+			//		(*particleIterator).currentTime += deltaTimer;
+			//		instancingData[numInstance].WVP = WorldViewProjectionMatrixModel;
+			//		instancingData[numInstance].World = worldMatrixModel;
+			//		instancingData[numInstance].color = (*particleIterator).color;
+
+			//		float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
+			//		instancingData[numInstance].color.s = alpha;
+			//
+			//		
+			//		++numInstance;
+			//	}
+			//	++particleIterator;//繰り返し　forの最後のやつ
+			//}
+
+			//if (isBorn) {
+			//	emitter.frequencyTime += deltaTimer;
+			//	if (emitter.frequency <= emitter.frequencyTime) {
+			//		particles.splice(particles.end(), Emit(emitter, randomEngine));
+			//		emitter.frequencyTime -= emitter.frequency;
+			//	}
+			//}
+
+
+			directionalLightSphereData->direction = Normalize(directionalLightSphereData->direction);
 
 		
 			//Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
@@ -2275,76 +2295,81 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//ImGui::InputFloat3("Scale", *inputScale);
 			//ImGui::SliderFloat3("SliderScale", *inputScale, 0.5f, 5.0f);
 
+			ImGui::InputFloat3("cameraT", *inputTransformCamera);
+			ImGui::SliderFloat3("SlidercameraT", *inputTransformCamera, -15.0f, 15.0f);
+
+			ImGui::InputFloat3("Vertexlight", *inputRotateCamera);
+			ImGui::SliderFloat3("SliderVertexlight", *inputRotateCamera, -1.0f, 1.0f);
 
 
-			//if (ImGui::TreeNode("Sphere")) {
-			//	ImGui::Checkbox("IsSphere", &IsSphere);
+			if (ImGui::TreeNode("Sphere")) {
+				ImGui::Checkbox("IsSphere", &IsSphere);
 
-			//	if (IsSphere) {
-			//		ImGui::InputFloat3("MaterialSphere", *inputMaterialSphere);
-			//		ImGui::SliderFloat3("SliderMaterialSphere", *inputMaterialSphere, 0.0f, 1.0f);
+				if (IsSphere) {
+					ImGui::InputFloat3("MaterialSphere", *inputMaterialSphere);
+					ImGui::SliderFloat3("SliderMaterialSphere", *inputMaterialSphere, 0.0f, 1.0f);
 
-			//		ImGui::InputFloat3("VertexSphere", *inputTransformSphere);
-			//		ImGui::SliderFloat3("SliderVertexSphere", *inputTransformSphere, -5.0f, 5.0f);
+					ImGui::InputFloat3("VertexSphere", *inputTransformSphere);
+					ImGui::SliderFloat3("SliderVertexSphere", *inputTransformSphere, -5.0f, 5.0f);
 
-			//		ImGui::InputFloat3("RotateSphere", *inputRotateSphere);
-			//		ImGui::SliderFloat3("SliderRotateSphere", *inputRotateSphere, -10.0f, 10.0f);
+					ImGui::InputFloat3("RotateSphere", *inputRotateSphere);
+					ImGui::SliderFloat3("SliderRotateSphere", *inputRotateSphere, -10.0f, 10.0f);
 
-			//		ImGui::InputFloat3("ScaleSphere", *inputScaleSphere);
-			//		ImGui::SliderFloat3("SliderScaleSphere", *inputScaleSphere, 0.5f, 5.0f);
+					ImGui::InputFloat3("ScaleSphere", *inputScaleSphere);
+					ImGui::SliderFloat3("SliderScaleSphere", *inputScaleSphere, 0.5f, 5.0f);
 
-			//		ImGui::Checkbox("SphereTexture", &textureChange);
-			//	}
-			//	ImGui::TreePop();
-			//}
-
-			if (ImGui::TreeNode("Model")) {
-				ImGui::Checkbox("IsModel", &IsModel);
-				//ImGui::Combo("combo", &modelChange, "plane\0aixe\0teapot\0\0");
-				//ImGui::RadioButton("plane", &modelChange, 0); ImGui::SameLine();
-				//ImGui::RadioButton("axis", &modelChange, 1); ImGui::SameLine();
-				//ImGui::RadioButton("teapot", &modelChange, 2);
-				if (IsModel) {
-					ImGui::InputFloat3("MaterialModel", *inputMaterialModel);
-					ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
-
-					//ImGui::InputFloat3("VertexModel", *inputTransformModel);
-					//ImGui::SliderFloat3("SliderVertexModel", *inputTransformModel, -5.0f, 5.0f);
-
-					//ImGui::InputFloat3("RotateModel", *inputRotateModel);
-					//ImGui::SliderFloat3("SliderRotateModel", *inputRotateModel, -10.0f, 10.0f);
-
-					//ImGui::InputFloat3("ScaleModel", *inputScaleModel);
-					//ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
-				
-					ImGui::DragFloat3("EmitterTranslate", &emitter.transform.translate.x,0.01f,-100.0f,100.0f);
-
-
-					ImGui::ColorEdit4("Color",*inputMaterialModel);
-
-					//ImGui::Checkbox("ModelTexture", &textureChange2);	
-					ImGui::Checkbox("move", &isMove);
-					ImGui::Checkbox("wind", &isWind);
-					ImGui::Checkbox("camera", &cameraChange);
-					ImGui::Checkbox("Add Particle", &isBorn);
+					ImGui::Checkbox("SphereTexture", &textureChange);
 				}
 				ImGui::TreePop();
 			}
 
+			//if (ImGui::TreeNode("Model")) {
+			//	ImGui::Checkbox("IsModel", &IsModel);
+			//	//ImGui::Combo("combo", &modelChange, "plane\0aixe\0teapot\0\0");
+			//	//ImGui::RadioButton("plane", &modelChange, 0); ImGui::SameLine();
+			//	//ImGui::RadioButton("axis", &modelChange, 1); ImGui::SameLine();
+			//	//ImGui::RadioButton("teapot", &modelChange, 2);
+			//	if (IsModel) {
+			//		ImGui::InputFloat3("MaterialModel", *inputMaterialModel);
+			//		ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
 
-			//if (ImGui::TreeNode("light")) {
+			//		//ImGui::InputFloat3("VertexModel", *inputTransformModel);
+			//		//ImGui::SliderFloat3("SliderVertexModel", *inputTransformModel, -5.0f, 5.0f);
 
-			//	ImGui::InputFloat4("Materiallight", *inputMateriallight);
-			//	ImGui::SliderFloat4("SliderMateriallight", *inputMateriallight, 0.0f, 1.0f);
+			//		//ImGui::InputFloat3("RotateModel", *inputRotateModel);
+			//		//ImGui::SliderFloat3("SliderRotateModel", *inputRotateModel, -10.0f, 10.0f);
 
-			//	ImGui::InputFloat3("Vertexlight", *inputDirectionLight);
-			//	ImGui::SliderFloat3("SliderVertexlight", *inputDirectionLight, -1.0f, 1.0f);
+			//		//ImGui::InputFloat3("ScaleModel", *inputScaleModel);
+			//		//ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
+			//	
+			//		ImGui::DragFloat3("EmitterTranslate", &emitter.transform.translate.x,0.01f,-100.0f,100.0f);
 
 
-			//	ImGui::InputFloat("intensity", intensity);
+			//		ImGui::ColorEdit4("Color",*inputMaterialModel);
 
+			//		//ImGui::Checkbox("ModelTexture", &textureChange2);	
+			//		ImGui::Checkbox("move", &isMove);
+			//		ImGui::Checkbox("wind", &isWind);
+			//		ImGui::Checkbox("camera", &cameraChange);
+			//		ImGui::Checkbox("Add Particle", &isBorn);
+			//	}
 			//	ImGui::TreePop();
 			//}
+
+
+			if (ImGui::TreeNode("light")) {
+
+				ImGui::InputFloat4("Materiallight", *inputMateriallight);
+				ImGui::SliderFloat4("SliderMateriallight", *inputMateriallight, 0.0f, 1.0f);
+
+				ImGui::InputFloat3("Vertexlight", *inputDirectionLight);
+				ImGui::SliderFloat3("SliderVertexlight", *inputDirectionLight, -1.0f, 1.0f);
+
+
+				ImGui::InputFloat("intensity", intensity);
+
+				ImGui::TreePop();
+			}
 			
 
 			//if (ImGui::TreeNode("Sprite")) {
@@ -2430,37 +2455,35 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//球体
 
-			//if (IsSphere) {
-			//	commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSphere);
-			//	commandList->SetGraphicsRootConstantBufferView(0, materialResourceSphere->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
-			//	commandList->SetGraphicsRootConstantBufferView(1, wvpResourceSphere->GetGPUVirtualAddress());
+			if (IsSphere) {
+				commandList->IASetVertexBuffers(0, 1, &vertexBufferViewSphere);
+				commandList->SetGraphicsRootConstantBufferView(0, materialResourceSphere->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
+				commandList->SetGraphicsRootConstantBufferView(1, wvpResourceSphere->GetGPUVirtualAddress());
 
-			//	if (textureChange) {
-			//		commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
-			//	}
-			//	else {
-			//		commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-			//	}
-			//	commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
-			//	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-			//	commandList->DrawInstanced(SphereVertexNum, 1, 0, 0);
+				if (textureChange) {
+					commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+				}
+				else {
+					commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
+				}
+				commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
+				commandList->SetGraphicsRootConstantBufferView(4,cameraResource->GetGPUVirtualAddress());
+				commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+				commandList->DrawInstanced(SphereVertexNum, 1, 0, 0);
 
-			//}
+			}
 
 			//モデル
-			if (IsModel) {
-				commandList->IASetVertexBuffers(0, 1, &vertexBufferViewModel);
-				commandList->SetGraphicsRootConstantBufferView(0, materialResourceModel->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
-				commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel->GetGPUVirtualAddress());
-				
-				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-				commandList->SetGraphicsRootDescriptorTable(4, instancingSrvHandleGPU); //rootParametor 4番目
-
-				commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
-				commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-				commandList->DrawInstanced(UINT(modelData.vertices.size()), numInstance, 0, 0);
-				
-			}
+			//if (IsModel) {
+			//	commandList->IASetVertexBuffers(0, 1, &vertexBufferViewModel);
+			//	commandList->SetGraphicsRootConstantBufferView(0, materialResourceModel->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
+			//	commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel->GetGPUVirtualAddress());	
+			//	commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+			//	commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
+			//	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
+			//	commandList->DrawInstanced(UINT(modelData.vertices.size()), numInstance, 0, 0);
+			//	
+			//}
 
 			//UI
 			//if (IsSprite) {
