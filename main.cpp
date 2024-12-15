@@ -1999,7 +1999,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	directionalLightSphereResource->Map(0, nullptr, reinterpret_cast<void**>(&directionalLightSphereData));
 	//色の設定
 	directionalLightSphereData->color = { 1.0f,1.0f,1.0f,1.0f };
-	directionalLightSphereData->direction = { 0.0f,-1.0f,1.0f };
+	directionalLightSphereData->direction = { 0.1f,-1.0f,0.1f };
 	directionalLightSphereData->intensity = 1.0f;
 
 
@@ -2194,7 +2194,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 					
 			DrawSphere(vertexDataSphere);
 		
-
 
 			
 			//Matrix4x4 billbordMatrix = Multiply(backToFrontMatrix, cameraMatrix);
