@@ -41,6 +41,7 @@ using namespace MyMath;
 #include "TextureManager.h"
 #include "Object3d.h"
 #include "Object3dCommon.h"
+#include "Model.h"
 
 using namespace Logger;
 using namespace StringUtility;
@@ -196,7 +197,7 @@ void DrawSphere(VertexData* vertexDataSphere) {
 
 //Windowsアプリのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-	
+
 	//旧WinApp
 	D3DResourceLeakChecker leakCheck;
 
@@ -208,7 +209,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Input* input_;
 	input_ = new Input();
 	//GetHInstance()GetHwnd()を入れず直接winAppのクラスのものを使える
-	input_->Initialize(winApp_); 
+	input_->Initialize(winApp_);
 
 
 	//ShowWindow(hwnd, SW_SHOW);
@@ -224,7 +225,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	SpriteCommon* spriteCommon = nullptr;
 	spriteCommon = new SpriteCommon;
 	spriteCommon->Initialize(dxCommon);
-	
+
 	Object3dCommon* object3dCommon = nullptr;
 	object3dCommon = new Object3dCommon();
 	object3dCommon->Initialize(dxCommon);
@@ -237,18 +238,44 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		//	sprite->Initialize(spriteCommon, "resource/monsterBall.png");
 		//}
 		//else {
-			sprite->Initialize(spriteCommon, "resource/uvChecker.png");
+		sprite->Initialize(spriteCommon, "resource/uvChecker.png");
 		//}
 		Vector2 position[5] = {};
 		position[i].x += i * 200.0f;
 		sprite->SetPosition(position[i]);
-		
+
 		sprites.push_back(sprite);
 	}
 
 
-	Object3d* object3d = new Object3d();
-	object3d->Initialize(object3dCommon);
+
+
+	ModelCommon* modelCommon = nullptr;
+	modelCommon = new ModelCommon();
+	modelCommon->Initialize(dxCommon);
+
+
+	Model* model = nullptr;
+	model = new Model();
+	model->Initialize(modelCommon);
+
+	std::vector <Object3d*> objects;
+
+
+	Vector3 position[2] = {};
+
+	for (uint32_t i = 0; i < 2; ++i) {
+
+		Object3d* object3d = new Object3d();
+		object3d->SetModel(model);
+		object3d->Initialize(object3dCommon);
+
+
+		position[i].x += i * 3.0f;
+		object3d->SetTranslate(position[i]);
+
+		objects.push_back(object3d);
+	}
 
 
 	//三角
@@ -335,7 +362,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//モデルの読み込み
 	//ModelData modelData = LoadObjFile("resource", "plane.obj");
-	
+
 	//ModelData modelData = LoadObjFile("resource", "axis.obj");
 
 	//ModelData modelData = LoadObjFile("resource", "multiMesh.obj");
@@ -415,7 +442,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 	//描画させるもの
 	bool IsSphere = true;
-	bool IsModel = true;
+	bool IsModel[2] = {true,true};
 	bool IsSprite = true;
 
 
@@ -472,7 +499,39 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 
 
-			object3d->Update();
+			Vector3 positionOBJ;
+			Vector3 rotationOBJ;
+			Vector3 rotationOBJ2;
+			Vector3 sizeOBJ;
+
+			for (Object3d* object3d : objects) {
+				object3d->Update();
+
+				positionOBJ = object3d->GetTranslate();
+				
+				object3d->SetTranslate(positionOBJ);
+				
+				rotationOBJ = object3d->GetRotate();
+				
+				object3d->SetRotate(rotationOBJ);
+
+
+				sizeOBJ = object3d->GetScale();
+
+				object3d->SetScale(sizeOBJ);
+
+			}
+				
+			rotationOBJ = objects[0]->GetRotate();
+			rotationOBJ.y += 0.05f;
+			objects[0]->SetRotate(rotationOBJ);
+
+			rotationOBJ2 = objects[1]->GetRotate();
+			rotationOBJ2.x += 0.1f;			
+			objects[1]->SetRotate(rotationOBJ2);
+
+
+
 
 			ImGui_ImplDX12_NewFrame();
 			ImGui_ImplWin32_NewFrame();
@@ -537,29 +596,68 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//	ImGui::TreePop();
 			//}
 
-			//if (ImGui::TreeNode("Model")) {
-			//	ImGui::Checkbox("IsModel", &IsModel);
-			//	//ImGui::Combo("combo", &modelChange, "plane\0aixe\0teapot\0\0");
-			//	//ImGui::RadioButton("plane", &modelChange, 0); ImGui::SameLine();
-			//	//ImGui::RadioButton("axis", &modelChange, 1); ImGui::SameLine();
-			//	//ImGui::RadioButton("teapot", &modelChange, 2);
-			//	if (IsModel) {
-			//		ImGui::InputFloat3("MaterialModel", *inputMaterialModel);
-			//		ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
+			
+			if (ImGui::TreeNode("Model_1")) {
+				ImGui::Checkbox("IsModel", &IsModel[0]);
+				if (IsModel) {
 
-			//		ImGui::InputFloat3("VertexModel", *inputTransformModel);
-			//		ImGui::SliderFloat3("SliderVertexModel", *inputTransformModel, -5.0f, 5.0f);
+					positionOBJ = objects[0]->GetTranslate();
+					ImGui::InputFloat3("VertexModel", &positionOBJ.x);
+					ImGui::SliderFloat3("SliderVertexModel", &positionOBJ.x, -5.0f, 5.0f);
+					objects[0]->SetTranslate(positionOBJ);
 
-			//		ImGui::InputFloat3("RotateModel", *inputRotateModel);
-			//		ImGui::SliderFloat3("SliderRotateModel", *inputRotateModel, -10.0f, 10.0f);
 
-			//		ImGui::InputFloat3("ScaleModel", *inputScaleModel);
-			//		ImGui::SliderFloat3("SliderScaleModel", *inputScaleModel, 0.5f, 5.0f);
+					rotationOBJ = objects[0]->GetRotate();
+					ImGui::InputFloat3("RotateModel", &rotationOBJ.x);
+					ImGui::SliderFloat3("SliderRotateModel", &rotationOBJ.x, -10.0f, 10.0f);
 
-			//		ImGui::Checkbox("ModelTexture", &textureChange2);			
-			//	}
-			//	ImGui::TreePop();
-			//}
+					objects[0]->SetRotate(rotationOBJ);
+
+
+					sizeOBJ = objects[0]->GetScale();
+					ImGui::InputFloat3("ScaleModel", &sizeOBJ.x);
+					ImGui::SliderFloat3("SliderScaleModel", &sizeOBJ.x, 0.5f, 5.0f);
+
+					objects[0]->SetScale(sizeOBJ);
+
+					//ImGui::InputFloat3("MaterialModel", *);
+					//ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
+					//ImGui::Checkbox("ModelTexture", &textureChange2);
+				}
+				ImGui::TreePop();
+			}
+			
+
+			if (ImGui::TreeNode("Model_2")) {
+				ImGui::Checkbox("IsModel", &IsModel[1]);
+				if (IsModel[1]) {
+
+					positionOBJ = objects[1]->GetTranslate();
+					ImGui::InputFloat3("VertexModel", &positionOBJ.x);
+					ImGui::SliderFloat3("SliderVertexModel", &positionOBJ.x, -5.0f, 5.0f);
+					objects[1]->SetTranslate(positionOBJ);
+
+
+					rotationOBJ = objects[1]->GetRotate();
+					ImGui::InputFloat3("RotateModel", &rotationOBJ.x);
+					ImGui::SliderFloat3("SliderRotateModel", &rotationOBJ.x, -10.0f, 10.0f);
+
+					objects[1]->SetRotate(rotationOBJ);
+
+
+					sizeOBJ = objects[1]->GetScale();
+					ImGui::InputFloat3("ScaleModel", &sizeOBJ.x);
+					ImGui::SliderFloat3("SliderScaleModel", &sizeOBJ.x, 0.5f, 5.0f);
+
+					objects[1]->SetScale(sizeOBJ);
+
+					//ImGui::InputFloat3("MaterialModel", *);
+					//ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
+					//ImGui::Checkbox("ModelTexture", &textureChange2);
+				}
+				ImGui::TreePop();
+			}
+
 
 
 			//if (ImGui::TreeNode("light")) {
@@ -612,40 +710,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			dxCommon->ProDraw();
 
-			//三角
-			//dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
-			//dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
-			//dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
-			//dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);	
-			//dxCommon->GetCommandList()->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-			//dxCommon->GetCommandList()->DrawInstanced(6, 1, 0, 0);
-
-
-			//球体
-
-			//if (IsSphere) {
-			//	dxCommon->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferViewSphere);
-			//	dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResourceSphere->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
-			//	dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResourceSphere->GetGPUVirtualAddress());
-
-			//	if (textureChange) {
-			//		dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
-			//	}
-			//	else {
-			//		dxCommon->GetCommandList()->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-			//	}
-			//	dxCommon->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
-			//	dxCommon->GetCommandList()->ClearDepthStencilView(dxCommon->GetDsvHandle(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-			//	dxCommon->GetCommandList()->DrawInstanced(SphereVertexNum, 1, 0, 0);
-
-			//}
-
 			//モデル
 			
 			object3dCommon->Command();
-
-			object3d->Draw();
 			
+			for (Object3d* object3d : objects) {
+				object3d->Draw();
+			}
+
 			//UI
 			spriteCommon->Command();
 
@@ -679,7 +751,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 	delete object3dCommon;
-	delete object3d;
+	for (Object3d* object3d : objects) {
+		delete object3d;
+	}
+
+	delete modelCommon;
+	delete model;
 
 
 	return 0;
