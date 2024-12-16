@@ -20,6 +20,7 @@ public:
 	//static ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
 
 	void SetModel(Model* model) { this->model = model; }
+	void SetModelFile(const std::string& filePath);
 
 	void SetScale(const Vector3& scale) { transform.scale = scale; }
 	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }

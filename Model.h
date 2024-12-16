@@ -5,7 +5,7 @@
 class Model{
 public:
 
-	void Initialize(ModelCommon* modelCommon);
+	void Initialize(ModelCommon* modelCommon,const std::string& directorypath,const std::string& fileName);
 	void Draw();
 	static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
 	static ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);

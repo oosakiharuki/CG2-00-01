@@ -5,6 +5,7 @@
 
 #include <fstream>
 #include <sstream>
+#include "ModelManager.h"
 
 using namespace MyMath;
 
@@ -62,4 +63,8 @@ void Object3d::Draw() {
 	if (model) {
 		model->Draw();
 	}
+}
+
+void Object3d::SetModelFile(const std::string& filePath) {
+	model = ModelManager::GetInstance()->FindModel(filePath);
 }

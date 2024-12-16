@@ -42,6 +42,7 @@ using namespace MyMath;
 #include "Object3d.h"
 #include "Object3dCommon.h"
 #include "Model.h"
+#include "ModelManager.h"
 
 using namespace Logger;
 using namespace StringUtility;
@@ -226,10 +227,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	spriteCommon = new SpriteCommon;
 	spriteCommon->Initialize(dxCommon);
 
-	Object3dCommon* object3dCommon = nullptr;
-	object3dCommon = new Object3dCommon();
-	object3dCommon->Initialize(dxCommon);
-
 	std::vector<Sprite*> sprites;
 
 	for (uint32_t i = 0; i < 1; ++i) {
@@ -248,6 +245,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 
+	ModelManager::GetInstance()->Initialize(dxCommon);
+	ModelManager::GetInstance()->LoadModel("plane.obj");
+	ModelManager::GetInstance()->LoadModel("axis.obj");
+
+	Object3dCommon* object3dCommon = nullptr;
+	object3dCommon = new Object3dCommon();
+	object3dCommon->Initialize(dxCommon);
 
 
 	ModelCommon* modelCommon = nullptr;
@@ -255,9 +259,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	modelCommon->Initialize(dxCommon);
 
 
-	Model* model = nullptr;
-	model = new Model();
-	model->Initialize(modelCommon);
+	//Model* model = nullptr;
+	//model = new Model();
+	//model->Initialize(modelCommon);
 
 	std::vector <Object3d*> objects;
 
@@ -267,9 +271,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	for (uint32_t i = 0; i < 2; ++i) {
 
 		Object3d* object3d = new Object3d();
-		object3d->SetModel(model);
-		object3d->Initialize(object3dCommon);
-
+		//object3d->SetModel(model);
+	
+		if (i == 0) {
+			object3d->SetModelFile("plane.obj");
+			object3d->Initialize(object3dCommon);
+		}
+		else {
+			object3d->SetModelFile("axis.obj");
+			object3d->Initialize(object3dCommon);
+		}
 
 		position[i].x += i * 3.0f;
 		object3d->SetTranslate(position[i]);
@@ -527,7 +538,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			objects[0]->SetRotate(rotationOBJ);
 
 			rotationOBJ2 = objects[1]->GetRotate();
-			rotationOBJ2.x += 0.1f;			
+			rotationOBJ2.z += 0.1f;			
 			objects[1]->SetRotate(rotationOBJ2);
 
 
@@ -742,6 +753,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	winApp_ = nullptr;
 
 	TextureManager::GetInstance()->Finalize();
+	ModelManager::GetInstance()->Finalize();
 
 	delete dxCommon;
 
@@ -756,7 +768,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	}
 
 	delete modelCommon;
-	delete model;
+	//delete model;
 
 
 	return 0;

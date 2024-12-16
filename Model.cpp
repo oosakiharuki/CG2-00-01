@@ -5,10 +5,10 @@
 
 using namespace MyMath;
 
-void Model::Initialize(ModelCommon* modelCommon) {
+void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypath, const std::string& fileName) {
 	this->modelCommon = modelCommon;
 
-	modelData = LoadObjFile("resource", "plane.obj");
+	modelData = LoadObjFile(directorypath, fileName);
 
 	vertexResource = modelCommon->GetDxCommon()->CreateBufferResource(sizeof(VertexData) * modelData.vertices.size());
 
