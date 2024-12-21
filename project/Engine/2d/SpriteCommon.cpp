@@ -5,7 +5,6 @@ using namespace Logger;
 void SpriteCommon::Initialize(DirectXCommon* dxCommon) {
 	dxCommon_ = dxCommon;
 
-	RootSignature();
 	GraphicsPipeline();
 }
 
@@ -16,8 +15,6 @@ void SpriteCommon::RootSignature() {
 		D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT;
 
 
-
-	D3D12_DESCRIPTOR_RANGE descriptorRange[1] = {};
 	descriptorRange[0].BaseShaderRegister = 0;
 	descriptorRange[0].NumDescriptors = 1;
 	descriptorRange[0].RangeType = D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -25,7 +22,6 @@ void SpriteCommon::RootSignature() {
 
 
 	//RootParameter作成__
-	D3D12_ROOT_PARAMETER rootParameters[4] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[0].Descriptor.ShaderRegister = 0;//Object3d.PS.hlsl の b0
@@ -50,7 +46,6 @@ void SpriteCommon::RootSignature() {
 
 	//2でまとめる
 
-	D3D12_STATIC_SAMPLER_DESC staticSamplers[1] = {};
 	staticSamplers[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	staticSamplers[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
 	staticSamplers[0].AddressV = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -66,6 +61,7 @@ void SpriteCommon::RootSignature() {
 
 void SpriteCommon::GraphicsPipeline() {
 
+	RootSignature();
 
 	//シリアライズしてバイナリにする
 	ID3DBlob* signatureBlob = nullptr;
