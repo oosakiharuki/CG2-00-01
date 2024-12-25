@@ -6,6 +6,8 @@
 #include <wrl.h>
 #include "d3d12.h"
 
+#include "Camera.h"
+
 class Object3dCommon;
 
 class Object3d
@@ -24,7 +26,9 @@ public:
 
 	void SetScale(const Vector3& scale) { transform.scale = scale; }
 	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
-	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
+	void SetTranslate(const Vector3& translate) { transform.translate = translate; }	
+	
+	void SetCamera(Camera* camera) { this->camera = camera; }
 
 	const Vector3& GetScale() const { return transform.scale; }
 	const Vector3& GetRotate() const { return transform.rotate; }
@@ -51,4 +55,5 @@ private:
 	Transform transformL;
 
 	Model* model = nullptr;
+	Camera* camera = nullptr;
 };
