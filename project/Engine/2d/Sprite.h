@@ -106,4 +106,6 @@ private:
 
 	//本来のテクスチャの大きさにする
 	void AdjustTextureSize();
+
+	std::string filePath;
 };
