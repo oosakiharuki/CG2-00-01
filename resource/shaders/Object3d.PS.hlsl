@@ -21,6 +21,15 @@ struct DirectionalLight
     float intensity;
 };
 
+struct PointLight
+{
+    float32_t4 color;
+    float32_t3 position;
+    float intensity;
+    float radius;
+    float decay;
+};
+
 struct Camera
 {
     float32_t3 worldPosition;
@@ -30,6 +39,7 @@ struct Camera
 ConstantBuffer<Material> gMaterial : register(b0);
 ConstantBuffer<DirectionalLight> gDirectionalLight : register(b1);
 ConstantBuffer<Camera> gCamera : register(b2);
+ConstantBuffer<PointLight> gPointLight : register(b3);
 
 Texture2D<float32_t4> gTexture : register(t0);
 
@@ -46,7 +56,8 @@ PixelShaderOutput main(VertexShaderOutput input)
 {
     float4 transformdUV = mul(float32_t4(input.texcoord, 0.0f, 1.0f), gMaterial.uvTransform);
     float32_t4 textureColor = gTexture.Sample(gSampler, transformdUV.xy);
-    
+  
+
     PixelShaderOutput output;
     
     if (gMaterial.enableLighting != 0)
@@ -62,22 +73,41 @@ PixelShaderOutput main(VertexShaderOutput input)
         float32_t reflectLight = reflect(gDirectionalLight.direction, normalize(input.normal));
          
         
-        float32_t3 halfVector = normalize(-gDirectionalLight.direction + toEye);
+        float32_t3 halfVector = normalize(-gDirectionalLight.direction + gPointLight.position + toEye);
         float NdotH = dot(normalize(input.normal), halfVector);
        
         float RdotE = dot(reflectLight, toEye);//u*r
         float specularPow = pow(saturate(NdotH), gMaterial.shininess);// saturate (u * r) s乗
             
-       
+             
+        //float32_t3 pointLightDirection = normalize(input.worldPostion - gPointLight.position);
+    
         //pow = 2乗
            
-
-        float32_t3 diffuse = gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
+        //平行光源
+        float32_t3 diffuseDirectionalLight = 
+        gMaterial.color.rgb * textureColor.rgb * gDirectionalLight.color.rgb * cos * gDirectionalLight.intensity;
         
-        float32_t3 specular = //Is
+        float32_t3 specularDirectionalLight = //Is
         gDirectionalLight.color.rgb * gDirectionalLight.intensity * specularPow * float32_t3(1.0f,1.0f,1.0f);
+            
         
-        output.color.rgb = diffuse + specular;
+        
+        float32_t distance = length(gPointLight.position - input.worldPostion);
+        float32_t factor = pow(saturate(-distance / gPointLight.radius + 1.0f),gPointLight.decay);
+
+        //ポイントライト
+        float32_t3 diffusePointLight = 
+        gMaterial.color.rgb * textureColor.rgb * gPointLight.color.rgb * cos * gPointLight.intensity * factor;
+        
+        float32_t3 specularPointLight =
+        gPointLight.color.rgb * gPointLight.intensity * factor * specularPow * float32_t3(1.0f, 1.0f, 1.0f);
+        
+        
+        
+        output.color.rgb = 
+        diffuseDirectionalLight + specularDirectionalLight +
+        diffusePointLight + specularPointLight;
         output.color.a = gMaterial.color.a * textureColor.a;
         
     }

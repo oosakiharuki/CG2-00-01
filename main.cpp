@@ -728,6 +728,15 @@ struct DirectionalLight {
 	float intensity;
 };
 
+struct PointLight {
+	Vector4 color;
+	Vector3 position;
+	float intensity;
+	float radius;
+	float decay;
+	float padding[2];
+};
+
 Vector3 Normalize(const Vector3& v) {
 	Vector3 result;
 	result.x = v.x / (float)sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
@@ -1499,7 +1508,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 	//textureを読んで転送
-	DirectX::ScratchImage mipImages = LoadTexture("resource/circle.png");
+	DirectX::ScratchImage mipImages = LoadTexture("resource/grass.png");
 	const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
 	Microsoft::WRL::ComPtr<ID3D12Resource> textureResource = CrateTextureResource(device, metadata);
 	UploadTextureData(textureResource, mipImages);
@@ -1604,7 +1613,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	//RootParameter作成__
-	D3D12_ROOT_PARAMETER rootParameters[5] = {};
+	D3D12_ROOT_PARAMETER rootParameters[6] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[0].Descriptor.ShaderRegister = 0;//Object3d.PS.hlsl の b0
@@ -1628,6 +1637,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBV
 	rootParameters[4].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//plxelshader
 	rootParameters[4].Descriptor.ShaderRegister = 2;//レジスタ番号
+
+	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBV
+	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//plxelshader
+	rootParameters[5].Descriptor.ShaderRegister = 3;//レジスタ番号
 
 	//パーテイクル
 	//rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
@@ -1744,7 +1757,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//DepthStencilState
 	D3D12_DEPTH_STENCIL_DESC depthStencilDesc{};
 	depthStencilDesc.DepthEnable = true;
-	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+	depthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
 	depthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
 
 	graphicsPipelineStateDesc.DepthStencilState = depthStencilDesc;
@@ -1913,16 +1926,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//ModelData modelData = LoadObjFile("resource", "teapot.obj");
 	//ModelData modelData = LoadObjFile("resource", "fence.obj");
 	//static int modelChange = 0;
-	ModelData modelData;
-	modelData.vertices.push_back({ {1.0f,1.0f,0.0f,1.0f},{0.0f,0.0f},{0.0f,0.0f,1.0f} });
-	modelData.vertices.push_back({ {-1.0f,1.0f,0.0f,1.0f},{1.0f,0.0f},{0.0f,0.0f,1.0f} });
-	modelData.vertices.push_back({ {1.0f,-1.0f,0.0f,1.0f},{0.0f,1.0f},{0.0f,0.0f,1.0f} });
-	modelData.vertices.push_back({ {1.0f,-1.0f,0.0f,1.0f},{0.0f,1.0f},{0.0f,0.0f,1.0f} });
-	modelData.vertices.push_back({ {-1.0f,1.0f,0.0f,1.0f},{1.0f,0.0f},{0.0f,0.0f,1.0f} });
-	modelData.vertices.push_back({ {-1.0f,-1.0f,0.0f,1.0f},{1.0f,1.0f},{0.0f,0.0f,1.0f} }); 
-	modelData.material.textureFilePath = "./resource/circle.png";
+	//ModelData modelData;
+	//modelData.vertices.push_back({ {1.0f,1.0f,0.0f,1.0f},{0.0f,0.0f},{0.0f,0.0f,1.0f} });
+	//modelData.vertices.push_back({ {-1.0f,1.0f,0.0f,1.0f},{1.0f,0.0f},{0.0f,0.0f,1.0f} });
+	//modelData.vertices.push_back({ {1.0f,-1.0f,0.0f,1.0f},{0.0f,1.0f},{0.0f,0.0f,1.0f} });
+	//modelData.vertices.push_back({ {1.0f,-1.0f,0.0f,1.0f},{0.0f,1.0f},{0.0f,0.0f,1.0f} });
+	//modelData.vertices.push_back({ {-1.0f,1.0f,0.0f,1.0f},{1.0f,0.0f},{0.0f,0.0f,1.0f} });
+	//modelData.vertices.push_back({ {-1.0f,-1.0f,0.0f,1.0f},{1.0f,1.0f},{0.0f,0.0f,1.0f} }); 
+	//modelData.material.textureFilePath = "./resource/circle.png";
 
-
+	ModelData modelData = LoadObjFile("resource", "terrain.obj");
 
 	//まだ	
 	//ModelData modelData = LoadObjFile("resource", "multiMaterial.obj");
@@ -1988,8 +2001,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialDataModel->color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	materialDataModel->enableLighting = true;
 	materialDataModel->uvTransform = MakeIdentity4x4();
+	materialDataModel->shininess = 70.0f;
 
 
+
+	//ポイントライト用のリソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> pointLightResource = CreateBufferResource(device, sizeof(PointLight));
+	//マテリアルにデータを書き込む
+	PointLight* PointLightData = nullptr;
+	//書き込むためのアドレス
+	pointLightResource->Map(0, nullptr, reinterpret_cast<void**>(&PointLightData));
+	//色の設定
+	PointLightData->color = { 1.0f,1.0f,1.0f,1.0f };
+	PointLightData->position = { 0.0f,2.0f,0.0f };
+	PointLightData->intensity = 1.0f;
+	PointLightData->radius = 5.0f;
+	PointLightData->decay = 1.0f;
 
 	//ライト用のリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightSphereResource = CreateBufferResource(device, sizeof(DirectionalLight));
@@ -2000,10 +2027,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//色の設定
 	directionalLightSphereData->color = { 1.0f,1.0f,1.0f,1.0f };
 	directionalLightSphereData->direction = { 0.1f,-1.0f,0.1f };
-	directionalLightSphereData->intensity = 1.0f;
+	directionalLightSphereData->intensity = 0.0f;
 
-
-	 
 
 
 	////spriteのリソース
@@ -2038,7 +2063,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				
 
 	Transform transform{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
-	Transform cameraTransform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f}, {0.0f,0.0f,-10.5f} };
+	Transform cameraTransform = { {1.0f,1.0f,1.0f},{0.2f,0.0f,0.0f}, {0.0f,4.0f,-15.0f} };
 	
 	cameraData->worldPosition = { cameraTransform.translate };
 
@@ -2047,6 +2072,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//Transform transformSprite{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
 	Transform transformSphere{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
+	
+	Transform transformModel{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
 	//Particle transformModels[kNumMaxInstance];
 	std::list<Particle> particles;
@@ -2113,9 +2140,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	bool textureChange = false;
 
 	float* inputMaterialModel[3] = { &materialDataModel->color.x,&materialDataModel->color.y,&materialDataModel->color.z };
-	//float* inputTransformModel[3] = { &transformModels[0].translate.x,&transformModels[0].translate.y,&transformModels[0].translate.z};
-	//float* inputRotateModel[3] = { &transformModels[0].rotate.x,&transformModels[0].rotate.y,&transformModels[0].rotate.z };
-	//float* inputScaleModel[3] = { &transformModels[0].scale.x,&transformModels[0].scale.y,&transformModels[0].scale.z };
+	float* inputTransformModel[3] = { &transformModel.translate.x,&transformModel.translate.y,&transformModel.translate.z };
+	float* inputRotateModel[3] = { &transformModel.rotate.x,&transformModel.rotate.y,&transformModel.rotate.z };
+	float* inputScaleModel[3] = { &transformModel.scale.x,&transformModel.scale.y,&transformModel.scale.z };
 	bool textureChange2 = false;
 	bool isMove = true;
 	bool cameraChange = false;
@@ -2125,6 +2152,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float* inputMateriallight[3] = { &directionalLightSphereData->color.x,&directionalLightSphereData->color.y,&directionalLightSphereData->color.z };
 	float* inputDirectionLight[3] = { &directionalLightSphereData->direction.x,&directionalLightSphereData->direction.y,&directionalLightSphereData->direction.z };
 	float* intensity = &directionalLightSphereData->intensity;
+
+	float* inputMaterialPointLight[3] = { &PointLightData->color.x,&PointLightData->color.y,&PointLightData->color.z };
+	float* inputDirectionPointLight[3] = { &PointLightData->position.x,&PointLightData->position.y,&PointLightData->position.z };
+	float* intensityPointLight = &PointLightData->intensity;
+	float* radiusPointLight = &PointLightData->radius;
+	float* decayPointLight = &PointLightData->decay;
+
 
 	//描画させるもの
 	bool IsSphere = true;
@@ -2201,6 +2235,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//billbordMatrix.m[3][0] = 0.0f;
 			//billbordMatrix.m[3][1] = 0.0f;
 			//billbordMatrix.m[3][2] = 0.0f;
+
+			//モデル
+			Matrix4x4 worldMatrixModel = MakeAffineMatrix(transformModel.scale, transformModel.rotate, transformModel.translate);
+			Matrix4x4 WorldViewProjectionMatrixModel = Multiply(worldMatrixModel, Multiply(viewMatrix, projectionMatrix));
+
+			wvpDataModel->World = worldMatrixModel;
+			wvpDataModel->WVP = WorldViewProjectionMatrixModel;
 
 			////モデル
 			//uint32_t numInstance = 0;
@@ -2370,6 +2411,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::TreePop();
 			}
 			
+			if (ImGui::TreeNode("lightP")) {
+
+				ImGui::InputFloat4("MaterialPLight", *inputMaterialPointLight);
+				ImGui::SliderFloat4("SliderMaterialPLight", *inputMaterialPointLight, 0.0f, 1.0f);
+
+				ImGui::InputFloat3("VertexPLight", *inputDirectionPointLight);
+				ImGui::SliderFloat3("SliderVertexPLight", *inputDirectionPointLight, -10.0f, 10.0f);
+
+				ImGui::InputFloat("intensityPL", intensityPointLight);
+				ImGui::InputFloat("radiusPL", radiusPointLight);
+				ImGui::SliderFloat("SliderVertexPLightRadius", radiusPointLight, 0.0f, 50.0f);
+				ImGui::InputFloat("decayPL", decayPointLight);
+				ImGui::SliderFloat("SliderVertexPLightDecay", decayPointLight, 0.0f, 5.0f);
+
+				ImGui::TreePop();
+			}
 
 			//if (ImGui::TreeNode("Sprite")) {
 			//	ImGui::Checkbox("IsSprite", &IsSprite);
@@ -2433,7 +2490,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//DSV
 			D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = dsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
 			commandList->OMSetRenderTargets(1, &rtvHandles[backBufferIndex], false, &dsvHandle);	
-
+			commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
 			
 			commandList->RSSetViewports(1, &viewport);
@@ -2465,24 +2522,26 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				else {
 					commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU2);
 				}
+
 				commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
+				commandList->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
 				commandList->SetGraphicsRootConstantBufferView(4,cameraResource->GetGPUVirtualAddress());
-				commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 				commandList->DrawInstanced(SphereVertexNum, 1, 0, 0);
 
 			}
 
 			//モデル
-			//if (IsModel) {
-			//	commandList->IASetVertexBuffers(0, 1, &vertexBufferViewModel);
-			//	commandList->SetGraphicsRootConstantBufferView(0, materialResourceModel->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
-			//	commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel->GetGPUVirtualAddress());	
-			//	commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
-			//	commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
-			//	commandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-			//	commandList->DrawInstanced(UINT(modelData.vertices.size()), numInstance, 0, 0);
-			//	
-			//}
+			if (IsModel) {
+				commandList->IASetVertexBuffers(0, 1, &vertexBufferViewModel);
+				commandList->SetGraphicsRootConstantBufferView(0, materialResourceModel->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
+				commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel->GetGPUVirtualAddress());	
+				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
+				commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
+				commandList->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
+				commandList->SetGraphicsRootConstantBufferView(4, cameraResource->GetGPUVirtualAddress());
+				commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
+				
+			}
 
 			//UI
 			//if (IsSprite) {
