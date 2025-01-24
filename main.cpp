@@ -737,6 +737,18 @@ struct PointLight {
 	float padding[2];
 };
 
+struct SpotLight {
+	Vector4 color;
+	Vector3 position;
+	float intensity;
+	Vector3 direction;
+	float distance;
+	float decay;
+	float cosAngle;
+	float cosFalloffStart;
+	float padding[2];
+};
+
 Vector3 Normalize(const Vector3& v) {
 	Vector3 result;
 	result.x = v.x / (float)sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
@@ -1613,7 +1625,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	descriptorRange[0].OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 
 	//RootParameter作成__
-	D3D12_ROOT_PARAMETER rootParameters[6] = {};
+	D3D12_ROOT_PARAMETER rootParameters[7] = {};
 	rootParameters[0].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;
 	rootParameters[0].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 	rootParameters[0].Descriptor.ShaderRegister = 0;//Object3d.PS.hlsl の b0
@@ -1641,6 +1653,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	rootParameters[5].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBV
 	rootParameters[5].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//plxelshader
 	rootParameters[5].Descriptor.ShaderRegister = 3;//レジスタ番号
+
+	rootParameters[6].ParameterType = D3D12_ROOT_PARAMETER_TYPE_CBV;//CBV
+	rootParameters[6].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;//plxelshader
+	rootParameters[6].Descriptor.ShaderRegister = 4;//レジスタ番号
 
 	//パーテイクル
 	//rootParameters[4].ParameterType = D3D12_ROOT_PARAMETER_TYPE_DESCRIPTOR_TABLE;
@@ -2004,6 +2020,22 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	materialDataModel->shininess = 70.0f;
 
 
+	//スポットライト用のリソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> spotLightResource = CreateBufferResource(device, sizeof(SpotLight));
+	//マテリアルにデータを書き込む
+	SpotLight* SpotLightData = nullptr;
+	//書き込むためのアドレス
+	spotLightResource->Map(0, nullptr, reinterpret_cast<void**>(&SpotLightData));
+	//色の設定
+	SpotLightData->color = { 1.0f,1.0f,1.0f,1.0f };
+	SpotLightData->position = { 2.0f,1.25f,0.0f };
+	SpotLightData->distance = 7.0f;
+	SpotLightData->direction = Normalize({ -1.0f,-1.0f,0.0f });
+	SpotLightData->intensity = 4.0f;	
+	SpotLightData->decay = 2.0f;
+	SpotLightData->cosAngle = std::cos(std::numbers::pi_v<float> / 3.0f);
+	SpotLightData->cosFalloffStart = std::cos(std::numbers::pi_v<float> / 4.0f);
+
 
 	//ポイントライト用のリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> pointLightResource = CreateBufferResource(device, sizeof(PointLight));
@@ -2014,11 +2046,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//色の設定
 	PointLightData->color = { 1.0f,1.0f,1.0f,1.0f };
 	PointLightData->position = { 0.0f,2.0f,0.0f };
-	PointLightData->intensity = 1.0f;
+	PointLightData->intensity = 0.0f;
 	PointLightData->radius = 5.0f;
 	PointLightData->decay = 1.0f;
 
-	//ライト用のリソース
+	//平行ライト用のリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightSphereResource = CreateBufferResource(device, sizeof(DirectionalLight));
 	//マテリアルにデータを書き込む
 	DirectionalLight* directionalLightSphereData = nullptr;
@@ -2160,6 +2192,17 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	float* decayPointLight = &PointLightData->decay;
 
 
+	float* inputMaterialSpotLight[3] = { &SpotLightData->color.x,&SpotLightData->color.y,&SpotLightData->color.z };
+	float* inputDirectionSpotLight[3] = { &SpotLightData->position.x,&SpotLightData->position.y,&SpotLightData->position.z };
+	float* intensitySpotLight = &SpotLightData->intensity;
+	float* distanceSpotLight = &SpotLightData->distance;
+	float* directionSpotLight[3] = { &SpotLightData->direction.x,&SpotLightData->direction.y,&SpotLightData->direction.z };
+	float* decaySpotLight = &SpotLightData->decay;
+	float* cosAngleSpotLight = &SpotLightData->cosAngle;
+	float* cosFalloffSpotLight = &SpotLightData->cosFalloffStart;
+
+
+
 	//描画させるもの
 	bool IsSphere = true;
 	bool IsModel = true;
@@ -2298,6 +2341,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 			directionalLightSphereData->direction = Normalize(directionalLightSphereData->direction);
+			
+			SpotLightData->direction = Normalize(SpotLightData->direction);
 
 		
 			//Matrix4x4 worldMatrixSprite = MakeAffineMatrix(transformSprite.scale, transformSprite.rotate, transformSprite.translate);
@@ -2428,6 +2473,34 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::TreePop();
 			}
 
+			if (ImGui::TreeNode("lightS")) {
+
+				ImGui::InputFloat4("MaterialSLight", *inputMaterialSpotLight);
+				ImGui::SliderFloat4("SliderMaterialSLight", *inputMaterialSpotLight, 0.0f, 1.0f);
+
+				ImGui::InputFloat3("VertexSLight", *inputDirectionSpotLight);
+				ImGui::SliderFloat3("SliderVertexSLight", *inputDirectionSpotLight, -10.0f, 10.0f);
+
+				ImGui::InputFloat("distanceSL", distanceSpotLight);
+				ImGui::SliderFloat("SliderVertexSLightDistance", distanceSpotLight, 0.0f, 30.0f);
+
+				ImGui::InputFloat3("directionSL", *directionSpotLight);
+				ImGui::SliderFloat3("SliderVertexSLightDirection", *directionSpotLight, -1.0f, 1.0f);
+
+
+				ImGui::InputFloat("decaySL", decaySpotLight);
+				ImGui::SliderFloat("SliderVertexSLightDecay", decaySpotLight, 0.0f, 10.0f);
+
+				ImGui::InputFloat("cosAngleSL", cosAngleSpotLight);
+				ImGui::SliderFloat("SliderVertexSLightCosAngle", cosAngleSpotLight, 0.0f, *cosFalloffSpotLight);
+				
+				ImGui::InputFloat("cosFolloffStartSL", cosFalloffSpotLight);
+				ImGui::SliderFloat("SliderVertexSLightCosFolloffStart", cosFalloffSpotLight, *cosAngleSpotLight, 1.0f);
+
+				ImGui::InputFloat("intensitySL", intensitySpotLight);
+				ImGui::TreePop();
+			}
+
 			//if (ImGui::TreeNode("Sprite")) {
 			//	ImGui::Checkbox("IsSprite", &IsSprite);
 
@@ -2524,6 +2597,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				}
 
 				commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
+				commandList->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
 				commandList->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
 				commandList->SetGraphicsRootConstantBufferView(4,cameraResource->GetGPUVirtualAddress());
 				commandList->DrawInstanced(SphereVertexNum, 1, 0, 0);
@@ -2537,6 +2611,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				commandList->SetGraphicsRootConstantBufferView(1, wvpResourceModel->GetGPUVirtualAddress());	
 				commandList->SetGraphicsRootDescriptorTable(2, textureSrvHandleGPU);
 				commandList->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
+				commandList->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
 				commandList->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
 				commandList->SetGraphicsRootConstantBufferView(4, cameraResource->GetGPUVirtualAddress());
 				commandList->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
