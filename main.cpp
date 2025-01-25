@@ -2466,9 +2466,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 				ImGui::InputFloat("intensityPL", intensityPointLight);
 				ImGui::InputFloat("radiusPL", radiusPointLight);
-				ImGui::SliderFloat("SliderVertexPLightRadius", radiusPointLight, 0.0f, 50.0f);
+				ImGui::SliderFloat("SliderPLightRadius", radiusPointLight, 0.0f, 50.0f);
 				ImGui::InputFloat("decayPL", decayPointLight);
-				ImGui::SliderFloat("SliderVertexPLightDecay", decayPointLight, 0.0f, 5.0f);
+				ImGui::SliderFloat("SliderPLightDecay", decayPointLight, 0.0f, 5.0f);
 
 				ImGui::TreePop();
 			}
@@ -2482,20 +2482,20 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				ImGui::SliderFloat3("SliderVertexSLight", *inputDirectionSpotLight, -10.0f, 10.0f);
 
 				ImGui::InputFloat("distanceSL", distanceSpotLight);
-				ImGui::SliderFloat("SliderVertexSLightDistance", distanceSpotLight, 0.0f, 30.0f);
+				ImGui::SliderFloat("SliderSLightDistance", distanceSpotLight, 0.0f, 30.0f);
 
 				ImGui::InputFloat3("directionSL", *directionSpotLight);
-				ImGui::SliderFloat3("SliderVertexSLightDirection", *directionSpotLight, -1.0f, 1.0f);
+				ImGui::SliderFloat3("SliderSLightDirection", *directionSpotLight, -1.0f, 1.0f);
 
 
 				ImGui::InputFloat("decaySL", decaySpotLight);
-				ImGui::SliderFloat("SliderVertexSLightDecay", decaySpotLight, 0.0f, 10.0f);
+				ImGui::SliderFloat("SliderSLightDecay", decaySpotLight, 0.0f, 10.0f);
 
 				ImGui::InputFloat("cosAngleSL", cosAngleSpotLight);
-				ImGui::SliderFloat("SliderVertexSLightCosAngle", cosAngleSpotLight, 0.0f, *cosFalloffSpotLight);
+				ImGui::SliderFloat("SliderSLightCosAngle", cosAngleSpotLight, 0.0f, *cosFalloffSpotLight);
 				
 				ImGui::InputFloat("cosFolloffStartSL", cosFalloffSpotLight);
-				ImGui::SliderFloat("SliderVertexSLightCosFolloffStart", cosFalloffSpotLight, *cosAngleSpotLight, 1.0f);
+				ImGui::SliderFloat("SliderSLightCosFolloffStart", cosFalloffSpotLight, *cosAngleSpotLight, 1.0f);
 
 				ImGui::InputFloat("intensitySL", intensitySpotLight);
 				ImGui::TreePop();

@@ -83,13 +83,20 @@ PixelShaderOutput main(VertexShaderOutput input)
             
         float32_t3 toEye = normalize(gCamera.worldPosition - input.worldPostion);
         float32_t reflectLight = reflect(gDirectionalLight.direction, normalize(input.normal));
-         
         
-        float32_t3 halfVector = normalize(-gDirectionalLight.direction + gPointLight.position + gSpotLight.position + toEye);
-        float NdotH = dot(normalize(input.normal), halfVector);
-       
         float RdotE = dot(reflectLight, toEye);//u*r
+        
+        float32_t3 halfVector = normalize(-gDirectionalLight.direction + toEye);
+        float32_t3 halfVectorP = normalize(gPointLight.position + toEye);
+        float32_t3 halfVectorS = normalize(gSpotLight.position + toEye);
+        float NdotH = dot(normalize(input.normal), halfVector);
+        float NdotHP = dot(normalize(input.normal), halfVectorP);
+        float NdotHS = dot(normalize(input.normal), halfVectorS);
+       
+        
         float specularPow = pow(saturate(NdotH), gMaterial.shininess);// saturate (u * r) s乗
+        float specularPowP = pow(saturate(NdotHP), gMaterial.shininess);// saturate (u * r) s乗
+        float specularPowS = pow(saturate(NdotHS), gMaterial.shininess); // saturate (u * r) s乗
             
              
         //float32_t3 pointLightDirection = normalize(input.worldPostion - gPointLight.position);
@@ -113,7 +120,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         gMaterial.color.rgb * textureColor.rgb * gPointLight.color.rgb * cos * gPointLight.intensity * factor;
         
         float32_t3 specularPointLight =
-        gPointLight.color.rgb * gPointLight.intensity * factor * specularPow * float32_t3(1.0f, 1.0f, 1.0f);
+        gPointLight.color.rgb * gPointLight.intensity * factor * specularPowP * float32_t3(1.0f, 1.0f, 1.0f);
         
 
         //スポットライト        
@@ -133,7 +140,7 @@ PixelShaderOutput main(VertexShaderOutput input)
         gMaterial.color.rgb * textureColor.rgb * gSpotLight.color.rgb * cos * gSpotLight.intensity * attenuationFactor * falloffFactorS;
         
         float32_t3 specularSpotLight =
-        gSpotLight.color.rgb * gSpotLight.intensity * attenuationFactor * falloffFactor * specularPow * float32_t3(1.0f, 1.0f, 1.0f);
+        gSpotLight.color.rgb * gSpotLight.intensity * attenuationFactor * falloffFactor * specularPowS * float32_t3(1.0f, 1.0f, 1.0f);
                
         output.color.rgb = 
         diffuseDirectionalLight + specularDirectionalLight +
