@@ -2219,6 +2219,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 
+	ImGuiIO& io = ImGui::GetIO();
+
+	io.Fonts->AddFontFromFileTTF("フォントのパス", 10.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+
+	static ImWchar const glyph_ranges[] = { 0x0020, 0xfffd,0, };
+	ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\meiryo.ttc", 18.0f, NULL, glyph_ranges);
+
 
 
 	//初期化で0でFenceを作る
@@ -2379,15 +2386,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//ImGui::InputFloat3("Scale", *inputScale);
 			//ImGui::SliderFloat3("SliderScale", *inputScale, 0.5f, 5.0f);
+			if (ImGui::TreeNode("カメラワーク")) {
+				ImGui::InputFloat3("cameraT", *inputTransformCamera);
+				ImGui::SliderFloat3("SlidercameraT", *inputTransformCamera, -15.0f, 15.0f);
 
-			ImGui::InputFloat3("cameraT", *inputTransformCamera);
-			ImGui::SliderFloat3("SlidercameraT", *inputTransformCamera, -15.0f, 15.0f);
+				ImGui::InputFloat3("Vertexlight", *inputRotateCamera);
+				ImGui::SliderFloat3("SliderVertexlight", *inputRotateCamera, -1.0f, 1.0f);
+				ImGui::TreePop();
+			}
 
-			ImGui::InputFloat3("Vertexlight", *inputRotateCamera);
-			ImGui::SliderFloat3("SliderVertexlight", *inputRotateCamera, -1.0f, 1.0f);
-
-
-			if (ImGui::TreeNode("Sphere")) {
+			if (ImGui::TreeNode("球")) {
 				ImGui::Checkbox("IsSphere", &IsSphere);
 
 				if (IsSphere) {
@@ -2442,59 +2450,59 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//}
 
 
-			if (ImGui::TreeNode("light")) {
+			if (ImGui::TreeNode("平行光源")) {
 
-				ImGui::InputFloat4("Materiallight", *inputMateriallight);
+				ImGui::InputFloat4("マテリアル", *inputMateriallight);
 				ImGui::SliderFloat4("SliderMateriallight", *inputMateriallight, 0.0f, 1.0f);
 
-				ImGui::InputFloat3("Vertexlight", *inputDirectionLight);
+				ImGui::InputFloat3("方向", *inputDirectionLight);
 				ImGui::SliderFloat3("SliderVertexlight", *inputDirectionLight, -1.0f, 1.0f);
-
 
 				ImGui::InputFloat("intensity", intensity);
 
 				ImGui::TreePop();
 			}
 			
-			if (ImGui::TreeNode("lightP")) {
+			if (ImGui::TreeNode("ポイントライト")) {
 
-				ImGui::InputFloat4("MaterialPLight", *inputMaterialPointLight);
+				ImGui::InputFloat4("マテリアル", *inputMaterialPointLight);
 				ImGui::SliderFloat4("SliderMaterialPLight", *inputMaterialPointLight, 0.0f, 1.0f);
 
-				ImGui::InputFloat3("VertexPLight", *inputDirectionPointLight);
+				ImGui::InputFloat3("位置", *inputDirectionPointLight);
 				ImGui::SliderFloat3("SliderVertexPLight", *inputDirectionPointLight, -10.0f, 10.0f);
 
-				ImGui::InputFloat("intensityPL", intensityPointLight);
-				ImGui::InputFloat("radiusPL", radiusPointLight);
+				ImGui::InputFloat("範囲", radiusPointLight);
 				ImGui::SliderFloat("SliderPLightRadius", radiusPointLight, 0.0f, 50.0f);
-				ImGui::InputFloat("decayPL", decayPointLight);
+			
+				ImGui::InputFloat("減衰率", decayPointLight);
 				ImGui::SliderFloat("SliderPLightDecay", decayPointLight, 0.0f, 5.0f);
+				
+				ImGui::InputFloat("intensityPL", intensityPointLight);
 
 				ImGui::TreePop();
 			}
 
-			if (ImGui::TreeNode("lightS")) {
+			if (ImGui::TreeNode("スポットライト")) {
 
-				ImGui::InputFloat4("MaterialSLight", *inputMaterialSpotLight);
+				ImGui::InputFloat4("マテリアル", *inputMaterialSpotLight);
 				ImGui::SliderFloat4("SliderMaterialSLight", *inputMaterialSpotLight, 0.0f, 1.0f);
 
 				ImGui::InputFloat3("VertexSLight", *inputDirectionSpotLight);
 				ImGui::SliderFloat3("SliderVertexSLight", *inputDirectionSpotLight, -10.0f, 10.0f);
 
-				ImGui::InputFloat("distanceSL", distanceSpotLight);
+				ImGui::InputFloat("方向", distanceSpotLight);
 				ImGui::SliderFloat("SliderSLightDistance", distanceSpotLight, 0.0f, 30.0f);
 
-				ImGui::InputFloat3("directionSL", *directionSpotLight);
+				ImGui::InputFloat3("距離", *directionSpotLight);
 				ImGui::SliderFloat3("SliderSLightDirection", *directionSpotLight, -1.0f, 1.0f);
 
-
-				ImGui::InputFloat("decaySL", decaySpotLight);
+				ImGui::InputFloat("減衰率", decaySpotLight);
 				ImGui::SliderFloat("SliderSLightDecay", decaySpotLight, 0.0f, 10.0f);
 
-				ImGui::InputFloat("cosAngleSL", cosAngleSpotLight);
+				ImGui::InputFloat("cosAngle", cosAngleSpotLight);
 				ImGui::SliderFloat("SliderSLightCosAngle", cosAngleSpotLight, 0.0f, *cosFalloffSpotLight);
 				
-				ImGui::InputFloat("cosFolloffStartSL", cosFalloffSpotLight);
+				ImGui::InputFloat("Folloff", cosFalloffSpotLight);
 				ImGui::SliderFloat("SliderSLightCosFolloffStart", cosFalloffSpotLight, *cosAngleSpotLight, 1.0f);
 
 				ImGui::InputFloat("intensitySL", intensitySpotLight);
