@@ -48,7 +48,7 @@ public:
 	void SetWinApp(WinApp* winApp) { winApp_ = winApp; }
 
 	//コンパイルシェーダ
-	IDxcBlob* CompileShader(const std::wstring& filePath, const wchar_t* profile);
+	Microsoft::WRL::ComPtr <IDxcBlob> CompileShader(const std::wstring& filePath, const wchar_t* profile);
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> CreateBufferResource(size_t sizeInBytes);
 
@@ -60,10 +60,10 @@ public:
 	void ProDraw();
 	void PostDraw();
 
-	ID3D12Device* GetDevice()const { return device.Get(); }
-	ID3D12GraphicsCommandList* GetCommandList() const { return commandList.Get(); }
+	Microsoft::WRL::ComPtr<ID3D12Device>  GetDevice()const { return device.Get(); }
+	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList() const { return commandList.Get(); }
 	D3D12_CPU_DESCRIPTOR_HANDLE GetDsvHandle() { return dsvHandle; }
-	//HANDLE GetFenceEvent() { return fenceEvent; }
+	HANDLE GetFenceEvent() { return fenceEvent; }
 
 	//最大SRV数
 	static const uint32_t kMaxSRVCount;
@@ -136,16 +136,16 @@ private:
 
 
 	//DXC
-	IDxcUtils* dxcUtils = nullptr;
-	IDxcCompiler3* dxcCompiler = nullptr;
-	IDxcIncludeHandler* includeHandler = nullptr;
+	Microsoft::WRL::ComPtr <IDxcUtils> dxcUtils = nullptr;
+	Microsoft::WRL::ComPtr <IDxcCompiler3> dxcCompiler = nullptr;
+	Microsoft::WRL::ComPtr <IDxcIncludeHandler> includeHandler = nullptr;
 
 	//Update
 
 
 	Microsoft::WRL::ComPtr <ID3D12Fence> fence = nullptr;
 	uint64_t fenceValue = 0;
-	//HANDLE fenceEvent;
+	HANDLE fenceEvent;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle;
 
