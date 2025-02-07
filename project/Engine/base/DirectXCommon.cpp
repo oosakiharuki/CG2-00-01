@@ -59,9 +59,7 @@ void DirectXCommon::Device() {
 
 #pragma region Factoryの生成
 	//DZGIファクトリーの生成
-
-	//Microsoft::WRL::ComPtr<ID3D12Resource>* CreateTextureResource(Microsoft::WRL::ComPtr<ID3D12Resource> device, const DirectX::TexMetadata & metadata);
-
+	
 	//HREUSLTはWindouws系のエラーコード
 	//関数が成功したかどうかをSUCCEEDEDマクロで判定できる
 	HRESULT hr = CreateDXGIFactory(IID_PPV_ARGS(&dxgiFactory));
@@ -140,9 +138,6 @@ void DirectXCommon::Device() {
 
 		infoQueue->PushStorageFilter(&filter);
 
-
-		//解放
-		//infoQueue->Release();
 	}
 
 
@@ -341,8 +336,8 @@ void DirectXCommon::Fence() {
 	HRESULT hr = device->CreateFence(fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&fence));
 	assert(SUCCEEDED(hr));
 
-	//fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	//assert(fenceEvent != nullptr);
+	fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+	assert(fenceEvent != nullptr);
 }
 
 void DirectXCommon::ViewPort() {
@@ -366,7 +361,7 @@ void DirectXCommon::Siccer() {
 
 
 //ComplierShader関数
-IDxcBlob* DirectXCommon::CompileShader(
+Microsoft::WRL::ComPtr<IDxcBlob> DirectXCommon::CompileShader(
 	const std::wstring& filePath,
 	const wchar_t* profile)
 {
@@ -393,19 +388,19 @@ IDxcBlob* DirectXCommon::CompileShader(
 		L"-Zpr",
 	};
 
-	IDxcResult* shaderResult = nullptr;
+	Microsoft::WRL::ComPtr<IDxcResult> shaderResult = nullptr;
 	hr = dxcCompiler->Compile(
 		&shaderSourceBuffer,
 		arguments,
 		_countof(arguments),
-		includeHandler,
+		*&includeHandler,
 		IID_PPV_ARGS(&shaderResult));
 
 	assert(SUCCEEDED(hr));
 
 	//3.警告エラー
 
-	IDxcBlobUtf8* shaderError = nullptr;
+	Microsoft::WRL::ComPtr<IDxcBlobUtf8> shaderError = nullptr;
 	shaderResult->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&shaderError), nullptr);
 	if (shaderError != nullptr && shaderError->GetStringLength() != 0)
 	{
@@ -414,14 +409,11 @@ IDxcBlob* DirectXCommon::CompileShader(
 		assert(false);
 	}
 	//4.Complie結果
-	IDxcBlob* shaderBlob = nullptr;
+	Microsoft::WRL::ComPtr<IDxcBlob> shaderBlob = nullptr;
 	hr = shaderResult->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&shaderBlob), nullptr);
 	assert(SUCCEEDED(hr));
 
 	log(ConvertString(std::format(L"Compile Succeeded,path:{},profile:{}\n", filePath, profile)));
-
-	//shaderSource->Release();
-	//shaderResult->Release();
 
 	return shaderBlob;
 }
@@ -617,10 +609,8 @@ void DirectXCommon::PostDraw() {
 	commandQueue->Signal(fence.Get(), ++fenceValue);
 
 	if (fence->GetCompletedValue() != fenceValue) {
-		HANDLE event = CreateEvent(nullptr, false, false, nullptr);
-		fence->SetEventOnCompletion(fenceValue, event);
-		WaitForSingleObject(event, INFINITE);
-		CloseHandle(event);
+		fence->SetEventOnCompletion(fenceValue, fenceEvent);
+		WaitForSingleObject(fenceEvent, INFINITE);
 	}
 	// FPS
 	UpdateFixFPS();
