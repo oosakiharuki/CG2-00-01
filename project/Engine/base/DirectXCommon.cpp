@@ -522,7 +522,7 @@ void DirectXCommon::ImGui() {
 
 
 //更新前
-void DirectXCommon::ProDraw() {
+void DirectXCommon::PreDraw() {
 
 	////ImGuiの内部コマンド
 	//ImGui::Render();
@@ -600,9 +600,9 @@ void DirectXCommon::PostDraw() {
 	//OutputDebugStringA("Hello DirectX!\n");
 	//FENCEを更新する
 
-	//fenceValue++;
+	fenceValue++;
 	//コマンドの実行完了まで待つ
-	commandQueue->Signal(fence.Get(), ++fenceValue);
+	commandQueue->Signal(fence.Get(), fenceValue);
 
 	if (fence->GetCompletedValue() != fenceValue) {
 		fence->SetEventOnCompletion(fenceValue, fenceEvent);
@@ -644,5 +644,9 @@ void DirectXCommon::UpdateFixFPS() {
 }
 
 void DirectXCommon::Finalize() {
+	ImGui_ImplDX12_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+
 	CloseHandle(fenceEvent);
 }
