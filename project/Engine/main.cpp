@@ -1,39 +1,4 @@
-//#include<Windows.h>//winapp
-#include <cstdint>
-//#include <string>
-#include<format>
-
-#include<cassert>
-
-#include <dxgidebug.h>
-
-//#include <dxcapi.h>
-
-
-
-
-
-#include"externals/imgui/imgui.h"
-#include"externals/imgui/imgui_impl_dx12.h"
-#include"externals/imgui/imgui_impl_win32.h"
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
-#include "MyMath.h"
-using namespace MyMath;
-
-#pragma comment(lib,"dxguid.lib")
-
-
-#pragma comment(lib,"dxcompiler.lib")
-
-#define DIRECTINPUT_VERSION 0x0800
-#include <dinput.h>
-
-#pragma comment(lib,"dinput8.lib")
-#pragma comment(lib,"dxguid.lib")
-
 #include "Input.h"
-//#include "WinApp.h"
 #include "DirectXCommon.h"
 #include "D3DResorceLeakChecker.h"
 #include "SpriteCommon.h"
@@ -43,6 +8,10 @@ using namespace MyMath;
 #include "Object3dCommon.h"
 #include "Model.h"
 #include "ModelManager.h"
+#include "MyMath.h"
+
+using namespace MyMath;
+
 
 //Windowsアプリのエントリーポイント(main関数)
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
@@ -106,11 +75,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	modelCommon = new ModelCommon();
 	modelCommon->Initialize(dxCommon);
 
-
-	//Model* model = nullptr;
-	//model = new Model();
-	//model->Initialize(modelCommon);
-
 	std::vector <Object3d*> objects;
 
 
@@ -119,7 +83,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	for (uint32_t i = 0; i < 2; ++i) {
 
 		Object3d* object3d = new Object3d();
-		//object3d->SetModel(model);
 	
 		if (i == 0) {
 			object3d->SetModelFile("plane.obj");
@@ -135,169 +98,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 		objects.push_back(object3d);
 	}
-
-
-	//三角
-	//Microsoft::WRL::ComPtr<ID3D12Resource> vertexResource = dxCommon->CreateBufferResource(sizeof(VertexData) * 6);
-
-
-	//D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
-
-	//vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-
-	//vertexBufferView.SizeInBytes = sizeof(VertexData) * 6;
-
-	//vertexBufferView.StrideInBytes = sizeof(VertexData);
-
-
-	//Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource = dxCommon->CreateBufferResource(sizeof(Matrix4x4));
-
-	//Matrix4x4* wvpData = nullptr;
-
-	//wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
-
-	//*wvpData = MakeIdentity4x4();
-
-	//VertexData* vertexData = nullptr;
-
-	//vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	////leftTop
-	//vertexData[0].position = { -0.5f, -0.5f,0.0f,1.0f };
-	//vertexData[0].texcoord = { 0.0f,1.0f };
-
-	////Top
-	//vertexData[1].position = { 0.0f, 0.5f,0.0f,1.0f };
-	//vertexData[1].texcoord = { 0.5f,0.0f };
-
-	////rightBottom
-	//vertexData[2].position = { 0.5f, -0.5f,0.0f,1.0f };
-	//vertexData[2].texcoord = { 1.0f,1.0f };
-
-
-
-	////leftTop
-	//vertexData[3].position = { -0.5f, -0.5f,0.5f,1.0f };
-	//vertexData[3].texcoord = { 0.0f,1.0f };
-
-	////Top
-	//vertexData[4].position = { 0.0f, 0.0f,0.0f,1.0f };
-	//vertexData[4].texcoord = { 0.5f,0.0f };
-
-	////rightBottom
-	//vertexData[5].position = { 0.5f, -0.5f,-0.5f,1.0f };
-	//vertexData[5].texcoord = { 1.0f,1.0f };
-
-
-
-
-
-
-	uint32_t SphereVertexNum = 16 * 16 * 6;
-
-	//Sphere
-	Microsoft::WRL::ComPtr<ID3D12Resource> vertexResourceSphere = dxCommon->CreateBufferResource(sizeof(VertexData) * SphereVertexNum);
-
-
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferViewSphere{};
-
-	vertexBufferViewSphere.BufferLocation = vertexResourceSphere->GetGPUVirtualAddress();
-
-	vertexBufferViewSphere.SizeInBytes = sizeof(VertexData) * SphereVertexNum;
-
-	vertexBufferViewSphere.StrideInBytes = sizeof(VertexData);
-
-	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResourceSphere = dxCommon->CreateBufferResource(sizeof(TransformationMatrix));
-
-	TransformationMatrix* wvpDataSphere = nullptr;
-
-	wvpResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&wvpDataSphere));
-
-	wvpDataSphere->World = MakeIdentity4x4();
-
-	VertexData* vertexDataSphere = nullptr;
-
-	vertexResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&vertexDataSphere));
-
-
-	//モデルの読み込み
-	//ModelData modelData = LoadObjFile("resource", "plane.obj");
-
-	//ModelData modelData = LoadObjFile("resource", "axis.obj");
-
-	//ModelData modelData = LoadObjFile("resource", "multiMesh.obj");
-
-	//ModelData modelData = LoadObjFile("resource", "teapot.obj");
-
-	//static int modelChange = 0;
-
-
-
-	//まだ	
-	//ModelData modelData = LoadObjFile("resource", "multiMaterial.obj");
-	//ModelData modelData = LoadObjFile("resource", "stanford-bunny.obj");
-
-
-	////三角用マテリアル
-	////マテリアル用のリソース
-	//Microsoft::WRL::ComPtr<ID3D12Resource> materialResource = dxCommon->CreateBufferResource(sizeof(Vector4));
-	////マテリアルにデータを書き込む
-	//Vector4* materialData = nullptr;
-	////書き込むためのアドレス
-	//materialResource->Map(0, nullptr, reinterpret_cast<void**>(&materialData));
-	////色の設定
-	//*materialData = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-
-
-
-
-	////球体用マテリアル
-	////マテリアル用のリソース
-	//Microsoft::WRL::ComPtr<ID3D12Resource> materialResourceSphere = dxCommon->CreateBufferResource(sizeof(Material));
-	////マテリアルにデータを書き込む
-	//Material* materialDataSphere = nullptr;
-	////書き込むためのアドレス
-	//materialResourceSphere->Map(0, nullptr, reinterpret_cast<void**>(&materialDataSphere));
-	////色の設定
-	//materialDataSphere->color =  Vector4(1.0f, 1.0f, 1.0f, 1.0f);
-	//materialDataSphere->enableLighting = true;
-	//materialDataSphere->uvTransform = MakeIdentity4x4();
-
-
-
-
-
-
-
-
-
-	Transform transformSphere{ {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
-
-
-
-
-
-	//float *inputMaterial[3] = { &materialData->x,&materialData->y,&materialData->z };
-	//float* inputTransform[3] = { &transform.translate.x,&transform.translate.y,&transform.translate.z };
-	//float* inputRotate[3] = { &transform.rotate.x,&transform.rotate.y,&transform.rotate.z };
-	//float* inputScale[3] = { &transform.scale.x,&transform.scale.y,&transform.scale.z };
-
-
-	//float* inputMaterialSphere[3] = { &materialDataSphere->color.x,&materialDataSphere->color.y,&materialDataSphere->color.z };
-	//float* inputTransformSphere[3] = { &transformSphere.translate.x,&transformSphere.translate.y,&transformSphere.translate.z };
-	//float* inputRotateSphere[3] = { &transformSphere.rotate.x,&transformSphere.rotate.y,&transformSphere.rotate.z };
-	//float* inputScaleSphere[3] = { &transformSphere.scale.x,&transformSphere.scale.y,&transformSphere.scale.z };
-	//bool textureChange = false;
-
-	//float* inputMaterialModel[3] = { &materialDataModel->color.x,&materialDataModel->color.y,&materialDataModel->color.z };
-	//float* inputTransformModel[3] = { &transformModel.translate.x,&transformModel.translate.y,&transformModel.translate.z };
-	//float* inputRotateModel[3] = { &transformModel.rotate.x,&transformModel.rotate.y,&transformModel.rotate.z };
-	//float* inputScaleModel[3] = { &transformModel.scale.x,&transformModel.scale.y,&transformModel.scale.z };
-	//bool textureChange2 = false;
-
-
-	//float* inputMateriallight[3] = { &directionalLightSphereData->color.x,&directionalLightSphereData->color.y,&directionalLightSphereData->color.z };
-	//float* inputDirectionLight[3] = { &directionalLightSphereData->direction.x,&directionalLightSphereData->direction.y,&directionalLightSphereData->direction.z };
-	//float* intensity = &directionalLightSphereData->intensity;
 
 	//描画させるもの
 	bool IsSphere = true;
@@ -315,6 +115,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		else {
 			//ゲームの処理
 			
+			
+			ImGui_ImplDX12_NewFrame();
+			ImGui_ImplWin32_NewFrame();
+			ImGui::NewFrame();
+
+
 			input_->Update();
 			
 			if (input_->PushKey(DIK_0)) {
@@ -391,71 +197,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 
-
-			ImGui_ImplDX12_NewFrame();
-			ImGui_ImplWin32_NewFrame();
-			ImGui::NewFrame();
-
-			//三角
-			//*wvpData = WorldViewProjectionMatrix;
-
-
-			//球体
-
-			//Matrix4x4 worldMatrixSphere = MakeAffineMatrix(transformSphere.scale, transformSphere.rotate, transformSphere.translate);
-			//Matrix4x4 WorldViewProjectionMatrixSphere = Multiply(worldMatrixSphere, Multiply(viewMatrix, projectionMatrix));
-
-			//wvpDataSphere->World = worldMatrixSphere;
-			//wvpDataSphere->WVP = WorldViewProjectionMatrixSphere;
-			//		
-			//DrawSphere(vertexDataSphere);
-		
-		
-
 			//開発用UIの処理
 			//ImGui::ShowDemoWindow();
 
 			//ここにテキストを入れられる
 			ImGui::Text("ImGuiText");
 
-
-			//ImGui::Text("Traiangle");
-			//ImGui::InputFloat3("Material", *inputMaterial);
-			//ImGui::SliderFloat3("SliderMaterial", *inputMaterial, 0.0f, 1.0f);
-
-			//ImGui::InputFloat3("Vertex", *inputTransform);
-			//ImGui::SliderFloat3("SliderVertex", *inputTransform, -5.0f, 5.0f);
-
-			//ImGui::InputFloat3("Rotate", *inputRotate);
-			//ImGui::SliderFloat3("SliderRotate", *inputRotate, -10.0f, 10.0f);
-
-			//ImGui::InputFloat3("Scale", *inputScale);
-			//ImGui::SliderFloat3("SliderScale", *inputScale, 0.5f, 5.0f);
-
-
-
-			//if (ImGui::TreeNode("Sphere")) {
-			//	ImGui::Checkbox("IsSphere", &IsSphere);
-
-			//	if (IsSphere) {
-			//		ImGui::InputFloat3("MaterialSphere", *inputMaterialSphere);
-			//		ImGui::SliderFloat3("SliderMaterialSphere", *inputMaterialSphere, 0.0f, 1.0f);
-
-			//		ImGui::InputFloat3("VertexSphere", *inputTransformSphere);
-			//		ImGui::SliderFloat3("SliderVertexSphere", *inputTransformSphere, -5.0f, 5.0f);
-
-			//		ImGui::InputFloat3("RotateSphere", *inputRotateSphere);
-			//		ImGui::SliderFloat3("SliderRotateSphere", *inputRotateSphere, -10.0f, 10.0f);
-
-			//		ImGui::InputFloat3("ScaleSphere", *inputScaleSphere);
-			//		ImGui::SliderFloat3("SliderScaleSphere", *inputScaleSphere, 0.5f, 5.0f);
-
-			//		ImGui::Checkbox("SphereTexture", &textureChange);
-			//	}
-			//	ImGui::TreePop();
-			//}
-
-			
 			if (ImGui::TreeNode("Model_1")) {
 				ImGui::Checkbox("IsModel", &IsModel[0]);
 				if (IsModel) {
@@ -593,18 +340,18 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
 
-	CloseHandle(dxCommon->GetFenceEvent());
-
 	delete input_;
+	
 	winApp_->Finalize();
-
 	delete winApp_;	
 	winApp_ = nullptr;
 
 	TextureManager::GetInstance()->Finalize();
 	ModelManager::GetInstance()->Finalize();
-
+	
+	dxCommon->Finalize();
 	delete dxCommon;
+	dxCommon = nullptr;
 
 	delete spriteCommon;
 	for (Sprite* sprite : sprites) {

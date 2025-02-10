@@ -14,6 +14,11 @@
 #include "externals/DirectXTex/DirectXTex.h"
 #include <chrono>
 
+#include"externals/imgui/imgui.h"
+#include"externals/imgui/imgui_impl_dx12.h"
+#include"externals/imgui/imgui_impl_win32.h"
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 class DirectXCommon {
 public:
 	void Initialize();
@@ -64,6 +69,8 @@ public:
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList() const { return commandList.Get(); }
 	D3D12_CPU_DESCRIPTOR_HANDLE GetDsvHandle() { return dsvHandle; }
 	HANDLE GetFenceEvent() { return fenceEvent; }
+
+	void Finalize();
 
 	//最大SRV数
 	static const uint32_t kMaxSRVCount;

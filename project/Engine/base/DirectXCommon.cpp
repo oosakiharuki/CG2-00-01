@@ -5,11 +5,7 @@
 
 #pragma comment(lib,"d3d12.lib")
 #pragma comment(lib,"dxgi.lib")
-
-#include"externals/imgui/imgui.h"
-#include"externals/imgui/imgui_impl_dx12.h"
-#include"externals/imgui/imgui_impl_win32.h"
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+#pragma comment(lib,"dxcompiler.lib")
 
 #include <thread>
 
@@ -645,4 +641,8 @@ void DirectXCommon::UpdateFixFPS() {
 		}
 	}
 	reference_ = std::chrono::steady_clock::now();
+}
+
+void DirectXCommon::Finalize() {
+	CloseHandle(fenceEvent);
 }
