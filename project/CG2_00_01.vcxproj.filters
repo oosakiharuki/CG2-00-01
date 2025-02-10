@@ -108,6 +108,9 @@
     <ClCompile Include="Engine\3d\Camera.cpp">
       <Filter>ソース ファイル\Engine\3d</Filter>
     </ClCompile>
+    <ClCompile Include="Engine\base\SrvManager.cpp">
+      <Filter>ソース ファイル\Engine\base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="externals\imgui\imconfig.h">
@@ -196,6 +199,9 @@
     </ClInclude>
     <ClInclude Include="Engine\3d\Camera.h">
       <Filter>ソース ファイル\Engine\3d</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\base\SrvManager.h">
+      <Filter>ソース ファイル\Engine\base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -7,10 +7,11 @@ using namespace MyMath;
 
 void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath) {
 	this->spriteCommon_ = spriteCommon;
+	filePath = textureFilePath;
 
 	TextureManager::GetInstance()->LoadTexture(textureFilePath);
 
-	textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
+	//textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
 
 	//Sprite
 	vertexResource = spriteCommon_->GetDirectXCommon()->CreateBufferResource(sizeof(VertexData) * 4);
@@ -44,7 +45,7 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath)
 	}
 
 	AdjustTextureSize();
-	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureIndex);
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(filePath);
 	float tex_left = textureLeftTop.x / metadata.width;
 	float tex_right = textureLeftTop.x + textureSize.x / metadata.width;
 	float tex_top = textureLeftTop.y / metadata.height;
@@ -113,7 +114,7 @@ void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath)
 }
 
 void Sprite::AdjustTextureSize() {
-	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(textureIndex);
+	const DirectX::TexMetadata& metadata = TextureManager::GetInstance()->GetMetaData(filePath);
 
 	textureSize.x = static_cast<float>(metadata.width);
 	textureSize.y = static_cast<float>(metadata.height);
@@ -142,6 +143,6 @@ void Sprite::Draw() {
 	spriteCommon_->GetDirectXCommon()->GetCommandList()->IASetIndexBuffer(&indexBufferView);
 	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
 	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, transformationMatrixResource->GetGPUVirtualAddress());
-	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(textureIndex));
+	spriteCommon_->GetDirectXCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(filePath));
 	spriteCommon_->GetDirectXCommon()->GetCommandList()->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
