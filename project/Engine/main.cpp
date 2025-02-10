@@ -314,7 +314,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//ImGuiの内部コマンド
 			ImGui::Render();
 
-			dxCommon->ProDraw();
+			dxCommon->PreDraw();
 
 			//モデル
 			
@@ -333,12 +333,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			dxCommon->PostDraw();
 		}
 	}
-
-
-
-	ImGui_ImplDX12_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
 
 	delete input_;
 	

@@ -62,7 +62,7 @@ public:
 	void UploadTextureData(Microsoft::WRL::ComPtr<ID3D12Resource> texture, const DirectX::ScratchImage& mipImages);
 
 
-	void ProDraw();
+	void PreDraw();
 	void PostDraw();
 
 	Microsoft::WRL::ComPtr<ID3D12Device>  GetDevice()const { return device.Get(); }
