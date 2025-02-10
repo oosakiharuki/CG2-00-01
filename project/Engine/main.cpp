@@ -70,6 +70,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3dCommon = new Object3dCommon();
 	object3dCommon->Initialize(dxCommon);
 
+	Camera* camera = new Camera();
+	Vector3 cameraRotate = { 0.0f,0.0f,0.0f };
+	Vector3 cameraTranslate = { 0.0f,0.0f,-15.0f };
+	camera->SetRotate(cameraRotate);
+	camera->SetTranslate(cameraTranslate);
+	object3dCommon->SetDefaultCamera(camera);
 
 	ModelCommon* modelCommon = nullptr;
 	modelCommon = new ModelCommon();
@@ -195,13 +201,23 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			rotationOBJ2.z += 0.1f;			
 			objects[1]->SetRotate(rotationOBJ2);
 
-
+			camera->Update();
 
 			//開発用UIの処理
 			//ImGui::ShowDemoWindow();
 
 			//ここにテキストを入れられる
 			ImGui::Text("ImGuiText");
+
+			//カメラ
+			ImGui::SliderFloat3("cameraTranslate", &cameraTranslate.x, -30.0f, 30.0f);
+
+			ImGui::SliderFloat("cameraRotateX", &cameraRotate.x, -10.0f, 10.0f);
+			ImGui::SliderFloat("cameraRotateY", &cameraRotate.y, -10.0f, 10.0f);
+			ImGui::SliderFloat("cameraRotateZ", &cameraRotate.z, -10.0f, 10.0f);
+			camera->SetRotate(cameraRotate);
+			camera->SetTranslate(cameraTranslate);
+
 
 			if (ImGui::TreeNode("Model_1")) {
 				ImGui::Checkbox("IsModel", &IsModel[0]);
