@@ -9,6 +9,7 @@
 #include "Model.h"
 #include "ModelManager.h"
 #include "MyMath.h"
+#include "SrvManager.h"
 
 using namespace MyMath;
 
@@ -38,7 +39,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dxCommon->SetWinApp(winApp_);
 	dxCommon->Initialize();
 
-	TextureManager::GetInstance()->Initialize(dxCommon);
+	SrvManager* srvManager = nullptr;
+	srvManager = new SrvManager();
+	srvManager->Initialize(dxCommon);
+
+	TextureManager::GetInstance()->Initialize(dxCommon,srvManager);
 
 	SpriteCommon* spriteCommon = nullptr;
 	spriteCommon = new SpriteCommon;
@@ -362,6 +367,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dxCommon->Finalize();
 	delete dxCommon;
 	dxCommon = nullptr;
+
+	delete srvManager;
 
 	delete spriteCommon;
 	for (Sprite* sprite : sprites) {
