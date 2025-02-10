@@ -19,9 +19,6 @@
     <Filter Include="ソース ファイル\Engine">
       <UniqueIdentifier>{193ab31c-5a16-4f54-8224-7c6d6b0a57d1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="ソース ファイル\Engine\2d">
-      <UniqueIdentifier>{60c51db4-57e8-4c52-a251-89af31add87e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="ソース ファイル\Engine\3d">
       <UniqueIdentifier>{180c8c76-a122-465c-91ed-1a680a934e3e}</UniqueIdentifier>
     </Filter>
@@ -33,6 +30,9 @@
     </Filter>
     <Filter Include="ソース ファイル\Engine\math">
       <UniqueIdentifier>{5080c25b-1a97-4ac3-bbc4-937a3146f8b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Engine\2d">
+      <UniqueIdentifier>{60c51db4-57e8-4c52-a251-89af31add87e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -104,6 +104,9 @@
     </ClCompile>
     <ClCompile Include="Engine\math\MyMath.cpp">
       <Filter>ソース ファイル\Engine\math</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\3d\Camera.cpp">
+      <Filter>ソース ファイル\Engine\3d</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -190,6 +193,9 @@
     </ClInclude>
     <ClInclude Include="Engine\math\Vector4.h">
       <Filter>ソース ファイル\Engine\math</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\3d\Camera.h">
+      <Filter>ソース ファイル\Engine\3d</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
