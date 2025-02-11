@@ -34,6 +34,15 @@
     <Filter Include="ソース ファイル\Engine\2d">
       <UniqueIdentifier>{60c51db4-57e8-4c52-a251-89af31add87e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Application">
+      <UniqueIdentifier>{7daa247b-4fb1-4524-ba31-796377f1a1cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Application\scene">
+      <UniqueIdentifier>{b4e8101f-8a23-42ec-bd48-f2e748d7e170}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ソース ファイル\Application\system">
+      <UniqueIdentifier>{41623119-b330-41e1-9691-d67a47e0d74d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="externals\imgui\imgui.cpp">
@@ -110,6 +119,30 @@
     </ClCompile>
     <ClCompile Include="Engine\base\SrvManager.cpp">
       <Filter>ソース ファイル\Engine\base</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\scene\ClearScene.cpp">
+      <Filter>ソース ファイル\Application\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\scene\GameManager.cpp">
+      <Filter>ソース ファイル\Application\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\scene\GameOverScene.cpp">
+      <Filter>ソース ファイル\Application\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\scene\GameScene.cpp">
+      <Filter>ソース ファイル\Application\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\scene\IScene.cpp">
+      <Filter>ソース ファイル\Application\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\scene\TitleScene.cpp">
+      <Filter>ソース ファイル\Application\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\system\Audio.cpp">
+      <Filter>ソース ファイル\Application\system</Filter>
+    </ClCompile>
+    <ClCompile Include="Application\system\Fead.cpp">
+      <Filter>ソース ファイル\Application\system</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -202,6 +235,30 @@
     </ClInclude>
     <ClInclude Include="Engine\base\SrvManager.h">
       <Filter>ソース ファイル\Engine\base</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\scene\ClearScene.h">
+      <Filter>ソース ファイル\Application\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\scene\GameManager.h">
+      <Filter>ソース ファイル\Application\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\scene\GameOverScene.h">
+      <Filter>ソース ファイル\Application\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\scene\GameScene.h">
+      <Filter>ソース ファイル\Application\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\scene\IScene.h">
+      <Filter>ソース ファイル\Application\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\scene\TitleScene.h">
+      <Filter>ソース ファイル\Application\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\system\Audio.h">
+      <Filter>ソース ファイル\Application\system</Filter>
+    </ClInclude>
+    <ClInclude Include="Application\system\Fead.h">
+      <Filter>ソース ファイル\Application\system</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
