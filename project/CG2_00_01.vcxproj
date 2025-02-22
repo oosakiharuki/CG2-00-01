@@ -98,6 +98,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Engine\3d\Camera.cpp" />
+    <ClCompile Include="Engine\3d\Particle.cpp" />
+    <ClCompile Include="Engine\3d\ParticleCommon.cpp" />
+    <ClCompile Include="Engine\3d\ParticleManager.cpp" />
     <ClCompile Include="Engine\base\D3DResorceLeakChecker.cpp" />
     <ClCompile Include="Engine\base\DirectXCommon.cpp" />
     <ClCompile Include="Engine\base\SrvManager.cpp" />
@@ -132,6 +135,9 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\3d\Camera.h" />
+    <ClInclude Include="Engine\3d\Particle.h" />
+    <ClInclude Include="Engine\3d\ParticleCommon.h" />
+    <ClInclude Include="Engine\3d\ParticleManager.h" />
     <ClInclude Include="Engine\base\D3DResorceLeakChecker.h" />
     <ClInclude Include="Engine\base\DirectXCommon.h" />
     <ClInclude Include="Engine\base\SrvManager.h" />
@@ -175,6 +181,10 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </None>
+    <None Include="resource\shaders\Particle.hlsli">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="resource\shaders\Object3d.PS.hlsl">
@@ -182,6 +192,14 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
     <FxCompile Include="resource\shaders\Object3d.VS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="resource\shaders\Particle.PS.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="resource\shaders\Particle.VS.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>

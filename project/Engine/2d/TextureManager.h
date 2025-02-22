@@ -31,7 +31,7 @@ private:
 
 	struct TextureData {
 		DirectX::TexMetadata metadata; //width,height
-		Microsoft::WRL::ComPtr<ID3D12Resource>resoource; // テクスチャリソース
+		Microsoft::WRL::ComPtr<ID3D12Resource>resource; // テクスチャリソース
 		uint32_t srvIndex;
 		D3D12_CPU_DESCRIPTOR_HANDLE srvHandleCPU;
 		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU;
