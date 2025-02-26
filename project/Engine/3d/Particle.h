@@ -25,6 +25,16 @@ struct Emitter {
 	float frequencyTime; //頻度時刻
 };
 
+struct AABB {
+	Vector3 min;
+	Vector3 max;
+};
+
+struct AccelerationField {
+	Vector3 acceleration;
+	AABB area;
+};
+
 class Particle{
 public:
 	void Initialize(ParticleCommon* particleCommon, const std::string& fileName);
@@ -51,6 +61,8 @@ public:
 
 	//Particles MakeNewParticle(std::mt19937& randomEngine,const Vector3& translate);
 	//std::list<Particles> MakeEmit(const Emitter& emitter, std::mt19937& randomEngine);
+
+	bool IsCollision(const AABB& aabb, const Vector3& point);
 
 private:
 	ParticleCommon* particleCommon = nullptr;
@@ -101,5 +113,5 @@ private:
 
 	//std::list<Particles> MakeEmit(const Emitter& emitter, std::mt19937& randomEngine);
 
-	bool a = true;
+	AccelerationField accelerationField;
 };

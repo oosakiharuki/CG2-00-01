@@ -62,7 +62,7 @@ void Particle::Initialize(ParticleCommon* ParticleCommon, const std::string& fil
 	directionalLightSphereData->direction = { 0.0f,-1.0f,0.0f };
 	directionalLightSphereData->intensity = 1.0f;
 
-
+	//エミッター
 	emitter.transform.translate = { 0.0f,0.0f,-3.0f };
 	emitter.transform.rotate = { 0.0f,0.0f,0.0f };
 	emitter.transform.scale = { 1.0f,1.0f,1.0f };
@@ -71,7 +71,7 @@ void Particle::Initialize(ParticleCommon* ParticleCommon, const std::string& fil
 	emitter.frequencyTime = 0.0f;
 
 
-	transform.translate = { 0.0f,0.0f,-3.0f };
+	transform.translate = { 0.0f,0.0f,0.0f };
 
 	//ParticleManager::GetInstance()->Emit(fileName,.);
 	//ParticleManager::GetInstance()->Emit(fileName, transform.translate, count);
@@ -79,6 +79,10 @@ void Particle::Initialize(ParticleCommon* ParticleCommon, const std::string& fil
 
 	transformL = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
+	//場
+	accelerationField.acceleration = { 15.0f,0.0f,0.0f };
+	accelerationField.area.min = { -1.0f,-1.0f,-1.0f };
+	accelerationField.area.max = { 1.0f,1.0f,1.0f };
 }
 
 void Particle::Update() {
@@ -132,6 +136,10 @@ void Particle::Update() {
 		const float kDeltaTime = 1.0f / 60.0f;
 		float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
 
+		if (IsCollision(accelerationField.area, (*particleIterator).transform.translate)) {
+			(*particleIterator).velocity += accelerationField.acceleration * kDeltaTime;
+		}
+
 		(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime;
 
 	
@@ -166,6 +174,19 @@ void Particle::Draw() {
 
 	particleCommon->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()),numInstance, 0, 0);
 }
+
+bool Particle::IsCollision(const AABB& aabb, const Vector3& point) {
+	
+	if ((aabb.min.x < point.x && aabb.max.x > point.x) &&
+		(aabb.min.y < point.y && aabb.max.y > point.y) &&
+		(aabb.min.z < point.z && aabb.max.z > point.z)) {
+		return true;
+	}
+
+	return false;
+}
+
+
 
 //Particles Particle::MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate){
 //	//random
