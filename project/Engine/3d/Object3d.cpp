@@ -29,7 +29,6 @@ void Object3d::Initialize(Object3dCommon* object3dCommon_) {
 	directionalLightSphereData->intensity = 1.0f;
 
 	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
-	cameraTransform = { {1.0f,1.0f,1.0f},{0.3f,0.0f,0.0f}, {0.0f,4.0f,-10.0f} };
 
 	transformL = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 

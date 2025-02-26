@@ -4,6 +4,7 @@
 #include <memory>
 #include "Particle.h"
 #include "SrvManager.h"
+#include "ParticleEmitter.h"
 
 class ParticleManager {
 public:
@@ -17,6 +18,9 @@ public:
 	ModelData GetModelData(const std::string filePath);
 	std::string GetTextureHandle(const std::string filePath);
 	Microsoft::WRL::ComPtr<ID3D12Resource> GetResource(const std::string filePath);
+	std::list<Particles> GetParticle(const std::string filePath);
+
+	void Emit(const std::string name, const Vector3& position, uint32_t count);
 
 private:
 	static ParticleManager* instance;
@@ -35,10 +39,10 @@ private:
 		std::string textureFile;
 		ModelData modelData;
 
-		std::list<Particle> particles;
-		uint32_t srvIndex;		
+		std::list<Particles> particles;
+		uint32_t srvIndex;
 		Microsoft::WRL::ComPtr<ID3D12Resource> resource;
-		uint32_t kNumInstance;
+		uint32_t kNumInstance = 100;
 		DirectX::TexMetadata metadata; //width,height
 
 
@@ -46,10 +50,14 @@ private:
 		D3D12_GPU_DESCRIPTOR_HANDLE srvHandleGPU;
 	};
 
+	Emitter emitter{};
+	const float kDeltaTime = 1.0f / 60.0f;
+
 
 	//uint32_t kNumInstance = 10;
 	//Microsoft::WRL::ComPtr<ID3D12Resource> instancingResource;
 
 	std::unordered_map<std::string, ParticleGroup> particleGroups;
+	ParticleEmitter particleEmit;
 
 };

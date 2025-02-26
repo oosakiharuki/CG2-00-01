@@ -2,6 +2,60 @@
 
 namespace MyMath {
 
+	Vector3 operator+(const Vector3& v1, const Vector3& v2) {
+		Vector3 result;
+		result.x = v1.x + v2.x;
+		result.y = v1.y + v2.y;
+		result.z = v1.z + v2.z;
+		return result;
+	}
+
+	Vector3 operator-(const Vector3& v1, const Vector3& v2) {
+		Vector3 result;
+		result.x = v1.x - v2.x;
+		result.y = v1.y - v2.y;
+		result.z = v1.z - v2.z;
+		return result;
+	}
+
+	Vector3 operator*(const Vector3& v1, const Vector3& v2) {
+		Vector3 result;
+		result.x = v1.x * v2.x;
+		result.y = v1.y * v2.y;
+		result.z = v1.z * v2.z;
+		return result;
+	}
+
+	Vector3 operator/(const Vector3& v1, const Vector3& v2) {
+		Vector3 result;
+		result.x = v1.x / v2.x;
+		result.y = v1.y / v2.y;
+		result.z = v1.z / v2.z;
+		return result;
+	}
+
+	Vector3 operator*(const Vector3& v, const float f) {
+		Vector3 result;
+		result.x = v.x * f;
+		result.y = v.y * f;
+		result.z = v.z * f;
+		return result;
+	}
+
+	Vector3 operator*(const float f, const Vector3& v) {
+		return v * f;
+	}
+
+	Vector3& operator+=(Vector3& v1, const Vector3& v2) {
+		v1.x += v2.x;
+		v1.y += v2.y;
+		v1.z += v2.z;
+		return v1;
+	}
+
+
+
+
 	Matrix4x4 MakeIdentity4x4() {
 		Matrix4x4 result{};
 
@@ -46,6 +100,48 @@ namespace MyMath {
 
 		return result;
 	}
+	Matrix4x4 MakeRotateXMatrix(float radian) {
+		Matrix4x4 result{};
+		result.m[0][0] = 1.0f;
+		result.m[0][1] = 0.0f;
+		result.m[0][2] = 0.0f;
+		result.m[0][3] = 0.0f;
+		result.m[1][0] = 0.0f;
+		result.m[1][1] = cosf(radian);
+		result.m[1][2] = sinf(radian);
+		result.m[1][3] = 0.0f;
+		result.m[2][0] = 0.0f;
+		result.m[2][1] = -(sinf(radian));
+		result.m[2][2] = cosf(radian);
+		result.m[2][3] = 0.0f;
+		result.m[3][0] = 0.0f;
+		result.m[3][1] = 0.0f;
+		result.m[3][2] = 0.0f;
+		result.m[3][3] = 1.0f;
+
+		return result;
+	}	
+	Matrix4x4 MakeRotateYMatrix(float radian) {
+		Matrix4x4 result{};
+		result.m[0][0] = cosf(radian);
+		result.m[0][1] = 0.0f;
+		result.m[0][2] = -(sinf(radian));
+		result.m[0][3] = 0.0f;
+		result.m[1][0] = 0.0f;
+		result.m[1][1] = 1.0f;
+		result.m[1][2] = 0.0f;
+		result.m[1][3] = 0.0f;
+		result.m[2][0] = sinf(radian);
+		result.m[2][1] = 0.0f;
+		result.m[2][2] = cosf(radian);
+		result.m[2][3] = 0.0f;
+		result.m[3][0] = 0.0f;
+		result.m[3][1] = 0.0f;
+		result.m[3][2] = 0.0f;
+		result.m[3][3] = 1.0f;
+
+		return result;
+	}	
 	Matrix4x4 MakeRotateZMatrix(float radian) {
 		Matrix4x4 result{};
 		result.m[0][0] = cosf(radian);
@@ -133,65 +229,9 @@ namespace MyMath {
 
 	Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rotate, const Vector3& translate) {
 
-		Matrix4x4 resultX{};
-
-		resultX.m[0][0] = 1.0f;
-		resultX.m[0][1] = 0.0f;
-		resultX.m[0][2] = 0.0f;
-		resultX.m[0][3] = 0.0f;
-		resultX.m[1][0] = 0.0f;
-		resultX.m[1][1] = cosf(rotate.x);
-		resultX.m[1][2] = sinf(rotate.x);
-		resultX.m[1][3] = 0.0f;
-		resultX.m[2][0] = 0.0f;
-		resultX.m[2][1] = -(sinf(rotate.x));
-		resultX.m[2][2] = cosf(rotate.x);
-		resultX.m[2][3] = 0.0f;
-		resultX.m[3][0] = 0.0f;
-		resultX.m[3][1] = 0.0f;
-		resultX.m[3][2] = 0.0f;
-		resultX.m[3][3] = 1.0f;
-
-
-		Matrix4x4 resultY{};
-
-		resultY.m[0][0] = cosf(rotate.y);
-		resultY.m[0][1] = 0.0f;
-		resultY.m[0][2] = -(sinf(rotate.y));
-		resultY.m[0][3] = 0.0f;
-		resultY.m[1][0] = 0.0f;
-		resultY.m[1][1] = 1.0f;
-		resultY.m[1][2] = 0.0f;
-		resultY.m[1][3] = 0.0f;
-		resultY.m[2][0] = sinf(rotate.y);
-		resultY.m[2][1] = 0.0f;
-		resultY.m[2][2] = cosf(rotate.y);
-		resultY.m[2][3] = 0.0f;
-		resultY.m[3][0] = 0.0f;
-		resultY.m[3][1] = 0.0f;
-		resultY.m[3][2] = 0.0f;
-		resultY.m[3][3] = 1.0f;
-
-
-		Matrix4x4 resultZ{};
-
-		resultZ.m[0][0] = cosf(rotate.z);
-		resultZ.m[0][1] = sinf(rotate.z);
-		resultZ.m[0][2] = 0.0f;
-		resultZ.m[0][3] = 0.0f;
-		resultZ.m[1][0] = -(sinf(rotate.z));
-		resultZ.m[1][1] = cosf(rotate.z);
-		resultZ.m[1][2] = 0.0f;
-		resultZ.m[1][3] = 0.0f;
-		resultZ.m[2][0] = 0.0f;
-		resultZ.m[2][1] = 0.0f;
-		resultZ.m[2][2] = 1.0f;
-		resultZ.m[2][3] = 0.0f;
-		resultZ.m[3][0] = 0.0f;
-		resultZ.m[3][1] = 0.0f;
-		resultZ.m[3][2] = 0.0f;
-		resultZ.m[3][3] = 1.0f;
-
+		Matrix4x4 resultX = MakeRotateXMatrix(rotate.x);
+		Matrix4x4 resultY = MakeRotateYMatrix(rotate.y);
+		Matrix4x4 resultZ = MakeRotateZMatrix(rotate.z);
 
 		Matrix4x4 rotateXYZ = Multiply(resultX, Multiply(resultY, resultZ));
 

@@ -1,4 +1,5 @@
 #include "ParticleManager.h"
+#include "ModelManager.h"
 #include <cassert>
 
 using namespace MyMath;
@@ -28,26 +29,6 @@ void ParticleManager::Finalize() {
 	instance = nullptr;
 }
 
-//void ParticleManager::LoadModel(const std::string& filePath) {
-//	if (particles.contains(filePath)) {
-//		return;
-//	}
-//
-//	std::unique_ptr<Particle> particle = std::make_unique <Particle> ();
-//	particle->ManagerInitialize("resource", filePath);//model,file名,OBJ本体
-// 
-//	particles.insert(std::make_pair(filePath, std::move(particle)));
-//
-//}
-
-//Particle* ParticleManager::FindModel(const std::string& filePath) {
-//	if (particles.contains(filePath)) {
-//		return particles.at(filePath).get();
-//	}
-//
-//	//ファイル一致なし
-//	return nullptr;
-//}
 
 void ParticleManager::CreateParticleGroup(const std::string name, const std::string textureFilePath) {
 	//読み込み済み
@@ -57,28 +38,12 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 
 	assert(srvManager->Max());
 
-	////テクスチャファイル // byte関連
-	//DirectX::ScratchImage image{};
-	//std::wstring filePathW = ConvertString(textureFilePath);
-	//HRESULT hr = DirectX::LoadFromWICFile(filePathW.c_str(), DirectX::WIC_FLAGS_FORCE_SRGB, nullptr, image);
-	//assert(SUCCEEDED(hr));
-
-	////ミップマップ　//拡大縮小で使う
-	//DirectX::ScratchImage mipImages{};
-	//hr = DirectX::GenerateMipMaps(image.GetImages(), image.GetImageCount(), image.GetMetadata(), DirectX::TEX_FILTER_SRGB, 0, mipImages);
-	//assert(SUCCEEDED(hr));
-
-	//const DirectX::TexMetadata& metadata = mipImages.GetMetadata();
-
-
 	ParticleGroup& particleG = particleGroups[name];
 
 
 	particleG.textureFile = textureFilePath;
 
-	//モデルでするとき
-	//particleG.modelData = LoadObjFile("resource", "fence.obj");
-
+	//仮のモデル
 	particleG.modelData.vertices.push_back({ {1.0f,1.0f,0.0f,1.0f},{0.0f,0.0f},{0.0f,0.0f,1.0f} });
 	particleG.modelData.vertices.push_back({ {-1.0f,1.0f,0.0f,1.0f},{1.0f,0.0f},{0.0f,0.0f,1.0f} });
 	particleG.modelData.vertices.push_back({ {1.0f,-1.0f,0.0f,1.0f},{0.0f,1.0f},{0.0f,0.0f,1.0f} });
@@ -89,23 +54,8 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	particleG.modelData.material.textureFilePath = textureFilePath;
 
 
-	
-	//particleG.metadata = metadata;
-	//particleG.resource = particleCommon->GetDxCommon()->CreateTextureResource(particleG.metadata);
-	//particleCommon->GetDxCommon()->UploadTextureData(particleG.resource, mipImages);
+	particleG.resource = particleCommon->GetDxCommon()->CreateBufferResource(sizeof(ParticleForGPU) * particleG.kNumInstance);
 
-
-	particleG.kNumInstance = 10;
-
-	particleG.resource = particleCommon->GetDxCommon()->CreateBufferResource(sizeof(TransformationMatrix) * particleG.kNumInstance);
-
-	//TransformationMatrix* instancingData = nullptr;
-	//particleG.resource->Map(0, nullptr, reinterpret_cast<void**>(&instancingData));
-
-	//for (uint32_t index = 0; index < particleG.kNumInstance; ++index) {
-	//	instancingData[index].World = MakeIdentity4x4();
-	//	instancingData[index].WVP = MakeIdentity4x4();
-	//}
 
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc{};
@@ -115,7 +65,7 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	srvDesc.Buffer.FirstElement = 0;
 	srvDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 	srvDesc.Buffer.NumElements = particleG.kNumInstance;
-	srvDesc.Buffer.StructureByteStride = sizeof(TransformationMatrix);
+	srvDesc.Buffer.StructureByteStride = sizeof(ParticleForGPU);
 
 	particleG.srvIndex = srvManager->Allocate();
 	particleG.srvHandleCPU = srvManager->GetCPUDescriptorHandle(particleG.srvIndex);
@@ -125,6 +75,13 @@ void ParticleManager::CreateParticleGroup(const std::string name, const std::str
 	//SRVの生成
 	particleCommon->GetDxCommon()->GetDevice()->CreateShaderResourceView(particleG.resource.Get(), &srvDesc, particleG.srvHandleCPU);
 
+
+	//particleEmit->Emit();
+
+	emitter.transform.rotate = { 0.0f,0.0f,0.0f };
+	emitter.transform.scale = { 1.0f,1.0f,1.0f };
+	emitter.frequency = 0.5f;
+	emitter.frequencyTime = 0.0f;
 }
 
 D3D12_GPU_DESCRIPTOR_HANDLE  ParticleManager::GetSrvHandleGPU(const std::string filePath) {
@@ -153,4 +110,29 @@ Microsoft::WRL::ComPtr<ID3D12Resource> ParticleManager::GetResource(const std::s
 
 	ParticleGroup& particleG = particleGroups[filePath];
 	return particleG.resource;
+}
+
+std::list<Particles> ParticleManager::GetParticle(const std::string filePath) {
+	assert(srvManager->Max());
+
+	ParticleGroup& particleG = particleGroups[filePath];
+	return particleG.particles;
+}
+
+
+
+void ParticleManager::Emit(const std::string name, const Vector3& position, uint32_t count) {
+	ParticleGroup& particleG = particleGroups[name];
+
+
+	emitter.transform.translate = position;
+	emitter.count = count;
+
+	//
+	std::random_device seedGenerator;
+	std::mt19937 randomEngine(seedGenerator());
+
+	particleG.particles = particleEmit.MakeEmit(emitter, randomEngine);
+	emitter.frequencyTime -= emitter.frequency;
+	
 }

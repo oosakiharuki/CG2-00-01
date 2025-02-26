@@ -5,6 +5,8 @@
 #include <fstream>
 #include <sstream>
 
+#include <numbers>
+#include "ModelManager.h"
 
 using namespace MyMath;
 
@@ -22,32 +24,18 @@ void Particle::Initialize(ParticleCommon* ParticleCommon, const std::string& fil
 	vertexBufferView.StrideInBytes = sizeof(VertexData);
 
 
-
-	//wvpResource = particleCommon->GetDxCommon()->CreateBufferResource(sizeof(TransformationMatrix));
 	wvpResource = ParticleManager::GetInstance()->GetResource(fileName);
 	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));
 	
-	for (uint32_t index = 0; index < kNumInstance; ++index) {
+	for (uint32_t index = 0; index < kNumMaxInstance; ++index) {
 		wvpData[index].World = MakeIdentity4x4();
 		wvpData[index].WVP = MakeIdentity4x4();
+		wvpData[index].color = Vector4(1.0f, 1.0f, 1.0f, 1.0f);
 	}
-
-	//wvpResource = particleCommon->GetDxCommon()->CreateBufferResource(sizeof(TransformationMatrix));
-	//wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));	
-	//wvpData->World = MakeIdentity4x4();
-	//wvpData->WVP = MakeIdentity4x4();
 
 
 	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	std::memcpy(vertexData, modelData.vertices.data(), sizeof(VertexData) * modelData.vertices.size());
-
-
-
-
-
-
-
-
 
 
 	//Particle用マテリアル
@@ -74,39 +62,63 @@ void Particle::Initialize(ParticleCommon* ParticleCommon, const std::string& fil
 	directionalLightSphereData->direction = { 0.0f,-1.0f,0.0f };
 	directionalLightSphereData->intensity = 1.0f;
 
-	//transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
-	for (uint32_t index = 0; index < kNumInstance; ++index) {
-		transform[index].scale = { 1.0f,1.0f,1.0f };
-		transform[index].rotate = { 0.0f,3.0f,0.0f };
-		transform[index].translate = { index * 0.1f,index * 0.1f,index * 0.1f };
-	}
-
-
+	emitter.transform.translate = { 0.0f,0.0f,-3.0f };
+	emitter.transform.rotate = { 0.0f,0.0f,0.0f };
+	emitter.transform.scale = { 1.0f,1.0f,1.0f };
+	emitter.count = 3;
+	emitter.frequency = 0.5f;
+	emitter.frequencyTime = 0.0f;
 
 
-	cameraTransform = { {1.0f,1.0f,1.0f},{0.3f,0.0f,0.0f}, {0.0f,4.0f,-10.0f} };
+	transform.translate = { 0.0f,0.0f,-3.0f };
+
+	//ParticleManager::GetInstance()->Emit(fileName,.);
+	//ParticleManager::GetInstance()->Emit(fileName, transform.translate, count);
+	//particles = ParticleManager::GetInstance()->GetParticle(fileName);
 
 	transformL = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
 }
 
 void Particle::Update() {
-	//モデル
-	//Matrix4x4 worldMatrix = MakeAffineMatrix(transform.scale, transform.rotate, transform.translate);
-	//Matrix4x4 WorldViewProjectionMatrix;
-	//if (camera) {
-	//	Matrix4x4 projectionMatrix = camera->GetViewProjectionMatrix();
-	//	WorldViewProjectionMatrix = Multiply(worldMatrix, projectionMatrix);
-	//}
-	//else {
-	//	WorldViewProjectionMatrix = worldMatrix;
-	//}
-	//wvpData->World = worldMatrix;
-	//wvpData->WVP = WorldViewProjectionMatrix;
 
-	for (uint32_t index = 0; index < kNumInstance; ++index) {
-		Matrix4x4 worldMatrix = MakeAffineMatrix(transform[index].scale, transform[index].rotate, transform[index].translate);
+	
+	const float kDeltaTime = 1.0f / 60.0f;
+	emitter.frequencyTime += kDeltaTime;
+
+	ParticleManager::GetInstance()->Emit(fileName,transform.translate,count);
+
+	if (emitter.frequency <= emitter.frequencyTime) {
+		particles.splice(particles.end(), ParticleManager::GetInstance()->GetParticle(fileName));
+		emitter.frequencyTime -= emitter.frequency;
+	}
+
+	numInstance = 0;
+	Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
+	
+	Matrix4x4 billboardMatrix = Multiply(backToFrontMatrix, camera->GetWorldMatrix());
+	billboardMatrix.m[3][0] = 0.0f;
+	billboardMatrix.m[3][1] = 0.0f;
+	billboardMatrix.m[3][2] = 0.0f;
+
+
+	for (std::list<Particles>::iterator particleIterator = particles.begin();
+		particleIterator != particles.end(); ) {
+
+		if ((*particleIterator).lifeTime <= (*particleIterator).currentTime) {
+			particleIterator = particles.erase(particleIterator);
+			continue;
+		}
+
+
+		Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
+		Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
+
+		Matrix4x4 worldMatrix = Multiply(Multiply(scaleMatrix, billboardMatrix), translateMatrix);
+		//Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
+
+		
 		Matrix4x4 WorldViewProjectionMatrix;
 
 		if (camera) {
@@ -117,13 +129,27 @@ void Particle::Update() {
 			WorldViewProjectionMatrix = worldMatrix;
 		}
 
-		wvpData[index].World = worldMatrix;
-		wvpData[index].WVP = WorldViewProjectionMatrix;
+		const float kDeltaTime = 1.0f / 60.0f;
+		float alpha = 1.0f - ((*particleIterator).currentTime / (*particleIterator).lifeTime);
+
+		(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime;
+
+	
+		(*particleIterator).currentTime += kDeltaTime;
+
+		wvpData[numInstance].World = worldMatrix;
+		
+		wvpData[numInstance].color = (*particleIterator).color;
+		wvpData[numInstance].color.s = alpha;
+
+		if (numInstance < kNumMaxInstance) {
+			wvpData[numInstance].WVP = WorldViewProjectionMatrix;
+			++numInstance;
+		}
+		++particleIterator;
 	}
 	
 	directionalLightSphereData->direction = Normalize(directionalLightSphereData->direction);
-
-
 
 }
 
@@ -139,5 +165,35 @@ void Particle::Draw() {
 	particleCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, ParticleManager::GetInstance()->GetSrvHandleGPU(fileName));
 
 	particleCommon->GetDxCommon()->GetCommandList()->ClearDepthStencilView(particleCommon->GetDxCommon()->GetDsvHandle(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
-	particleCommon->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()),kNumInstance, 0, 0);
+	particleCommon->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()),numInstance, 0, 0);
 }
+
+//Particles Particle::MakeNewParticle(std::mt19937& randomEngine, const Vector3& translate){
+//	//random
+//	std::uniform_real_distribution<float> distribution(-1.0f, 1.0f);//position用
+//	std::uniform_real_distribution<float> distColor(0.0f, 1.0f);//color用
+//	std::uniform_real_distribution<float> distTime(1.0f, 3.0f);
+//	
+//	Particles particle;
+//	particle.transform.scale = { 1.0f,1.0f,1.0f };
+//	particle.transform.rotate = { 0.0f,3.0f,0.0f };
+//	
+//	Vector3 randomTranslate{ distribution(randomEngine),distribution(randomEngine),distribution(randomEngine) };
+//	particle.transform.translate = translate + randomTranslate;
+//	
+//	particle.velocity = { distribution(randomEngine),distribution(randomEngine),distribution(randomEngine) };	
+//	particle.color = { distColor(randomEngine),distColor(randomEngine),distColor(randomEngine),1.0f };
+//	
+//	particle.lifeTime = distTime(randomEngine);
+//	particle.currentTime = 0;
+//	
+//	return particle;
+//}
+//
+//std::list<Particles> Particle::MakeEmit(const Emitter& emitter, std::mt19937& randomEngine) {
+//	std::list<Particles> particles;
+//	for (uint32_t count = 0; count < emitter.count; ++count) {
+//		particles.push_back(MakeNewParticle(randomEngine,emitter.transform.translate));
+//	}
+//	return particles;
+//}

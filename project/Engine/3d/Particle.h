@@ -1,6 +1,29 @@
 #pragma once
 #include "MyMath.h"
 #include "ParticleCommon.h"
+#include <random>
+
+
+struct ParticleForGPU {
+	Matrix4x4 WVP;
+	Matrix4x4 World;
+	Vector4 color;
+};
+
+struct Particles {
+	Transform transform;
+	Vector3 velocity;
+	Vector4 color;
+	float lifeTime;
+	float currentTime;
+};
+
+struct Emitter {
+	Transform transform;
+	uint32_t count; //発生数
+	float frequency; //発生頻度
+	float frequencyTime; //頻度時刻
+};
 
 class Particle{
 public:
@@ -26,6 +49,9 @@ public:
 	//static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
 	//static ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
 
+	//Particles MakeNewParticle(std::mt19937& randomEngine,const Vector3& translate);
+	//std::list<Particles> MakeEmit(const Emitter& emitter, std::mt19937& randomEngine);
+
 private:
 	ParticleCommon* particleCommon = nullptr;
 
@@ -45,7 +71,7 @@ private:
 
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> wvpResource;
-	TransformationMatrix* wvpData = nullptr;
+	ParticleForGPU* wvpData = nullptr;
 
 	//ライト用のリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightSphereResource;
@@ -55,19 +81,25 @@ private:
 	DirectionalLight* directionalLightSphereData = nullptr;
 
 
-	static const uint32_t kNumInstance = 10;
+	static const uint32_t kNumMaxInstance = 20;
 
-	Transform transform[kNumInstance];
-	Transform cameraTransform;
+	//Transform transform[kNumMaxInstance];
 
+	//Particles particles[kNumMaxInstance];
+	std::list<Particles> particles;
+	uint32_t numInstance = 0;
+
+	Transform transform;
+	uint32_t count = 3;
 
 	Transform transformL;
 
-	//Model* model = nullptr;
 	Camera* camera = nullptr;
 
 	ModelData modelData;
+	Emitter emitter{};
 
-	D3D12_CPU_DESCRIPTOR_HANDLE instancingSrvHandleCPU;
-	D3D12_GPU_DESCRIPTOR_HANDLE instancingSrvHandleGPU;
+	//std::list<Particles> MakeEmit(const Emitter& emitter, std::mt19937& randomEngine);
+
+	bool a = true;
 };

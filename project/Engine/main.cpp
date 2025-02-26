@@ -80,6 +80,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	object3dCommon->Initialize(dxCommon);
 
 	Camera* camera = new Camera();
+	//Vector3 cameraRotate = { 1.4f,0.0f,0.0f };
+	//Vector3 cameraTranslate = { 0.0f,30.0f,-8.0f };
 	Vector3 cameraRotate = { 0.0f,0.0f,0.0f };
 	Vector3 cameraTranslate = { 0.0f,0.0f,-15.0f };
 	camera->SetRotate(cameraRotate);
@@ -120,10 +122,11 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	particleCommon->SetDefaultCamera(camera);
 	
 	ParticleManager::GetInstance()->Initialize(dxCommon,srvManager);
-	ParticleManager::GetInstance()->CreateParticleGroup("particle01","resource/uvChecker.png");
+	ParticleManager::GetInstance()->CreateParticleGroup("particle01", "resource/circle.png");
+	ParticleManager::GetInstance()->CreateParticleGroup("particle02","resource/uvChecker.png");
 
 	Particle* particle = new Particle();
-	particle->Initialize(particleCommon,"particle01");
+	particle->Initialize(particleCommon,"particle02");
 
 
 	//描画させるもの
@@ -224,9 +227,6 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			particle->Update();			
 
-			//Vector3 ro = particle->GetRotate();
-			//ro.y += 0.1f;
-			//particle->SetRotate(ro);
 
 			camera->Update();
 
@@ -364,7 +364,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			object3dCommon->Command();
 			
 			for (Object3d* object3d : objects) {
-				//object3d->Draw();
+				object3d->Draw();
 			}
 
 			particleCommon->Command();

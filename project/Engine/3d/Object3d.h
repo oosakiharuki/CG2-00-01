@@ -46,10 +46,7 @@ private:
 	//マテリアルにデータを書き込む
 	DirectionalLight* directionalLightSphereData = nullptr;
 
-
 	Transform transform;
-	Transform cameraTransform;
-
 
 	Transform transformL;
 
