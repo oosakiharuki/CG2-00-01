@@ -110,8 +110,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			object3d->Initialize(object3dCommon);
 		}
 
-		position[i].x += i * 3.0f;
-		object3d->SetTranslate(position[i]);
+		//position[i].x += i * 3.0f;
+		//object3d->SetTranslate(position[i]);
 
 		objects.push_back(object3d);
 	}
@@ -126,7 +126,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ParticleManager::GetInstance()->CreateParticleGroup("particle02","resource/uvChecker.png");
 
 	Particle* particle = new Particle();
-	particle->Initialize(particleCommon,"particle02");
+	particle->Initialize(particleCommon,"particle01");
 
 
 	//描画させるもの

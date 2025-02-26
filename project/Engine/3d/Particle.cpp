@@ -164,7 +164,6 @@ void Particle::Draw() {
 	//4のやつ particle専用
 	particleCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(4, ParticleManager::GetInstance()->GetSrvHandleGPU(fileName));
 
-	particleCommon->GetDxCommon()->GetCommandList()->ClearDepthStencilView(particleCommon->GetDxCommon()->GetDsvHandle(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 	particleCommon->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()),numInstance, 0, 0);
 }
 

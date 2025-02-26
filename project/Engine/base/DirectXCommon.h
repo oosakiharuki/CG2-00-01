@@ -67,7 +67,7 @@ public:
 
 	Microsoft::WRL::ComPtr<ID3D12Device>  GetDevice()const { return device.Get(); }
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList() const { return commandList.Get(); }
-	D3D12_CPU_DESCRIPTOR_HANDLE GetDsvHandle() { return dsvHandle; }
+	//D3D12_CPU_DESCRIPTOR_HANDLE GetDsvHandle() { return dsvHandle; }
 	HANDLE GetFenceEvent() { return fenceEvent; }
 
 	void Finalize();
