@@ -72,15 +72,14 @@ void Particle::Initialize(ParticleCommon* ParticleCommon, const std::string& fil
 
 
 	transform.translate = { 0.0f,0.0f,0.0f };
+	transform.rotate = { 0.0f,0.0f,0.0f };
+	transform.scale = { 1.0f,1.0f,1.0f };
 
-	//ParticleManager::GetInstance()->Emit(fileName,.);
-	//ParticleManager::GetInstance()->Emit(fileName, transform.translate, count);
-	//particles = ParticleManager::GetInstance()->GetParticle(fileName);
 
 	transformL = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
 	//場
-	accelerationField.acceleration = { 15.0f,0.0f,0.0f };
+	accelerationField.acceleration = { 0.0f,15.0f,0.0f };
 	accelerationField.area.min = { -1.0f,-1.0f,-1.0f };
 	accelerationField.area.max = { 1.0f,1.0f,1.0f };
 }
@@ -116,11 +115,7 @@ void Particle::Update() {
 		}
 
 
-		Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
-		Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
-
-		Matrix4x4 worldMatrix = Multiply(Multiply(scaleMatrix, billboardMatrix), translateMatrix);
-		//Matrix4x4 worldMatrix = MakeAffineMatrix(particles[index].transform.scale, particles[index].transform.rotate, particles[index].transform.translate);
+		Matrix4x4 worldMatrix = Multiply(billboardMatrix, MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate));
 
 		
 		Matrix4x4 WorldViewProjectionMatrix;
@@ -141,6 +136,10 @@ void Particle::Update() {
 		}
 
 		(*particleIterator).transform.translate += (*particleIterator).velocity * kDeltaTime;
+
+		(*particleIterator).transform.rotate = transform.rotate;
+
+		(*particleIterator).transform.scale = transform.scale;
 
 	
 		(*particleIterator).currentTime += kDeltaTime;

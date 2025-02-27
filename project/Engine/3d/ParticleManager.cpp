@@ -133,6 +133,6 @@ void ParticleManager::Emit(const std::string name, const Vector3& position, uint
 	std::mt19937 randomEngine(seedGenerator());
 
 	particleG.particles = particleEmit.MakeEmit(emitter, randomEngine);
-	emitter.frequencyTime -= emitter.frequency;
+	//emitter.frequencyTime -= emitter.frequency;
 	
 }

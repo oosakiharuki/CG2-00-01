@@ -10,7 +10,7 @@ Particles ParticleEmitter::MakeNewParticle(std::mt19937& randomEngine, const Vec
 
 	Particles particle;
 	particle.transform.scale = { 1.0f,1.0f,1.0f };
-	particle.transform.rotate = { 0.0f,3.0f,0.0f };
+	particle.transform.rotate = { 0.0f,0.0f,0.0f };
 
 	Vector3 randomTranslate{ distribution(randomEngine),distribution(randomEngine),distribution(randomEngine) };
 	particle.transform.translate = translate + randomTranslate;

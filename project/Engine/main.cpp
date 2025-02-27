@@ -126,8 +126,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	ParticleManager::GetInstance()->CreateParticleGroup("particle02","resource/uvChecker.png");
 
 	Particle* particle = new Particle();
-	particle->Initialize(particleCommon,"particle01");
+	particle->Initialize(particleCommon,"particle02");
 
+	Particle* particle2 = new Particle();
+	particle2->Initialize(particleCommon, "particle01");
 
 	//描画させるもの
 	bool IsSphere = true;
@@ -212,7 +214,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 
 				sizeOBJ = object3d->GetScale();
-
+				
 				object3d->SetScale(sizeOBJ);
 
 			}
@@ -222,11 +224,30 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			objects[0]->SetRotate(rotationOBJ);
 
 			rotationOBJ2 = objects[1]->GetRotate();
-			rotationOBJ2.z += 0.1f;			
-			objects[1]->SetRotate(rotationOBJ2);
+			//rotationOBJ2.z += 0.1f;			
+
+			if (input_->PushKey(DIK_D)) {
+				positionOBJ.x += 0.1f;
+			}
+
+			if (input_->PushKey(DIK_A)) {
+				positionOBJ.x -= 0.1f;
+			}
+
+			objects[1]->SetTranslate(positionOBJ);
 
 			particle->Update();			
+			particle2->Update();
 
+			particle->SetTranslate(positionOBJ);
+			particle->SetFrequency(0.5f);
+
+			Vector3 rotateP = particle->GetRotate();
+			rotateP.z += 0.1f;
+			particle->SetRotate(rotateP);
+			
+			Vector3 sizeP = { 1,1,1 };
+			particle->SetScale(sizeP);
 
 			camera->Update();
 
@@ -370,6 +391,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			particleCommon->Command();
 
 			particle->Draw();
+			//particle2->Draw();
 
 			//UI
 			spriteCommon->Command();
@@ -411,6 +433,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	//delete model;
 
 	delete particle;
+	delete particle2;
 	delete particleCommon;
 
 	return 0;

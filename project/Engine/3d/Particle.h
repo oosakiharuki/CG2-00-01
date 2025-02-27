@@ -38,22 +38,24 @@ struct AccelerationField {
 class Particle{
 public:
 	void Initialize(ParticleCommon* particleCommon, const std::string& fileName);
-	//void ManagerInitialize(const std::string& directorypath, const std::string& fileName);
 	void Update();
 	void Draw();
 
 	//void SetModel(Model* model) { this->model = model; }
 	//void SetModelFile(const std::string& filePath);
 
-	//void SetScale(const Vector3& scale) { transform.scale = scale; }
-	//void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
-	//void SetTranslate(const Vector3& translate) { transform.translate = translate; }
-	//void SetCamera(Camera* camera) { this->camera = camera; }
+	void SetScale(const Vector3& scale) { transform.scale = scale; }
+	const Vector3& GetScale() const { return transform.scale; }
 
-	//const Vector3& GetScale() const { return transform.scale; }
-	//const Vector3& GetRotate() const { return transform.rotate; }
-	//const Vector3& GetTranslate()const { return transform.translate; }
+	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
+	const Vector3& GetRotate() const { return transform.rotate; }
 
+	const Vector3& GetTranslate()const { return transform.translate; }
+	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
+
+	void SetFrequency(const float time) { emitter.frequency = time; }
+
+	void SetCamera(Camera* camera) { this->camera = camera; }
 
 
 	//static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
@@ -93,7 +95,7 @@ private:
 	DirectionalLight* directionalLightSphereData = nullptr;
 
 
-	static const uint32_t kNumMaxInstance = 20;
+	static const uint32_t kNumMaxInstance = 100;
 
 	//Transform transform[kNumMaxInstance];
 
