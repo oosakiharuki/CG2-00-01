@@ -97,6 +97,9 @@ void Particle::Update() {
 		emitter.frequencyTime -= emitter.frequency;
 	}
 
+
+
+
 	numInstance = 0;
 	Matrix4x4 backToFrontMatrix = MakeRotateYMatrix(std::numbers::pi_v<float>);
 	
@@ -113,9 +116,12 @@ void Particle::Update() {
 			particleIterator = particles.erase(particleIterator);
 			continue;
 		}
+	
+		Matrix4x4 scaleMatrix = MakeScaleMatrix((*particleIterator).transform.scale);
+		Matrix4x4 translateMatrix = MakeTranslateMatrix((*particleIterator).transform.translate);
 
-
-		Matrix4x4 worldMatrix = Multiply(billboardMatrix, MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate));
+		Matrix4x4 worldMatrix = Multiply(scaleMatrix, Multiply(billboardMatrix, translateMatrix));
+		//Matrix4x4 worldMatrix = Multiply(billboardMatrix, MakeAffineMatrix((*particleIterator).transform.scale, (*particleIterator).transform.rotate, (*particleIterator).transform.translate));
 
 		
 		Matrix4x4 WorldViewProjectionMatrix;

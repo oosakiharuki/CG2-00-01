@@ -47,8 +47,9 @@ public:
 	void SetScale(const Vector3& scale) { transform.scale = scale; }
 	const Vector3& GetScale() const { return transform.scale; }
 
-	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
-	const Vector3& GetRotate() const { return transform.rotate; }
+	//未完
+	//void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }
+	//const Vector3& GetRotate() const { return transform.rotate; }
 
 	const Vector3& GetTranslate()const { return transform.translate; }
 	void SetTranslate(const Vector3& translate) { transform.translate = translate; }
