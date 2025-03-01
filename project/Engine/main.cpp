@@ -14,6 +14,7 @@
 #include "ParticleCommon.h"
 #include "ParticleManager.h"
 #include "ImGuiManager.h"
+#include "Audio.h"
 
 using namespace MyMath;
 
@@ -134,6 +135,16 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	Particle* particle2 = new Particle();
 	particle2->Initialize(particleCommon, "particle01");
 
+	//Audio* audio = new Audio();
+	//audio->Initialize("resource/audio01.wav");
+	//int audioHandle = 0;
+
+	Audio* audio2 = new Audio();
+	audio2->Initialize("resource/audio01.wav");
+	int audioHandle2 = 0;
+
+	
+
 	//描画させるもの
 	bool IsSphere = true;
 	bool IsModel[2] = {true,true};
@@ -251,6 +262,27 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			particle->SetScale(sizeP);
 
 			camera->Update();
+			
+			
+			//if (input_->TriggerKey(DIK_2)) {
+			//	audioHandle = -1;
+			//}
+
+			//if (audioHandle < 0) {
+			//	audio->SoundPlayWave(0.05f);
+			//	audioHandle++;
+			//}
+
+
+			if (input_->TriggerKey(DIK_3)) {
+				audioHandle2 = -1;
+			}
+
+			if (audioHandle2 < 0) {
+				audio2->SoundPlayWave(0.05f);
+				audioHandle2++;
+			}
+
 
 
 #ifdef  USE_IMGUI
@@ -450,6 +482,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	delete particle;
 	delete particle2;
 	delete particleCommon;
+
+	//delete audio;
+	delete audio2;
 
 	return 0;
 }

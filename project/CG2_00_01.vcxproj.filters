@@ -31,6 +31,9 @@
     <Filter Include="ソース ファイル\Engine\2d">
       <UniqueIdentifier>{60c51db4-57e8-4c52-a251-89af31add87e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ソース ファイル\Engine\audio">
+      <UniqueIdentifier>{7e494eda-49a5-4e26-aa68-09331557a0e6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine\2d\Sprite.cpp">
@@ -101,6 +104,9 @@
     </ClCompile>
     <ClCompile Include="Engine\2d\ImGuiManager.cpp">
       <Filter>ソース ファイル\Engine\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine\audio\Audio.cpp">
+      <Filter>ソース ファイル\Engine\audio</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -184,6 +190,9 @@
     </ClInclude>
     <ClInclude Include="Engine\2d\ImGuiManager.h">
       <Filter>ソース ファイル\Engine\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine\audio\Audio.h">
+      <Filter>ソース ファイル\Engine\audio</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
