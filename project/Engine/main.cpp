@@ -13,6 +13,7 @@
 #include "particle.h" 
 #include "ParticleCommon.h"
 #include "ParticleManager.h"
+#include "ImGuiManager.h"
 
 using namespace MyMath;
 
@@ -45,6 +46,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	SrvManager* srvManager = nullptr;
 	srvManager = new SrvManager();
 	srvManager->Initialize(dxCommon);
+
+	ImGuiManager::GetInstance()->Initialize(winApp_,dxCommon,srvManager);
 
 	TextureManager::GetInstance()->Initialize(dxCommon, srvManager);
 	//TextureManager::GetInstance()->LoadTexture("resource/monsterBall.png");
@@ -146,11 +149,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 		}
 		else {
 			//ゲームの処理
-			
-			
-			ImGui_ImplDX12_NewFrame();
-			ImGui_ImplWin32_NewFrame();
-			ImGui::NewFrame();
+
+
+			ImGuiManager::GetInstance()->Begin();
 
 
 			input_->Update();
@@ -253,9 +254,13 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			//開発用UIの処理
 			//ImGui::ShowDemoWindow();
-
+#ifdef  USE_IMGUI
 			////ここにテキストを入れられる
-			//ImGui::Text("ImGuiText");
+
+			ImGui::Text("ImGuiText");
+
+
+#endif //  USE_IMGUI
 
 			////カメラ
 			//ImGui::SliderFloat3("cameraTranslate", &cameraTranslate.x, -30.0f, 30.0f);
@@ -375,9 +380,10 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			//		ImGui::TreePop();
 			//	}
 			//}
-			//ImGuiの内部コマンド
-			ImGui::Render();
+			
+			ImGuiManager::GetInstance()->End();
 
+			//描画開始
 			dxCommon->PreDraw();
 			srvManager->PreDraw();
 			//モデル
@@ -398,8 +404,12 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 
 			for (Sprite* sprite : sprites) {
 				//sprite->Draw();
-			}
+			}		
+			
+			ImGuiManager::GetInstance()->Draw();
+
 			dxCommon->PostDraw();
+
 		}
 	}
 
@@ -418,6 +428,9 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	dxCommon = nullptr;
 
 	delete srvManager;
+
+	ImGuiManager::GetInstance()->Finalize();
+
 
 	delete spriteCommon;
 	for (Sprite* sprite : sprites) {
