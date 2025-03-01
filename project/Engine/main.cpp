@@ -165,8 +165,8 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			}
 
 
-			//Vector2 position;
-			//float rotation;
+			Vector2 position;
+			float rotation;
 			Vector4 color;
 			Vector2 size;
 
@@ -243,144 +243,146 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			particle->SetTranslate(positionOBJ);
 			particle->SetFrequency(0.5f);
 
-			Vector3 rotateP = particle->GetRotate();
-			rotateP.z += 0.1f;
-			particle->SetRotate(rotateP);
+			//Vector3 rotateP = particle->GetRotate();
+			//rotateP.z = 0.1f;
+			//particle->SetRotate(rotateP);
 			
 			Vector3 sizeP = { 1,1,1 };
 			particle->SetScale(sizeP);
 
 			camera->Update();
 
-			//開発用UIの処理
-			//ImGui::ShowDemoWindow();
+
 #ifdef  USE_IMGUI
-			////ここにテキストを入れられる
+			//ここにテキストを入れられる
+			
+			//開発用UIの処理
+			ImGui::ShowDemoWindow();
 
 			ImGui::Text("ImGuiText");
 
+			//カメラ
+			ImGui::SliderFloat3("cameraTranslate", &cameraTranslate.x, -30.0f, 30.0f);
+
+			ImGui::SliderFloat("cameraRotateX", &cameraRotate.x, -10.0f, 10.0f);
+			ImGui::SliderFloat("cameraRotateY", &cameraRotate.y, -10.0f, 10.0f);
+			ImGui::SliderFloat("cameraRotateZ", &cameraRotate.z, -10.0f, 10.0f);
+			camera->SetRotate(cameraRotate);
+			camera->SetTranslate(cameraTranslate);
+
+
+			if (ImGui::TreeNode("Model_1")) {
+				ImGui::Checkbox("IsModel", &IsModel[0]);
+				if (IsModel) {
+
+					positionOBJ = objects[0]->GetTranslate();
+					ImGui::InputFloat3("VertexModel", &positionOBJ.x);
+					ImGui::SliderFloat3("SliderVertexModel", &positionOBJ.x, -5.0f, 5.0f);
+					objects[0]->SetTranslate(positionOBJ);
+
+
+					rotationOBJ = objects[0]->GetRotate();
+					ImGui::InputFloat3("RotateModel", &rotationOBJ.x);
+					ImGui::SliderFloat3("SliderRotateModel", &rotationOBJ.x, -10.0f, 10.0f);
+
+					objects[0]->SetRotate(rotationOBJ);
+
+
+					sizeOBJ = objects[0]->GetScale();
+					ImGui::InputFloat3("ScaleModel", &sizeOBJ.x);
+					ImGui::SliderFloat3("SliderScaleModel", &sizeOBJ.x, 0.5f, 5.0f);
+
+					objects[0]->SetScale(sizeOBJ);
+
+					//ImGui::InputFloat3("MaterialModel", *);
+					//ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
+					//ImGui::Checkbox("ModelTexture", &textureChange2);
+				}
+				ImGui::TreePop();
+			}
+			
+
+			if (ImGui::TreeNode("Model_2")) {
+				ImGui::Checkbox("IsModel", &IsModel[1]);
+				if (IsModel[1]) {
+
+					positionOBJ = objects[1]->GetTranslate();
+					ImGui::InputFloat3("VertexModel", &positionOBJ.x);
+					ImGui::SliderFloat3("SliderVertexModel", &positionOBJ.x, -5.0f, 5.0f);
+					objects[1]->SetTranslate(positionOBJ);
+
+
+					rotationOBJ = objects[1]->GetRotate();
+					ImGui::InputFloat3("RotateModel", &rotationOBJ.x);
+					ImGui::SliderFloat3("SliderRotateModel", &rotationOBJ.x, -10.0f, 10.0f);
+
+					objects[1]->SetRotate(rotationOBJ);
+
+
+					sizeOBJ = objects[1]->GetScale();
+					ImGui::InputFloat3("ScaleModel", &sizeOBJ.x);
+					ImGui::SliderFloat3("SliderScaleModel", &sizeOBJ.x, 0.5f, 5.0f);
+
+					objects[1]->SetScale(sizeOBJ);
+
+					//ImGui::InputFloat3("MaterialModel", *);
+					//ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
+					//ImGui::Checkbox("ModelTexture", &textureChange2);
+				}
+				ImGui::TreePop();
+			}
+
+
+
+			//if (ImGui::TreeNode("light")) {
+
+			//	ImGui::InputFloat4("Materiallight", *inputMateriallight);
+			//	ImGui::SliderFloat4("SliderMateriallight", *inputMateriallight, 0.0f, 1.0f);
+
+			//	ImGui::InputFloat3("Vertexlight", *inputDirectionLight);
+			//	ImGui::SliderFloat3("SliderVertexlight", *inputDirectionLight, -1.0f, 1.0f);
+
+
+			//	ImGui::InputFloat("intensity", intensity);
+
+			//	ImGui::TreePop();
+			//}
+			for (Sprite* sprite : sprites) {
+				if (ImGui::TreeNode("Sprite")) {
+					ImGui::Checkbox("IsSprite", &IsSprite);
+
+					if (IsSprite) {
+
+						position = sprite->GetPosition();
+						ImGui::InputFloat("SpriteX", &position.x);
+						ImGui::SliderFloat("SliderSpriteX", &position.x, 0.0f, 1000.0f);
+						ImGui::InputFloat("SpriteY", &position.y);
+						ImGui::SliderFloat("SliderSpriteY", &position.y, 0.0f, 600.0f);
+						sprite->SetPosition(position);
+
+						ImGui::DragFloat2("UVTranlate", &position.x, 0.01f, -10.0f, 10.0f);				
+												
+						size = sprite->GetSize();
+						ImGui::DragFloat2("UVScale", &size.x, 0.1f);
+						sprite->SetSize(size);
+
+						rotation = sprite->GetRotate();
+						ImGui::SliderAngle("UVRotate", &rotation);	
+						sprite->SetRotate(rotation);	
+		
+
+						color = sprite->GetColor();
+						ImGui::SliderFloat4("color", &color.x, 0.0f, 1.0f);
+						sprite->SetColor(color);
+
+					}
+					ImGui::TreePop();
+				}
+			}
+			
 
 #endif //  USE_IMGUI
 
-			////カメラ
-			//ImGui::SliderFloat3("cameraTranslate", &cameraTranslate.x, -30.0f, 30.0f);
-
-			//ImGui::SliderFloat("cameraRotateX", &cameraRotate.x, -10.0f, 10.0f);
-			//ImGui::SliderFloat("cameraRotateY", &cameraRotate.y, -10.0f, 10.0f);
-			//ImGui::SliderFloat("cameraRotateZ", &cameraRotate.z, -10.0f, 10.0f);
-			//camera->SetRotate(cameraRotate);
-			//camera->SetTranslate(cameraTranslate);
-
-
-			//if (ImGui::TreeNode("Model_1")) {
-			//	ImGui::Checkbox("IsModel", &IsModel[0]);
-			//	if (IsModel) {
-
-			//		positionOBJ = objects[0]->GetTranslate();
-			//		ImGui::InputFloat3("VertexModel", &positionOBJ.x);
-			//		ImGui::SliderFloat3("SliderVertexModel", &positionOBJ.x, -5.0f, 5.0f);
-			//		objects[0]->SetTranslate(positionOBJ);
-
-
-			//		rotationOBJ = objects[0]->GetRotate();
-			//		ImGui::InputFloat3("RotateModel", &rotationOBJ.x);
-			//		ImGui::SliderFloat3("SliderRotateModel", &rotationOBJ.x, -10.0f, 10.0f);
-
-			//		objects[0]->SetRotate(rotationOBJ);
-
-
-			//		sizeOBJ = objects[0]->GetScale();
-			//		ImGui::InputFloat3("ScaleModel", &sizeOBJ.x);
-			//		ImGui::SliderFloat3("SliderScaleModel", &sizeOBJ.x, 0.5f, 5.0f);
-
-			//		objects[0]->SetScale(sizeOBJ);
-
-			//		//ImGui::InputFloat3("MaterialModel", *);
-			//		//ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
-			//		//ImGui::Checkbox("ModelTexture", &textureChange2);
-			//	}
-			//	ImGui::TreePop();
-			//}
-			//
-
-			//if (ImGui::TreeNode("Model_2")) {
-			//	ImGui::Checkbox("IsModel", &IsModel[1]);
-			//	if (IsModel[1]) {
-
-			//		positionOBJ = objects[1]->GetTranslate();
-			//		ImGui::InputFloat3("VertexModel", &positionOBJ.x);
-			//		ImGui::SliderFloat3("SliderVertexModel", &positionOBJ.x, -5.0f, 5.0f);
-			//		objects[1]->SetTranslate(positionOBJ);
-
-
-			//		rotationOBJ = objects[1]->GetRotate();
-			//		ImGui::InputFloat3("RotateModel", &rotationOBJ.x);
-			//		ImGui::SliderFloat3("SliderRotateModel", &rotationOBJ.x, -10.0f, 10.0f);
-
-			//		objects[1]->SetRotate(rotationOBJ);
-
-
-			//		sizeOBJ = objects[1]->GetScale();
-			//		ImGui::InputFloat3("ScaleModel", &sizeOBJ.x);
-			//		ImGui::SliderFloat3("SliderScaleModel", &sizeOBJ.x, 0.5f, 5.0f);
-
-			//		objects[1]->SetScale(sizeOBJ);
-
-			//		//ImGui::InputFloat3("MaterialModel", *);
-			//		//ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
-			//		//ImGui::Checkbox("ModelTexture", &textureChange2);
-			//	}
-			//	ImGui::TreePop();
-			//}
-
-
-
-			////if (ImGui::TreeNode("light")) {
-
-			////	ImGui::InputFloat4("Materiallight", *inputMateriallight);
-			////	ImGui::SliderFloat4("SliderMateriallight", *inputMateriallight, 0.0f, 1.0f);
-
-			////	ImGui::InputFloat3("Vertexlight", *inputDirectionLight);
-			////	ImGui::SliderFloat3("SliderVertexlight", *inputDirectionLight, -1.0f, 1.0f);
-
-
-			////	ImGui::InputFloat("intensity", intensity);
-
-			////	ImGui::TreePop();
-			////}
-			//for (Sprite* sprite : sprites) {
-			//	if (ImGui::TreeNode("Sprite")) {
-			//		ImGui::Checkbox("IsSprite", &IsSprite);
-
-			//		if (IsSprite) {
-
-			//			position = sprite->GetPosition();
-			//			ImGui::InputFloat("SpriteX", &position.x);
-			//			ImGui::SliderFloat("SliderSpriteX", &position.x, 0.0f, 1000.0f);
-			//			ImGui::InputFloat("SpriteY", &position.y);
-			//			ImGui::SliderFloat("SliderSpriteY", &position.y, 0.0f, 600.0f);
-			//			sprite->SetPosition(position);
-
-			//			ImGui::DragFloat2("UVTranlate", &position.x, 0.01f, -10.0f, 10.0f);				
-			//									
-			//			size = sprite->GetSize();
-			//			ImGui::DragFloat2("UVScale", &size.x, 0.1f);
-			//			sprite->SetSize(size);
-
-			//			rotation = sprite->GetRotate();
-			//			ImGui::SliderAngle("UVRotate", &rotation);	
-			//			sprite->SetRotate(rotation);	
-		
-
-			//			color = sprite->GetColor();
-			//			ImGui::SliderFloat4("color", &color.x, 0.0f, 1.0f);
-			//			sprite->SetColor(color);
-
-			//		}
-			//		ImGui::TreePop();
-			//	}
-			//}
-			
 			ImGuiManager::GetInstance()->End();
 
 			//描画開始
@@ -403,7 +405,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 			spriteCommon->Command();
 
 			for (Sprite* sprite : sprites) {
-				//sprite->Draw();
+				sprite->Draw();
 			}		
 			
 			ImGuiManager::GetInstance()->Draw();
