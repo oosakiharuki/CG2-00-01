@@ -34,7 +34,6 @@ void DirectXCommon::Initialize() {
 	ViewPort();
 	Siccer();
 	DXC();
-	ImGui();
 }
 
 
@@ -507,25 +506,10 @@ void DirectXCommon::DXC() {
 
 }
 
-void DirectXCommon::ImGui() {
-	//ImGui初期化
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-	ImGui_ImplWin32_Init(winApp_->GetHwnd());
-	ImGui_ImplDX12_Init(device.Get(), swapChainDesc.BufferCount,
-		rtvDesc.Format, srvDescriptorHeap.Get(),
-		srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-		srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
-
-}
-
 
 //更新前
 void DirectXCommon::PreDraw() {
 
-	////ImGuiの内部コマンド
-	//ImGui::Render();
 
 	//　これから書き込みバックバッファのインデックスを取得
 	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
@@ -572,10 +556,6 @@ void DirectXCommon::PostDraw() {
 
 	//　これから書き込みバックバッファのインデックスを取得
 	UINT backBufferIndex = swapChain->GetCurrentBackBufferIndex();
-
-	//実際のcommandListのImGui描画コマンドを挟む
-	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList.Get());
-
 
 	//画面に描く処理はすべて終わり、画面に映すので、状況をそうい
 	//今回はResourceTargetからPresentにする
@@ -645,9 +625,5 @@ void DirectXCommon::UpdateFixFPS() {
 }
 
 void DirectXCommon::Finalize() {
-	ImGui_ImplDX12_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext();
-
 	CloseHandle(fenceEvent);
 }

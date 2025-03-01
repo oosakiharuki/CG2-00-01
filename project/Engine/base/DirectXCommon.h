@@ -14,11 +14,6 @@
 #include "externals/DirectXTex/DirectXTex.h"
 #include <chrono>
 
-#include"externals/imgui/imgui.h"
-#include"externals/imgui/imgui_impl_dx12.h"
-#include"externals/imgui/imgui_impl_win32.h"
-extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
-
 class DirectXCommon {
 public:
 	void Initialize();
@@ -48,7 +43,6 @@ public:
 	void ViewPort();
 	void Siccer();
 	void DXC();
-	void ImGui();
 
 	void SetWinApp(WinApp* winApp) { winApp_ = winApp; }
 
@@ -65,10 +59,15 @@ public:
 	void PreDraw();
 	void PostDraw();
 
-	Microsoft::WRL::ComPtr<ID3D12Device>  GetDevice()const { return device.Get(); }
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> GetCommandList() const { return commandList.Get(); }
+	ID3D12Device*  GetDevice()const { return device.Get(); }
+	ID3D12GraphicsCommandList* GetCommandList() const { return commandList.Get(); }
 	//D3D12_CPU_DESCRIPTOR_HANDLE GetDsvHandle() { return dsvHandle; }
 	HANDLE GetFenceEvent() { return fenceEvent; }
+
+	D3D12_RENDER_TARGET_VIEW_DESC GetRtvDesc() { return rtvDesc; }
+	ID3D12DescriptorHeap* GetSrvDescriptorHeap() { return srvDescriptorHeap.Get(); }
+	//DXGI_SWAP_CHAIN_DESC1 GetSwapChainDesc() { return swapChainDesc; };
+	size_t GetSwapChainResourceNum() { return swapChainDesc.BufferCount; }
 
 	void Finalize();
 

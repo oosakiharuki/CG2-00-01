@@ -13,10 +13,15 @@ public:
 	void CreateSRVforStructureBuffer(uint32_t srvIndex, ID3D12Resource* pResource, UINT numElements, UINT structureByteStride);
 	void PreDraw();
 	void SetGraphicsRootDescriptorTable(UINT RootParameterIndex, uint32_t srvIndex);
-private:
-	DirectXCommon* directXCommon = nullptr;
+
+	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> GetDescriptorHeap() { return descriptorHeap; }
+
 	//最大SRV数
 	static const uint32_t kMaxSRVCount;
+
+private:
+	DirectXCommon* directXCommon = nullptr;
+
 	//
 	uint32_t descriptorSize;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap;
