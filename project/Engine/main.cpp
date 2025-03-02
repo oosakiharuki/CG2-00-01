@@ -185,14 +185,14 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 				sprite->Update();
 
 
-				//position = sprite->GetPosition();
+				position = sprite->GetPosition();
 				//position.x += 0.1f;
 				//position.y += 0.1f;
-				//sprite->SetPosition(position);
+				sprite->SetPosition(position);
 
-				//rotation = sprite->GetRotate();
+				rotation = sprite->GetRotate();
 				//rotation += 0.01f;
-				//sprite->SetRotate(rotation);
+				sprite->SetRotate(rotation);
 
 				color = sprite->GetColor();
 				//color.x += 0.01f;
