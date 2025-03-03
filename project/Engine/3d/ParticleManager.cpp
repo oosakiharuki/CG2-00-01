@@ -18,13 +18,13 @@ ParticleManager* ParticleManager::GetInstance() {
 }
 
 void ParticleManager::Initialize(DirectXCommon* dxCommon, SrvManager* srvManager) {
-	particleCommon = new ParticleCommon(); 
+	particleCommon = ParticleCommon::GetInstance(); 
 	this->srvManager = srvManager;
 	particleCommon->Initialize(dxCommon);
 }
 
 void ParticleManager::Finalize() {
-	delete particleCommon;
+	particleCommon->Finalize();
 	delete instance;
 	instance = nullptr;
 }

@@ -2,6 +2,22 @@
 
 const uint32_t SrvManager::kMaxSRVCount = 512;
 
+SrvManager* SrvManager::instance = nullptr;
+
+uint32_t SrvManager::kSRVIndexTop = 1;
+
+SrvManager* SrvManager::GetInstance() {
+	if (instance == nullptr) {
+		instance = new SrvManager;
+	}
+	return instance;
+}
+void SrvManager::Finalize() {
+	delete instance;
+	instance = nullptr;
+}
+
+
 void SrvManager::Initialize(DirectXCommon* dxCommon) {
 	this->directXCommon = dxCommon;
 	descriptorHeap = directXCommon->CreateDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, kMaxSRVCount, true);

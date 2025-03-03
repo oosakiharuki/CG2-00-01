@@ -16,6 +16,8 @@
 
 class DirectXCommon {
 public:
+	static DirectXCommon* GetInstance();
+
 	void Initialize();
 	void Device();
 	void Command();
@@ -61,7 +63,7 @@ public:
 
 	ID3D12Device*  GetDevice()const { return device.Get(); }
 	ID3D12GraphicsCommandList* GetCommandList() const { return commandList.Get(); }
-	//D3D12_CPU_DESCRIPTOR_HANDLE GetDsvHandle() { return dsvHandle; }
+	D3D12_CPU_DESCRIPTOR_HANDLE GetDsvHandle() { return dsvHandle; }
 	HANDLE GetFenceEvent() { return fenceEvent; }
 
 	D3D12_RENDER_TARGET_VIEW_DESC GetRtvDesc() { return rtvDesc; }
@@ -163,4 +165,15 @@ private:
 	void UpdateFixFPS();
 	//逆行しないタイマー
 	std::chrono::steady_clock::time_point reference_;
+
+
+	static DirectXCommon* instance;
+
+	DirectXCommon() = default;
+	~DirectXCommon() = default;
+	DirectXCommon(DirectXCommon&) = default;
+	DirectXCommon& operator=(DirectXCommon&) = default;
+
+
+	static uint32_t kSRVIndexTop;
 };

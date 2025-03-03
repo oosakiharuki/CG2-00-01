@@ -2,6 +2,21 @@
 
 using  namespace Logger;
 
+ParticleCommon* ParticleCommon::instance = nullptr;
+
+uint32_t ParticleCommon::kSRVIndexTop = 1;
+
+ParticleCommon* ParticleCommon::GetInstance() {
+	if (instance == nullptr) {
+		instance = new ParticleCommon;
+	}
+	return instance;
+}
+void ParticleCommon::Finalize() {
+	delete instance;
+	instance = nullptr;
+}
+
 void ParticleCommon::Initialize(DirectXCommon* dxCommon) {
 	dxCommon_ = dxCommon;
 

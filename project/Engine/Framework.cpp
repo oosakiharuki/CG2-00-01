@@ -6,7 +6,7 @@ void Framework::Initialize() {
 	winApp_->Initialize();
 
 
-	input_ = new Input();
+	input_ = Input::GetInstance();
 	//GetHInstance()GetHwnd()を入れず直接winAppのクラスのものを使える
 	input_->Initialize(winApp_);
 
@@ -14,23 +14,22 @@ void Framework::Initialize() {
 	//ShowWindow(hwnd, SW_SHOW);
 
 
-	dxCommon = new DirectXCommon();
+	dxCommon = DirectXCommon::GetInstance();
 	dxCommon->SetWinApp(winApp_);
 	dxCommon->Initialize();
 
-	srvManager = new SrvManager();
+	srvManager = SrvManager::GetInstance();
 	srvManager->Initialize(dxCommon);
 
 	ImGuiManager::GetInstance()->Initialize(winApp_, dxCommon, srvManager);
 
-	TextureManager::GetInstance()->Initialize(dxCommon, srvManager);
-	//TextureManager::GetInstance()->LoadTexture("resource/monsterBall.png");
 
-	spriteCommon = new SpriteCommon;
+	spriteCommon = SpriteCommon::GetInstance();
 	spriteCommon->Initialize(dxCommon);
+	TextureManager::GetInstance()->Initialize(dxCommon, srvManager);
+	
 
-
-	object3dCommon = new Object3dCommon();
+	object3dCommon = Object3dCommon::GetInstance();
 	object3dCommon->Initialize(dxCommon);
 
 
@@ -39,7 +38,7 @@ void Framework::Initialize() {
 	ModelManager::GetInstance()->Initialize(dxCommon);
 
 
-	particleCommon = new ParticleCommon();
+	particleCommon = ParticleCommon::GetInstance();
 	particleCommon->Initialize(dxCommon);
 	ParticleManager::GetInstance()->Initialize(dxCommon, srvManager);
 
@@ -59,7 +58,8 @@ void Framework::Finalize() {
 	//旧WinApp
 	D3DResourceLeakChecker leakCheck;
 
-	delete input_;
+	//delete input_;
+	input_->Finalize();
 
 	winApp_->Finalize();
 	delete winApp_;
@@ -70,16 +70,16 @@ void Framework::Finalize() {
 	ParticleManager::GetInstance()->Finalize();
 
 	dxCommon->Finalize();
-	delete dxCommon;
-	dxCommon = nullptr;
+	//delete dxCommon;
+	//dxCommon = nullptr;
 
-	delete srvManager;
+	srvManager->Finalize();
 
-
-	delete spriteCommon;
-	delete object3dCommon;
+	spriteCommon->Finalize();	
+	object3dCommon->Finalize();
 	delete modelCommon;
-	delete particleCommon;
+	
+	particleCommon->Finalize();
 }
 
 

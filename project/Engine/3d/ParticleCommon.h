@@ -4,6 +4,9 @@ class Camera;
 
 class ParticleCommon{
 public:
+	static ParticleCommon* GetInstance();
+	void Finalize();
+
 	void Initialize(DirectXCommon* dxCommon);
 	DirectXCommon* GetDxCommon()const { return dxCommon_; }
 
@@ -34,4 +37,14 @@ private:
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState = nullptr;
 
 	Camera* defaultCamera = nullptr;
+
+
+	static ParticleCommon* instance;
+
+	ParticleCommon() = default;
+	~ParticleCommon() = default;
+	ParticleCommon(ParticleCommon&) = default;
+	ParticleCommon& operator=(ParticleCommon&) = default;
+
+	static uint32_t kSRVIndexTop;
 };

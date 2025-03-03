@@ -110,6 +110,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClCompile Include="Engine\base\DirectXCommon.cpp" />
     <ClCompile Include="Engine\base\SrvManager.cpp" />
     <ClCompile Include="Engine\Framework.cpp" />
+    <ClCompile Include="Engine\GameScene.cpp" />
     <ClCompile Include="Engine\input\Input.cpp">
       <RuntimeLibrary Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
@@ -145,6 +146,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\base\DirectXCommon.h" />
     <ClInclude Include="Engine\base\SrvManager.h" />
     <ClInclude Include="Engine\Framework.h" />
+    <ClInclude Include="Engine\GameScene.h" />
     <ClInclude Include="Engine\input\Input.h" />
     <ClInclude Include="Engine\base\Logger.h" />
     <ClInclude Include="Engine\3d\Model.h" />

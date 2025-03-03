@@ -12,7 +12,7 @@ class SpriteCommon;
 
 class Sprite{
 public:
-	void Initialize(SpriteCommon* spriteCommon,std::string textureFilePath);
+	void Initialize(std::string textureFilePath);
 	void Update();
 	void Draw();
 

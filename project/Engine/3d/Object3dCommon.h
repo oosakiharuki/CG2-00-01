@@ -4,6 +4,9 @@ class Camera;
 
 class Object3dCommon {
 public:
+	static Object3dCommon* GetInstance();
+	void Finalize();
+
 	void Initialize(DirectXCommon* dxCommon);
 	DirectXCommon* GetDirectXCommon()const { return dxCommon_; }
 
@@ -33,4 +36,17 @@ private:
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState = nullptr;
 
 	Camera* defaultCamera = nullptr;
+
+	static Object3dCommon* instance;
+
+	Object3dCommon() = default;
+	~Object3dCommon() = default;
+	Object3dCommon(Object3dCommon&) = default;
+	Object3dCommon& operator=(Object3dCommon&) = default;
+
+
+	static uint32_t kSRVIndexTop;
+
+
+
 };

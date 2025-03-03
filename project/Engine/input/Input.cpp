@@ -10,6 +10,21 @@
 #pragma comment(lib,"dinput8.lib")
 #pragma comment(lib,"dxguid.lib")
 
+Input* Input::instance = nullptr;
+
+uint32_t Input::kSRVIndexTop = 1;
+
+Input* Input::GetInstance() {
+	if (instance == nullptr) {
+		instance = new Input;
+	}
+	return instance;
+}
+
+void Input::Finalize() {
+	delete instance;
+	instance = nullptr;
+}
 
 void Input::Initialize(WinApp* winApp) {
 

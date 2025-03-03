@@ -5,8 +5,8 @@
 
 using namespace MyMath;
 
-void Sprite::Initialize(SpriteCommon* spriteCommon, std::string textureFilePath) {
-	this->spriteCommon_ = spriteCommon;
+void Sprite::Initialize(std::string textureFilePath) {
+	this->spriteCommon_ = SpriteCommon::GetInstance();
 	filePath = textureFilePath;
 
 	TextureManager::GetInstance()->LoadTexture(textureFilePath);

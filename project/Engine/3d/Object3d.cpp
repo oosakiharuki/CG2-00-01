@@ -9,8 +9,8 @@
 
 using namespace MyMath;
 
-void Object3d::Initialize(Object3dCommon* object3dCommon_) {
-	this->object3dCommon = object3dCommon_;	
+void Object3d::Initialize() {
+	this->object3dCommon = Object3dCommon::GetInstance();	
 	this->camera = object3dCommon->GetDefaultCamera();
 	wvpResource = object3dCommon->GetDirectXCommon()->CreateBufferResource(sizeof(TransformationMatrix));
 	wvpResource->Map(0, nullptr, reinterpret_cast<void**>(&wvpData));

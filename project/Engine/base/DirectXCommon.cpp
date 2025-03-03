@@ -8,12 +8,26 @@
 #pragma comment(lib,"dxcompiler.lib")
 
 #include <thread>
+#include "SrvManager.h"
+#include "ImGuiManager.h"
 
 using namespace Microsoft::WRL;
 using namespace Logger;
 using namespace StringUtility;
 
 const uint32_t DirectXCommon::kMaxSRVCount = 512;
+
+
+DirectXCommon* DirectXCommon::instance = nullptr;
+
+uint32_t DirectXCommon::kSRVIndexTop = 1;
+
+DirectXCommon* DirectXCommon::GetInstance() {
+	if (instance == nullptr) {
+		instance = new DirectXCommon;
+	}
+	return instance;
+}
 
 void DirectXCommon::Initialize() {
 
@@ -549,6 +563,8 @@ void DirectXCommon::PreDraw() {
 
 	commandList->RSSetViewports(1, &viewport);
 	commandList->RSSetScissorRects(1, &scissorRect);
+
+	SrvManager::GetInstance()->PreDraw();
 }
 
 //更新後
@@ -626,4 +642,6 @@ void DirectXCommon::UpdateFixFPS() {
 
 void DirectXCommon::Finalize() {
 	CloseHandle(fenceEvent);
+	delete instance;
+	instance = nullptr;
 }

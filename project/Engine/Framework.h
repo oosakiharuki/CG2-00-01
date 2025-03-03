@@ -26,7 +26,7 @@ public:
 	virtual ~Framework() = default;
 
 	void Run();
-//private:
+private:
 	WinApp* winApp_ = nullptr;
 	Input* input_;
 	DirectXCommon* dxCommon = nullptr;

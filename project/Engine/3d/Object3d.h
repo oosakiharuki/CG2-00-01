@@ -13,7 +13,7 @@ class Object3dCommon;
 class Object3d
 {
 public:
-	void Initialize(Object3dCommon* object3dCommon_);
+	void Initialize();
 	void Update();
 	void Draw();
 
