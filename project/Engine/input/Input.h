@@ -9,6 +9,9 @@
 #include "WinApp.h"
 class Input{
 public:
+	static Input* GetInstance();
+	void Finalize();
+
 	//using namespace Microsoft::WRL の代わり
 	template <class T> using ComPtr =  Microsoft::WRL::ComPtr<T>;
 
@@ -23,4 +26,14 @@ private:
 	BYTE key[256] = {};
 	BYTE keyPre[256] = {};
 	WinApp* winApp_ = nullptr; //協力関係
+
+	static Input* instance;
+
+	Input() = default;
+	~Input() = default;
+	Input(Input&) = default;
+	Input& operator=(Input&) = default;
+
+
+	static uint32_t kSRVIndexTop;
 };

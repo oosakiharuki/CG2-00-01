@@ -2,6 +2,21 @@
 
 using namespace Logger;
 
+SpriteCommon* SpriteCommon::instance = nullptr;
+
+uint32_t SpriteCommon::kSRVIndexTop = 1;
+
+SpriteCommon* SpriteCommon::GetInstance() {
+	if (instance == nullptr) {
+		instance = new SpriteCommon;
+	}
+	return instance;
+}
+void SpriteCommon::Finalize() {
+	delete instance;
+	instance = nullptr;
+}
+
 void SpriteCommon::Initialize(DirectXCommon* dxCommon) {
 	dxCommon_ = dxCommon;
 
@@ -154,4 +169,5 @@ void SpriteCommon::Command() {
 	dxCommon_->GetCommandList()->SetGraphicsRootSignature(rootSignature.Get());
 	dxCommon_->GetCommandList()->SetPipelineState(graphicsPipelineState.Get());
 	dxCommon_->GetCommandList()->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	dxCommon_->GetCommandList()->ClearDepthStencilView(dxCommon_->GetDsvHandle(), D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 }

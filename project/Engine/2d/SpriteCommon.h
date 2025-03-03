@@ -3,6 +3,9 @@
 
 class SpriteCommon {
 public:
+	static SpriteCommon* GetInstance();
+	void Finalize();
+
 	void Initialize(DirectXCommon* dxCommon);
 	DirectXCommon* GetDirectXCommon()const { return dxCommon_; }
 
@@ -29,4 +32,13 @@ private:
 	//PSO
 	Microsoft::WRL::ComPtr < ID3D12PipelineState> graphicsPipelineState = nullptr;
 
+
+	static SpriteCommon* instance;
+
+	SpriteCommon() = default;
+	~SpriteCommon() = default;
+	SpriteCommon(SpriteCommon&) = default;
+	SpriteCommon& operator=(SpriteCommon&) = default;
+
+	static uint32_t kSRVIndexTop;
 };

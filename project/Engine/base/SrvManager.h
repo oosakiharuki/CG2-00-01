@@ -2,6 +2,9 @@
 #include "DirectXCommon.h"
 class SrvManager{
 public:
+	static SrvManager* GetInstance();
+	void Finalize();
+
 	void Initialize(DirectXCommon* dxCommon);
 	uint32_t Allocate();
 	bool Max();
@@ -26,4 +29,14 @@ private:
 	uint32_t descriptorSize;
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> descriptorHeap;
 	uint32_t useIndex = 0;
+
+
+	static SrvManager* instance;
+
+	SrvManager() = default;
+	~SrvManager() = default;
+	SrvManager(SrvManager&) = default;
+	SrvManager& operator=(SrvManager&) = default;
+
+	static uint32_t kSRVIndexTop;
 };
