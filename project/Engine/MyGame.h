@@ -1,6 +1,6 @@
 #pragma once 
 #include "Framework.h"
-#include "GameScene.h"
+#include "GameManager.h"
 
 class MyGame : public Framework{
 public:
@@ -9,7 +9,6 @@ public:
 	void Update() override;
 	void Draw() override;
 
-	//bool IsEndRequst() { return isRequst; }
 private:
-	GameScene* gameScene = nullptr;
+	GameManager* gameScene = nullptr;
 };

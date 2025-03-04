@@ -91,6 +91,9 @@ void GameScene::Update() {
 		OutputDebugStringA("Hit 1\n");
 	}
 
+	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+		sceneNo = Title;
+	}
 
 	Vector2 position;
 	float rotation;
@@ -203,8 +206,6 @@ void GameScene::Update() {
 
 
 #ifdef  USE_IMGUI
-
-	ImGuiManager::GetInstance()->Begin();
 
 	//ここにテキストを入れられる
 
@@ -332,8 +333,6 @@ void GameScene::Update() {
 		}
 	}
 
-	ImGuiManager::GetInstance()->End();
-
 #endif //  USE_IMGUI
 
 }
@@ -367,10 +366,6 @@ void GameScene::Draw() {
 
 }
 void GameScene::Finalize() {
-
-#ifdef  USE_IMGUI
-	ImGuiManager::GetInstance()->Finalize();
-#endif //  USE_IMGUI
 
 	delete camera;
 

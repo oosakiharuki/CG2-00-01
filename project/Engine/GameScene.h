@@ -7,13 +7,14 @@
 #include "particle.h" 
 #include "Audio.h"
 #include "Framework.h"
+#include "IScene.h"
 
-class GameScene{
+class GameScene : public IScene {
 public:
-	void Initialize();
-	void Update();
-	void Draw();
-	void Finalize();
+	void Initialize() override;
+	void Update() override;
+	void Draw() override;
+	void Finalize() override;
 private:
 
 
