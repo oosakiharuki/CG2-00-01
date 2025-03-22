@@ -42,4 +42,6 @@ private:
 	//ゲームループ終了(while文から抜ける)
 	bool isRequst = false;
 
+	XINPUT_STATE state,preState;
+
 };

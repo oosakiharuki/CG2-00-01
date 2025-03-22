@@ -79,6 +79,9 @@ void GameScene::Initialize() {
 	audio2 = new Audio();
 	audio2->Initialize("resource/audio01.wav");
 
+	Input::GetInstance()->GetJoyStickState(0, state);
+	//Input::GetInstance()->GetJoystickStatePrevious(0, preState);
+
 }
 
 void GameScene::Update() {
@@ -99,7 +102,7 @@ void GameScene::Update() {
 	float rotation;
 	Vector4 color;
 	Vector2 size;
-
+	
 	for (Sprite* sprite : sprites) {
 		sprite->Update();
 
@@ -133,10 +136,22 @@ void GameScene::Update() {
 	Vector3 rotationOBJ2;
 	Vector3 sizeOBJ;
 
+	Input::GetInstance()->GetJoyStickState(0, state);
+
 	for (Object3d* object3d : objects) {
 		object3d->Update();
-
+		
 		positionOBJ = object3d->GetTranslate();
+		
+		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) &&
+			!(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
+			positionOBJ.y += 0.5f;
+		}
+
+		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) &&
+			!(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
+			OutputDebugStringA("Hit A Botton\n");
+		}
 
 		object3d->SetTranslate(positionOBJ);
 
@@ -164,6 +179,27 @@ void GameScene::Update() {
 
 	if (Input::GetInstance()->PushKey(DIK_A)) {
 		positionOBJ.x -= 0.1f;
+	}
+	
+	float x = 0, z = 0;
+	const float speed = 0.2f;
+
+	if (Input::GetInstance()->GetJoyStickState(0, state)) {
+		// 左スティックの入力
+		x = static_cast<float>(state.Gamepad.sThumbLX) / 32768.0f; // -1.0f～1.0f
+		z = static_cast<float>(state.Gamepad.sThumbLY) / 32768.0f; // -1.0f～1.0f
+
+		// デッドゾーン処理
+		const float deadZone = 0.2f; // スティックの感度調整
+		if (abs(x) < deadZone) {
+			x = 0.0f;
+		}
+		if (abs(z) < deadZone) {
+			z = 0.0f;
+		}
+		positionOBJ.x += x * speed;
+		positionOBJ.z += z * speed;
+
 	}
 
 	objects[1]->SetTranslate(positionOBJ);
@@ -334,6 +370,9 @@ void GameScene::Update() {
 	}
 
 #endif //  USE_IMGUI
+
+	//現在のジョイスティック状態から前回のジョイスティック状態に
+	preState = state;
 
 }
 

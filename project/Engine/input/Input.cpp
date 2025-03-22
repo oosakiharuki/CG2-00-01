@@ -1,14 +1,10 @@
 #include "Input.h"
 
 #include <cassert>
-//#include <wrl.h>
-//using namespace Microsoft::WRL;
-
-//#define DIRECTINPUT_VERSION 0x0800
-//#include <dinput.h>
 
 #pragma comment(lib,"dinput8.lib")
 #pragma comment(lib,"dxguid.lib")
+#pragma comment(lib,"Xinput.lib")
 
 Input* Input::instance = nullptr;
 
@@ -71,6 +67,54 @@ bool Input::TriggerKey(BYTE keyNumber) {
 	
 	if (key[keyNumber] && !keyPre[keyNumber]) {
 		return true;
+	}
+
+	return false;
+}
+
+bool Input::GetJoyStickState(uint32_t num, XINPUT_STATE& state) {
+
+	ZeroMemory(&state, sizeof(XINPUT_STATE));
+
+	// Simply get the state of the controller from XInput.
+	Result = XInputGetState(num, &state);
+
+	//コントローラが作動してるか
+	if (Result == ERROR_SUCCESS)
+	{
+		// Controller is connected
+		return true;
+	}
+	else
+	{
+		// Controller is not connected
+		return false;
+	}
+
+	return false;
+}
+
+bool Input::GetJoystickStatePrevious(uint32_t num, XINPUT_STATE& state) {
+
+	ZeroMemory(&state, sizeof(XINPUT_KEYSTROKE_KEYDOWN));
+
+	XINPUT_STATE prevState = {};
+
+	// Simply get the state of the controller from XInput.
+	preResult = XInputGetState(num, &state);
+
+	//コントローラが作動してるか
+	if (preResult == ERROR_SUCCESS)
+	{
+		// Controller is connected	
+		// 
+		prevState = state;
+		return true;
+	}
+	else
+	{
+		// Controller is not connected		
+		return false;
 	}
 
 	return false;
