@@ -73,14 +73,17 @@ bool Input::TriggerKey(BYTE keyNumber) {
 }
 
 bool Input::GetJoyStickState(uint32_t num, XINPUT_STATE& state) {
+	DWORD dwResult;
+
+	prevState = state;
 
 	ZeroMemory(&state, sizeof(XINPUT_STATE));
-
+	
 	// Simply get the state of the controller from XInput.
-	Result = XInputGetState(num, &state);
+	dwResult = XInputGetState(num, &state);
 
 	//コントローラが作動してるか
-	if (Result == ERROR_SUCCESS)
+	if (dwResult == ERROR_SUCCESS)
 	{
 		// Controller is connected
 		return true;
@@ -95,20 +98,21 @@ bool Input::GetJoyStickState(uint32_t num, XINPUT_STATE& state) {
 }
 
 bool Input::GetJoystickStatePrevious(uint32_t num, XINPUT_STATE& state) {
+	DWORD dwResult;
 
-	ZeroMemory(&state, sizeof(XINPUT_KEYSTROKE_KEYDOWN));
-
-	XINPUT_STATE prevState = {};
+	ZeroMemory(&state, sizeof(XINPUT_STATE));
 
 	// Simply get the state of the controller from XInput.
-	preResult = XInputGetState(num, &state);
+	dwResult = XInputGetState(num, &state);
 
 	//コントローラが作動してるか
-	if (preResult == ERROR_SUCCESS)
+	if (dwResult == ERROR_SUCCESS)
 	{
 		// Controller is connected	
-		// 
-		prevState = state;
+
+		//現在の状態から前回の状態に
+		state = prevState;
+
 		return true;
 	}
 	else

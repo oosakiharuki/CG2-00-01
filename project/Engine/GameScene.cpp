@@ -79,9 +79,6 @@ void GameScene::Initialize() {
 	audio2 = new Audio();
 	audio2->Initialize("resource/audio01.wav");
 
-	Input::GetInstance()->GetJoyStickState(0, state);
-	//Input::GetInstance()->GetJoystickStatePrevious(0, preState);
-
 }
 
 void GameScene::Update() {
@@ -137,7 +134,8 @@ void GameScene::Update() {
 	Vector3 sizeOBJ;
 
 	Input::GetInstance()->GetJoyStickState(0, state);
-
+	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
+	
 	for (Object3d* object3d : objects) {
 		object3d->Update();
 		
@@ -146,6 +144,16 @@ void GameScene::Update() {
 		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) &&
 			!(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
 			positionOBJ.y += 0.5f;
+		}
+
+		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_B) &&
+			(preState.Gamepad.wButtons & XINPUT_GAMEPAD_B)) {
+			positionOBJ.y -= 0.5f;
+		}		
+		
+		if (!(state.Gamepad.wButtons & XINPUT_GAMEPAD_X) &&
+			(preState.Gamepad.wButtons & XINPUT_GAMEPAD_X)) {
+			positionOBJ.z += 0.5f;
 		}
 
 		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) &&
@@ -370,10 +378,6 @@ void GameScene::Update() {
 	}
 
 #endif //  USE_IMGUI
-
-	//現在のジョイスティック状態から前回のジョイスティック状態に
-	preState = state;
-
 }
 
 void GameScene::Draw() {

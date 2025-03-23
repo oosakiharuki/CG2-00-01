@@ -40,14 +40,7 @@ private:
 	Input(Input&) = default;
 	Input& operator=(Input&) = default;
 
-
 	static uint32_t kSRVIndexTop;
-	DWORD LastInput;
-
-	DWORD Result;
-
-	DWORD preResult;
-
-
-
+	
+	XINPUT_STATE prevState = {};
 };
