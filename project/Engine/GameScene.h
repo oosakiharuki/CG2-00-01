@@ -44,4 +44,6 @@ private:
 
 	XINPUT_STATE state,preState;
 
+	WorldTransform worldTransform;
+	WorldTransform worldTransform2;
 };

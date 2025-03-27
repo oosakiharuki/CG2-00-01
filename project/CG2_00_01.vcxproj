@@ -136,6 +136,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     </ClCompile>
     <ClCompile Include="Engine\MyGame.cpp" />
     <ClCompile Include="Engine\TitleScene.cpp" />
+    <ClCompile Include="Engine\WorldTransform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\2d\ImGuiManager.h" />
@@ -172,6 +173,7 @@ copy "$(WindowsSdkDir)bin\$(TargetPlatformVersion)\x64\dxil.dll" "$(TargetDir)dx
     <ClInclude Include="Engine\base\WinApp.h" />
     <ClInclude Include="Engine\MyGame.h" />
     <ClInclude Include="Engine\TitleScene.h" />
+    <ClInclude Include="Engine\WorldTransform.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="externals\DirectXTex\DirectXTex_Desktop_2022_Win10.vcxproj">

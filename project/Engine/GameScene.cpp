@@ -79,6 +79,10 @@ void GameScene::Initialize() {
 	audio2 = new Audio();
 	audio2->Initialize("resource/audio01.wav");
 
+
+	worldTransform.Initialize();
+	worldTransform2.Initialize();
+	worldTransform2.translation_ = { 0,2,0 };
 }
 
 void GameScene::Update() {
@@ -127,67 +131,29 @@ void GameScene::Update() {
 	}
 	spriteUI->Update();
 
-
-	Vector3 positionOBJ;
-	Vector3 rotationOBJ;
-	Vector3 rotationOBJ2;
-	Vector3 sizeOBJ;
-
 	Input::GetInstance()->GetJoyStickState(0, state);
 	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
+			
+	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) &&
+		!(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
+		worldTransform.translation_.y += 0.5f;
+	}
+
+	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_B) &&
+		(preState.Gamepad.wButtons & XINPUT_GAMEPAD_B)) {
+		worldTransform.rotation_.y -= 0.5f;
+	}
 	
-	for (Object3d* object3d : objects) {
-		object3d->Update();
-		
-		positionOBJ = object3d->GetTranslate();
-		
-		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) &&
-			!(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
-			positionOBJ.y += 0.5f;
-		}
-
-		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_B) &&
-			(preState.Gamepad.wButtons & XINPUT_GAMEPAD_B)) {
-			positionOBJ.y -= 0.5f;
-		}		
-		
-		if (!(state.Gamepad.wButtons & XINPUT_GAMEPAD_X) &&
-			(preState.Gamepad.wButtons & XINPUT_GAMEPAD_X)) {
-			positionOBJ.z += 0.5f;
-		}
-
-		if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) &&
-			!(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
-			OutputDebugStringA("Hit A Botton\n");
-		}
-
-		object3d->SetTranslate(positionOBJ);
-
-		rotationOBJ = object3d->GetRotate();
-
-		object3d->SetRotate(rotationOBJ);
-
-
-		sizeOBJ = object3d->GetScale();
-
-		object3d->SetScale(sizeOBJ);
-
+	if (!(state.Gamepad.wButtons & XINPUT_GAMEPAD_X) &&
+		(preState.Gamepad.wButtons & XINPUT_GAMEPAD_X)) {
+		worldTransform.scale_.z += 0.5f;
 	}
 
-	rotationOBJ = objects[0]->GetRotate();
-	rotationOBJ.y += 0.05f;
-	objects[0]->SetRotate(rotationOBJ);
-
-	rotationOBJ2 = objects[1]->GetRotate();
-	//rotationOBJ2.z += 0.1f;			
-
-	if (Input::GetInstance()->PushKey(DIK_D)) {
-		positionOBJ.x += 0.1f;
+	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) &&
+		!(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
+		OutputDebugStringA("Hit A Botton\n");
 	}
 
-	if (Input::GetInstance()->PushKey(DIK_A)) {
-		positionOBJ.x -= 0.1f;
-	}
 	
 	float x = 0, z = 0;
 	const float speed = 0.2f;
@@ -205,17 +171,15 @@ void GameScene::Update() {
 		if (abs(z) < deadZone) {
 			z = 0.0f;
 		}
-		positionOBJ.x += x * speed;
-		positionOBJ.z += z * speed;
+		worldTransform.translation_.x += x * speed;
+		worldTransform.translation_.z += z * speed;
 
 	}
-
-	objects[1]->SetTranslate(positionOBJ);
 
 	particle->Update();
 	particle2->Update();
 
-	particle->SetTranslate(positionOBJ);
+	particle->SetTranslate(worldTransform.translation_);
 	particle->SetFrequency(0.5f);
 
 	//Vector3 rotateP = particle->GetRotate();
@@ -248,6 +212,10 @@ void GameScene::Update() {
 	}
 
 
+	worldTransform2.parent_ = &worldTransform;
+
+	worldTransform.UpdateMatrix();
+	worldTransform2.UpdateMatrix();
 
 #ifdef  USE_IMGUI
 
@@ -267,33 +235,17 @@ void GameScene::Update() {
 	camera->SetRotate(cameraRotate);
 	camera->SetTranslate(cameraTranslate);
 
-
 	if (ImGui::TreeNode("Model_1")) {
 		ImGui::Checkbox("IsModel", &IsModel[0]);
 		if (IsModel) {
+			ImGui::InputFloat3("VertexModel", &worldTransform.translation_.x);
+			ImGui::SliderFloat3("SliderVertexModel", &worldTransform.translation_.x, -5.0f, 5.0f);
 
-			positionOBJ = objects[0]->GetTranslate();
-			ImGui::InputFloat3("VertexModel", &positionOBJ.x);
-			ImGui::SliderFloat3("SliderVertexModel", &positionOBJ.x, -5.0f, 5.0f);
-			objects[0]->SetTranslate(positionOBJ);
+			ImGui::InputFloat3("RotateModel", &worldTransform.rotation_.x);
+			ImGui::SliderFloat3("SliderRotateModel", &worldTransform.rotation_.x, -10.0f, 10.0f);
 
-
-			rotationOBJ = objects[0]->GetRotate();
-			ImGui::InputFloat3("RotateModel", &rotationOBJ.x);
-			ImGui::SliderFloat3("SliderRotateModel", &rotationOBJ.x, -10.0f, 10.0f);
-
-			objects[0]->SetRotate(rotationOBJ);
-
-
-			sizeOBJ = objects[0]->GetScale();
-			ImGui::InputFloat3("ScaleModel", &sizeOBJ.x);
-			ImGui::SliderFloat3("SliderScaleModel", &sizeOBJ.x, 0.5f, 5.0f);
-
-			objects[0]->SetScale(sizeOBJ);
-
-			//ImGui::InputFloat3("MaterialModel", *);
-			//ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
-			//ImGui::Checkbox("ModelTexture", &textureChange2);
+			ImGui::InputFloat3("ScaleModel", &worldTransform.scale_.x);
+			ImGui::SliderFloat3("SliderScaleModel", &worldTransform.scale_.x, 0.5f, 5.0f);
 		}
 		ImGui::TreePop();
 	}
@@ -303,28 +255,14 @@ void GameScene::Update() {
 		ImGui::Checkbox("IsModel", &IsModel[1]);
 		if (IsModel[1]) {
 
-			positionOBJ = objects[1]->GetTranslate();
-			ImGui::InputFloat3("VertexModel", &positionOBJ.x);
-			ImGui::SliderFloat3("SliderVertexModel", &positionOBJ.x, -5.0f, 5.0f);
-			objects[1]->SetTranslate(positionOBJ);
+			ImGui::InputFloat3("VertexModel", &worldTransform2.translation_.x);
+			ImGui::SliderFloat3("SliderVertexModel", &worldTransform2.translation_.x, -5.0f, 5.0f);
 
+			ImGui::InputFloat3("RotateModel", &worldTransform2.rotation_.x);
+			ImGui::SliderFloat3("SliderRotateModel", &worldTransform2.rotation_.x, -10.0f, 10.0f);
 
-			rotationOBJ = objects[1]->GetRotate();
-			ImGui::InputFloat3("RotateModel", &rotationOBJ.x);
-			ImGui::SliderFloat3("SliderRotateModel", &rotationOBJ.x, -10.0f, 10.0f);
-
-			objects[1]->SetRotate(rotationOBJ);
-
-
-			sizeOBJ = objects[1]->GetScale();
-			ImGui::InputFloat3("ScaleModel", &sizeOBJ.x);
-			ImGui::SliderFloat3("SliderScaleModel", &sizeOBJ.x, 0.5f, 5.0f);
-
-			objects[1]->SetScale(sizeOBJ);
-
-			//ImGui::InputFloat3("MaterialModel", *);
-			//ImGui::SliderFloat3("SliderMaterialModel", *inputMaterialModel, 0.0f, 1.0f);
-			//ImGui::Checkbox("ModelTexture", &textureChange2);
+			ImGui::InputFloat3("ScaleModel", &worldTransform2.scale_.x);
+			ImGui::SliderFloat3("SliderScaleModel", &worldTransform2.scale_.x, 0.5f, 5.0f);
 		}
 		ImGui::TreePop();
 	}
@@ -392,9 +330,14 @@ void GameScene::Draw() {
 	//モデル描画処理
 	Object3dCommon::GetInstance()->Command();
 
-	for (Object3d* object3d : objects) {
-		object3d->Draw();
-	}
+	//for (Object3d* object3d : objects) {
+	//	object3d->Draw(worldTransform);
+	//}
+
+
+	objects[0]->Draw(worldTransform);
+	objects[1]->Draw(worldTransform2);
+
 
 	//パーティクル描画処理
 	ParticleCommon::GetInstance()->Command();
