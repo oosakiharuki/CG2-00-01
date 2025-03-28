@@ -25,11 +25,6 @@ struct Emitter {
 	float frequencyTime; //頻度時刻
 };
 
-struct AABB {
-	Vector3 min;
-	Vector3 max;
-};
-
 struct AccelerationField {
 	Vector3 acceleration;
 	AABB area;

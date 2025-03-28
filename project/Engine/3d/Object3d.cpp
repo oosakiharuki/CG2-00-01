@@ -83,6 +83,38 @@ void Object3d::Draw(const WorldTransform& worldTransform) {
 	}
 }
 
+void Object3d::Draw(const WorldTransform& worldTransform, const std::string& textureData) {
+
+	Matrix4x4 WorldViewProjectionMatrix;
+	if (camera) {
+		Matrix4x4 projectionMatrix = camera->GetViewProjectionMatrix();
+		WorldViewProjectionMatrix = Multiply(worldTransform.matWorld_, projectionMatrix);
+	}
+	else {
+		WorldViewProjectionMatrix = worldTransform.matWorld_;
+	}
+
+	wvpData->World = worldTransform.matWorld_;
+	//wvpData->World = worldMatrix;
+	wvpData->WVP = WorldViewProjectionMatrix;
+
+	directionalLightSphereData->direction = Normalize(directionalLightSphereData->direction);
+
+
+	//モデル
+	object3dCommon->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
+	object3dCommon->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
+	if (model) {
+		model->Draw(textureData);
+	}
+}
+
 void Object3d::SetModelFile(const std::string& filePath) {
 	model = ModelManager::GetInstance()->FindModel(filePath);
+}
+
+void Object3d::LightSwitch(bool isLight) {
+	if (model) {
+		model->LightOn(isLight);
+	}
 }
