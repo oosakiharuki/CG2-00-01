@@ -66,7 +66,7 @@ void Model::Draw(const std::string& textureFilePath) {
 MaterialData Model::LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
 	MaterialData materialData;
 	std::string line;
-	std::ifstream file(directoryPath + "/" + filename);
+	std::ifstream file(directoryPath + "/Object/" + filename);
 	assert(file.is_open());
 
 	//ファイルを開く
@@ -79,7 +79,7 @@ MaterialData Model::LoadMaterialTemplateFile(const std::string& directoryPath, c
 			std::string textureFilename;
 			s >> textureFilename;
 
-			materialData.textureFilePath = directoryPath + "/" + textureFilename;
+			materialData.textureFilePath = directoryPath + "/Sprite/" + textureFilename;
 		}
 	}
 	return materialData;
@@ -96,7 +96,7 @@ ModelData Model::LoadObjFile(const std::string& directoryPath, const std::string
 	//ファイルから読んだ1行を格納する
 	std::string line;
 	//ファイルを読み取る
-	std::ifstream file(directoryPath + "/" + filename + "/" + filename + ".obj");
+	std::ifstream file(directoryPath + "/Object/" + filename + "/" + filename + ".obj");
 	assert(file.is_open());
 
 	//構築

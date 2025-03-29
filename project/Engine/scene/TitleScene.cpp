@@ -2,7 +2,7 @@
 
 void TitleScene::Initialize() {
 	sprite = new Sprite();
-	sprite->Initialize("resource/monsterBall.png");
+	sprite->Initialize("monsterBall.png");
 
 	sprite->SetPosition({ 64,64 });
 	sprite->SetSize({ 128,128 });

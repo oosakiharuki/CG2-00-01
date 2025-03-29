@@ -16,7 +16,7 @@ void TestClass::Init() {
 
 	object_ = new Object3d();
 	object_->Initialize();
-	object_->SetModelFile("cannon");
+	object_->SetModelFile("multiMaterial");
 	
 }
 
@@ -29,18 +29,19 @@ void TestClass::Update() {
 		damage = false;
 	}
 
-	if (ImGui::TreeNode("Model_1")) {
-		ImGui::InputFloat3("VertexModel", &worldTransform_.translation_.x);
-		ImGui::SliderFloat3("SliderVertexModel", &worldTransform_.translation_.x, -5.0f, 5.0f);
+	ImGui::Begin("TestModel");
 
-		ImGui::InputFloat3("RotateModel", &worldTransform_.rotation_.x);
-		ImGui::SliderFloat3("SliderRotateModel", &worldTransform_.rotation_.x, -10.0f, 10.0f);
+	ImGui::InputFloat3("VertexModel", &worldTransform_.translation_.x);
+	ImGui::SliderFloat3("SliderVertexModel", &worldTransform_.translation_.x, -5.0f, 5.0f);
 
-		ImGui::InputFloat3("ScaleModel", &worldTransform_.scale_.x);
-		ImGui::SliderFloat3("SliderScaleModel", &worldTransform_.scale_.x, 0.5f, 5.0f);
+	ImGui::InputFloat3("RotateModel", &worldTransform_.rotation_.x);
+	ImGui::SliderFloat3("SliderRotateModel", &worldTransform_.rotation_.x, -10.0f, 10.0f);
 
-		ImGui::TreePop();
-	}
+	ImGui::InputFloat3("ScaleModel", &worldTransform_.scale_.x);
+	ImGui::SliderFloat3("SliderScaleModel", &worldTransform_.scale_.x, 0.5f, 5.0f);
+
+	ImGui::End();
+
 	object_->LightSwitch(damage);
 
 	worldTransform_.UpdateMatrix();

@@ -7,7 +7,8 @@ void GameScene::Initialize() {
 	ModelManager::GetInstance()->LoadModel("axis");
 	ModelManager::GetInstance()->LoadModel("cannon");
 	ModelManager::GetInstance()->LoadModel("stage");
-	//ModelManager::GetInstance()->CreateOBJ("Spring");
+	ModelManager::GetInstance()->LoadModel("Spring");
+	ModelManager::GetInstance()->LoadModel("multiMaterial");
 	//ModelManager::GetInstance()->CreateOBJ("cannon");
 
 
@@ -49,8 +50,9 @@ void GameScene::Update() {
 	//ここにテキストを入れられる
 
 	//開発用UIの処理
-	ImGui::ShowDemoWindow();
+	//ImGui::ShowDemoWindow();
 
+	ImGui::Begin("camera");
 	ImGui::Text("ImGuiText");
 
 	//カメラ
@@ -62,6 +64,7 @@ void GameScene::Update() {
 	camera->SetRotate(cameraRotate);
 	camera->SetTranslate(cameraTranslate);
 
+	ImGui::End();
 #endif //  USE_IMGUI
 }
 
