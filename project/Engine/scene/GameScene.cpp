@@ -26,14 +26,16 @@ void GameScene::Initialize() {
 
 
 	ModelManager::GetInstance()->LoadModel("plane.obj");
-	ModelManager::GetInstance()->LoadModel("axis.obj");
+	ModelManager::GetInstance()->LoadModel("maru.obj");
+	ModelManager::GetInstance()->LoadModel("teapot.obj");
+	ModelManager::GetInstance()->LoadModel("grass01.obj");
 
 
 	camera = new Camera();
 	//Vector3 cameraRotate = { 1.4f,0.0f,0.0f };
 	//Vector3 cameraTranslate = { 0.0f,30.0f,-8.0f };
-	cameraRotate = { 0.0f,0.0f,0.0f };
-	cameraTranslate = { 0.0f,0.0f,-15.0f };
+	cameraRotate = { 1.2f,0.0f,0.0f };
+	cameraTranslate = { 0.0f,20.0f,-8.0f };
 	camera->SetRotate(cameraRotate);
 	camera->SetTranslate(cameraTranslate);
 
@@ -47,11 +49,11 @@ void GameScene::Initialize() {
 		Object3d* object3d = new Object3d();
 
 		if (i == 0) {
-			object3d->SetModelFile("plane.obj");
+			object3d->SetModelFile("maru.obj");
 			object3d->Initialize();
 		}
 		else {
-			object3d->SetModelFile("axis.obj");
+			object3d->SetModelFile("grass01.obj");
 			object3d->Initialize();
 		}
 
@@ -342,8 +344,8 @@ void GameScene::Draw() {
 	//パーティクル描画処理
 	ParticleCommon::GetInstance()->Command();
 
-	particle->Draw();
-	particle2->Draw();
+	//particle->Draw();
+	//particle2->Draw();
 
 	//スプライト描画処理(UI用)
 	SpriteCommon::GetInstance()->Command();

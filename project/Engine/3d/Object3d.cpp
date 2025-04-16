@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 #include "ModelManager.h"
+#include <numbers>
 
 using namespace MyMath;
 
@@ -26,7 +27,45 @@ void Object3d::Initialize() {
 	//色の設定
 	directionalLightSphereData->color = { 1.0f,1.0f,1.0f,1.0f };
 	directionalLightSphereData->direction = { 0.0f,-1.0f,0.0f };
-	directionalLightSphereData->intensity = 1.0f;
+	directionalLightSphereData->intensity = 0.0f;
+
+
+	//Phong Reflection Model
+	cameraResource =object3dCommon->GetDirectXCommon()->CreateBufferResource(sizeof(CameraForGPU));
+	cameraResource->Map(0, nullptr, reinterpret_cast<void**>(&cameraData));
+
+	cameraData->worldPosition = { 0,0,0 };
+
+	//ライト用のリソース
+	pointLightResource = object3dCommon->GetDirectXCommon()->CreateBufferResource(sizeof(PointLight));
+	//書き込むためのアドレス
+	pointLightResource->Map(0, nullptr, reinterpret_cast<void**>(&pointLightData));
+	//設定
+	pointLightData->color = { 1.0f,1.0f,1.0f,1.0f };
+	pointLightData->position = { 0.0f,2.0f,0.0f };
+	pointLightData->intensity = 1.0f;
+	pointLightData->radius = 5.0f;
+	pointLightData->decay = 1.0f;
+
+
+	//ライト用のリソース
+	spotLightResource = object3dCommon->GetDirectXCommon()->CreateBufferResource(sizeof(SpotLight));
+	//書き込むためのアドレス
+	spotLightResource->Map(0, nullptr, reinterpret_cast<void**>(&spotLightData));
+	//設定
+	spotLightData->color = { 1.0f,1.0f,1.0f,1.0f };
+	spotLightData->position = { 2.0f,1.25f,0.0f };
+	spotLightData->distance = 70.0f;
+	spotLightData->direction = Normalize({ -1.0f,-1.0f,0.0f });
+	spotLightData->intensity = 0.0f;
+	spotLightData->decay = 2.0f;
+	spotLightData->cosAngle = std::cos(std::numbers::pi_v<float> / 3.0f);
+	spotLightData->cosFalloffStart = std::cos(std::numbers::pi_v<float> / 4.0f);
+
+
+
+
+
 
 	transform = { {1.0f,1.0f,1.0f},{0.0f,0.0f,0.0f} ,{0.0f,0.0f,0.0f} };
 
@@ -78,6 +117,9 @@ void Object3d::Draw(const WorldTransform& worldTransform) {
 	//モデル
 	object3dCommon->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(1, wvpResource->GetGPUVirtualAddress());
 	object3dCommon->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(3, directionalLightSphereResource->GetGPUVirtualAddress());
+	object3dCommon->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(4, cameraResource->GetGPUVirtualAddress());
+	object3dCommon->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(5, pointLightResource->GetGPUVirtualAddress());
+	object3dCommon->GetDirectXCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(6, spotLightResource->GetGPUVirtualAddress());
 	if (model) {
 		model->Draw();
 	}
