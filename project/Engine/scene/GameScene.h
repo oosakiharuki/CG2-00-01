@@ -7,13 +7,14 @@
 #include "particle.h" 
 #include "Audio.h"
 #include "Framework.h"
+#include "IScene.h"
 
-class GameScene{
+class GameScene : public IScene {
 public:
-	void Initialize();
-	void Update();
-	void Draw();
-	void Finalize();
+	void Initialize() override;
+	void Update() override;
+	void Draw() override;
+	void Finalize() override;
 private:
 
 
@@ -41,4 +42,8 @@ private:
 	//ゲームループ終了(while文から抜ける)
 	bool isRequst = false;
 
+	XINPUT_STATE state,preState;
+
+	WorldTransform worldTransform;
+	WorldTransform worldTransform2;
 };

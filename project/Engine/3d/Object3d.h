@@ -7,6 +7,7 @@
 #include "d3d12.h"
 
 #include "Camera.h"
+#include "WorldTransform.h"
 
 class Object3dCommon;
 
@@ -15,7 +16,7 @@ class Object3d
 public:
 	void Initialize();
 	void Update();
-	void Draw();
+	void Draw(const WorldTransform& worldTransform);
 
 
 	//static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);

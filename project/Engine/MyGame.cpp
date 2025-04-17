@@ -4,7 +4,7 @@ void MyGame::Initialize() {
 
 	Framework::Initialize();
 
-	gameScene = new GameScene();
+	gameScene = new GameManager();
 	gameScene->Initialize();
 }
 
@@ -12,7 +12,16 @@ void MyGame::Update() {
 
 	Framework::Update();
 
+#ifdef  USE_IMGUI
+	ImGuiManager::GetInstance()->Begin();
+#endif //  USE_IMGUI
+
 	gameScene->Update();
+
+#ifdef  USE_IMGUI
+	ImGuiManager::GetInstance()->End();
+#endif //  USE_IMGUI
+
 }
 
 void MyGame::Draw() {
@@ -33,8 +42,12 @@ void MyGame::Draw() {
 
 
 void MyGame::Finalize() {
-	gameScene->Finalize();
+	//gameScene->Finalize();
 	delete gameScene;
+
+#ifdef  USE_IMGUI
+	ImGuiManager::GetInstance()->Finalize();
+#endif //  USE_IMGUI
 
 	Framework::Finalize();
 }

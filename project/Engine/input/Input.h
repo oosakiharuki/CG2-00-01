@@ -5,6 +5,7 @@
 
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
+#include <Xinput.h>
 
 #include "WinApp.h"
 class Input{
@@ -20,6 +21,11 @@ public:
 
 	bool PushKey(BYTE keyNumber);
 	bool TriggerKey(BYTE keyNumber);
+
+	bool GetJoyStickState(uint32_t num,XINPUT_STATE& state);
+	bool GetJoystickStatePrevious(uint32_t num, XINPUT_STATE& state);
+
+
 private:
 	ComPtr<IDirectInputDevice8> keyboard;
 	ComPtr<IDirectInput8> directInput;
@@ -34,6 +40,7 @@ private:
 	Input(Input&) = default;
 	Input& operator=(Input&) = default;
 
-
 	static uint32_t kSRVIndexTop;
+	
+	XINPUT_STATE prevState = {};
 };
