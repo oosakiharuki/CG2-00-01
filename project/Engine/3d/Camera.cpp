@@ -2,7 +2,7 @@
 #include "WinApp.h"
 using namespace MyMath;
 Camera::Camera()
-	: transform({ { 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,0.0f } })
+	: transform({ { 1.0f,1.0f,1.0f }, { 0.0f,0.0f,0.0f }, { 0.0f,0.0f,-50.0f } })
 	, forY(0.45f)
 	, aspect(float(WinApp::kClientWidth) / float(WinApp::kClientHeight))
 	, nearClip(0.1f)
