@@ -44,10 +44,22 @@ private:
 
 	//ライト用のリソース
 	Microsoft::WRL::ComPtr<ID3D12Resource> directionalLightSphereResource;
-
-
 	//マテリアルにデータを書き込む
 	DirectionalLight* directionalLightSphereData = nullptr;
+	
+	Microsoft::WRL::ComPtr<ID3D12Resource> cameraResource;
+	CameraForGPU* cameraData = nullptr;
+
+	//ポイントライト用のリソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> pointLightResource;
+	//マテリアルにデータを書き込む
+	PointLight* pointLightData = nullptr;
+
+	//スポットライト用のリソース
+	Microsoft::WRL::ComPtr<ID3D12Resource> spotLightResource;
+	//マテリアルにデータを書き込む
+	SpotLight* spotLightData = nullptr;
+
 
 	Transform transform;
 

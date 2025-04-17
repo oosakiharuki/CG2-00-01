@@ -247,24 +247,33 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="resource\shaders\Particle.hlsli">
+      <Filter>リソース ファイル</Filter>
+    </None>
     <None Include="resource\shaders\Object3d.hlsli">
       <Filter>リソース ファイル</Filter>
     </None>
-    <None Include="resource\shaders\Particle.hlsli">
+    <None Include="resource\shaders\Sprite.hlsli">
       <Filter>リソース ファイル</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="resource\shaders\Object3d.PS.hlsl">
+    <FxCompile Include="resource\shaders\Particle.PS.hlsl">
+      <Filter>リソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resource\shaders\Particle.VS.hlsl">
       <Filter>リソース ファイル</Filter>
     </FxCompile>
     <FxCompile Include="resource\shaders\Object3d.VS.hlsl">
       <Filter>リソース ファイル</Filter>
     </FxCompile>
-    <FxCompile Include="resource\shaders\Particle.PS.hlsl">
+    <FxCompile Include="resource\shaders\Sprite.PS.hlsl">
       <Filter>リソース ファイル</Filter>
     </FxCompile>
-    <FxCompile Include="resource\shaders\Particle.VS.hlsl">
+    <FxCompile Include="resource\shaders\Sprite.VS.hlsl">
+      <Filter>リソース ファイル</Filter>
+    </FxCompile>
+    <FxCompile Include="resource\shaders\Object3d.PS.hlsl">
       <Filter>リソース ファイル</Filter>
     </FxCompile>
   </ItemGroup>
