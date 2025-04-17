@@ -17,6 +17,7 @@ public:
 	void Initialize();
 	void Update();
 	void Draw(const WorldTransform& worldTransform);
+	void Draw(const WorldTransform& worldTransform, const std::string& textureData);
 
 
 	//static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
@@ -24,6 +25,7 @@ public:
 
 	void SetModel(Model* model) { this->model = model; }
 	void SetModelFile(const std::string& filePath);
+	void LightSwitch(bool isLight);
 
 	void SetScale(const Vector3& scale) { transform.scale = scale; }
 	void SetRotate(const Vector3& rotate) { transform.rotate = rotate; }

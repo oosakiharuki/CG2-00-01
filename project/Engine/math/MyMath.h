@@ -73,6 +73,11 @@
 		Matrix4x4 World;
 	};
 
+	struct AABB {
+		Vector3 min;
+		Vector3 max;
+	};
+
 namespace MyMath {
 
 	Vector3 operator+(const Vector3& v1, const Vector3& v2);

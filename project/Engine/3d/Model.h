@@ -6,9 +6,14 @@ class Model{
 public:
 
 	void Initialize(ModelCommon* modelCommon,const std::string& directorypath,const std::string& fileName);
+
 	void Draw();
+	void Draw(const std::string& textureFilePath);
+
 	static MaterialData LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename);
 	static ModelData LoadObjFile(const std::string& directoryPath, const std::string& filename);
+	
+	void LightOn(bool Light) { materialData->enableLighting = Light; }
 
 private:
 	ModelCommon* modelCommon = nullptr;
@@ -23,4 +28,6 @@ private:
 	Material* materialData = nullptr;
 
 	D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+
+	ModelData InitialData;
 };

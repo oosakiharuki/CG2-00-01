@@ -1,30 +1,17 @@
 #include "GameScene.h"
 
 void GameScene::Initialize() {
-
-
-	for (uint32_t i = 0; i < 1; ++i) {
-		Sprite* sprite = new Sprite();
-		//if (i == 1 || i == 3) {
-		sprite->Initialize("resource/monsterBall.png");
-		//}
-		//else {
-		sprite->Initialize("resource/uvChecker.png");
-		//}
-		Vector2 position[5] = {};
-		position[i].x += i * 200.0f;
-		sprite->SetPosition(position[i]);
-
-		sprites.push_back(sprite);
-	}
-
-	spriteUI = new Sprite();
-	spriteUI->Initialize("resource/monsterBall.png");
 	
-	spriteUI->SetPosition({ 64,64 });
-	spriteUI->SetSize({ 128,128 });
 
 
+  	//ModelManager::GetInstance()->LoadModel("plane.obj");
+	ModelManager::GetInstance()->LoadModel("axis");
+	ModelManager::GetInstance()->LoadModel("cannon");
+	ModelManager::GetInstance()->LoadModel("stage");
+	ModelManager::GetInstance()->LoadModel("Spring");
+	ModelManager::GetInstance()->LoadModel("multiMaterial");
+	//ModelManager::GetInstance()->CreateOBJ("cannon");
+  
 	ModelManager::GetInstance()->LoadModel("plane.obj");
 	ModelManager::GetInstance()->LoadModel("maru.obj");
 	ModelManager::GetInstance()->LoadModel("teapot.obj");
@@ -36,12 +23,14 @@ void GameScene::Initialize() {
 	//Vector3 cameraTranslate = { 0.0f,30.0f,-8.0f };
 	cameraRotate = { 1.2f,0.0f,0.0f };
 	cameraTranslate = { 0.0f,20.0f,-8.0f };
+
 	camera->SetRotate(cameraRotate);
 	camera->SetTranslate(cameraTranslate);
-
+	
 	Object3dCommon::GetInstance()->SetDefaultCamera(camera);
 	ParticleCommon::GetInstance()->SetDefaultCamera(camera);
 
+  
 	Vector3 position[2] = {};
 
 	for (uint32_t i = 0; i < 2; ++i) {
@@ -85,6 +74,10 @@ void GameScene::Initialize() {
 	worldTransform.Initialize();
 	worldTransform2.Initialize();
 	worldTransform2.translation_ = { 0,2,0 };
+// =======
+// 	testClass = new TestClass();
+// 	testClass->Init();
+// >>>>>>> master
 }
 
 void GameScene::Update() {
@@ -101,131 +94,18 @@ void GameScene::Update() {
 		sceneNo = Title;
 	}
 
-	Vector2 position;
-	float rotation;
-	Vector4 color;
-	Vector2 size;
-	
-	for (Sprite* sprite : sprites) {
-		sprite->Update();
-
-
-		position = sprite->GetPosition();
-		//position.x += 0.1f;
-		//position.y += 0.1f;
-		sprite->SetPosition(position);
-
-		rotation = sprite->GetRotate();
-		//rotation += 0.01f;
-		sprite->SetRotate(rotation);
-
-		color = sprite->GetColor();
-		//color.x += 0.01f;
-		//if (color.x > 1.0f) {
-		//	color.x -= 1.0f;
-		//}
-		sprite->SetColor(color);
-
-		size = sprite->GetSize();
-		//size.x -= 1.1f;
-		//size.y -= 1.1f;
-		sprite->SetSize(size);
-	}
-	spriteUI->Update();
-
-	Input::GetInstance()->GetJoyStickState(0, state);
-	Input::GetInstance()->GetJoystickStatePrevious(0, preState);
-			
-	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) &&
-		!(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
-		worldTransform.translation_.y += 0.5f;
-	}
-
-	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_B) &&
-		(preState.Gamepad.wButtons & XINPUT_GAMEPAD_B)) {
-		worldTransform.rotation_.y -= 0.5f;
-	}
-	
-	if (!(state.Gamepad.wButtons & XINPUT_GAMEPAD_X) &&
-		(preState.Gamepad.wButtons & XINPUT_GAMEPAD_X)) {
-		worldTransform.scale_.z += 0.5f;
-	}
-
-	if ((state.Gamepad.wButtons & XINPUT_GAMEPAD_A) &&
-		!(preState.Gamepad.wButtons & XINPUT_GAMEPAD_A)) {
-		OutputDebugStringA("Hit A Botton\n");
-	}
-
-	
-	float x = 0, z = 0;
-	const float speed = 0.2f;
-
-	if (Input::GetInstance()->GetJoyStickState(0, state)) {
-		// 左スティックの入力
-		x = static_cast<float>(state.Gamepad.sThumbLX) / 32768.0f; // -1.0f～1.0f
-		z = static_cast<float>(state.Gamepad.sThumbLY) / 32768.0f; // -1.0f～1.0f
-
-		// デッドゾーン処理
-		const float deadZone = 0.2f; // スティックの感度調整
-		if (abs(x) < deadZone) {
-			x = 0.0f;
-		}
-		if (abs(z) < deadZone) {
-			z = 0.0f;
-		}
-		worldTransform.translation_.x += x * speed;
-		worldTransform.translation_.z += z * speed;
-
-	}
-
-	particle->Update();
-	particle2->Update();
-
-	particle->SetTranslate(worldTransform.translation_);
-	particle->SetFrequency(0.5f);
-
-	//Vector3 rotateP = particle->GetRotate();
-	//rotateP.z = 0.1f;
-	//particle->SetRotate(rotateP);
-
-	Vector3 sizeP = { 1,1,1 };
-	particle->SetScale(sizeP);
+	testClass->Update();
 
 	camera->Update();
-
-
-	//if (input_->TriggerKey(DIK_2)) {
-	//	audioHandle = -1;
-	//}
-
-	//if (audioHandle < 0) {
-	//	audio->SoundPlayWave(0.05f);
-	//	audioHandle++;
-	//}
-
-
-	if (Input::GetInstance()->TriggerKey(DIK_3)) {
-		audioHandle2 = -1;
-	}
-
-	if (audioHandle2 < 0) {
-		audio2->SoundPlayWave(0.05f);
-		audioHandle2++;
-	}
-
-
-	worldTransform2.parent_ = &worldTransform;
-
-	worldTransform.UpdateMatrix();
-	worldTransform2.UpdateMatrix();
 
 #ifdef  USE_IMGUI
 
 	//ここにテキストを入れられる
 
 	//開発用UIの処理
-	ImGui::ShowDemoWindow();
+	//ImGui::ShowDemoWindow();
 
+	ImGui::Begin("camera");
 	ImGui::Text("ImGuiText");
 
 	//カメラ
@@ -237,86 +117,7 @@ void GameScene::Update() {
 	camera->SetRotate(cameraRotate);
 	camera->SetTranslate(cameraTranslate);
 
-	if (ImGui::TreeNode("Model_1")) {
-		ImGui::Checkbox("IsModel", &IsModel[0]);
-		if (IsModel) {
-			ImGui::InputFloat3("VertexModel", &worldTransform.translation_.x);
-			ImGui::SliderFloat3("SliderVertexModel", &worldTransform.translation_.x, -5.0f, 5.0f);
-
-			ImGui::InputFloat3("RotateModel", &worldTransform.rotation_.x);
-			ImGui::SliderFloat3("SliderRotateModel", &worldTransform.rotation_.x, -10.0f, 10.0f);
-
-			ImGui::InputFloat3("ScaleModel", &worldTransform.scale_.x);
-			ImGui::SliderFloat3("SliderScaleModel", &worldTransform.scale_.x, 0.5f, 5.0f);
-		}
-		ImGui::TreePop();
-	}
-
-
-	if (ImGui::TreeNode("Model_2")) {
-		ImGui::Checkbox("IsModel", &IsModel[1]);
-		if (IsModel[1]) {
-
-			ImGui::InputFloat3("VertexModel", &worldTransform2.translation_.x);
-			ImGui::SliderFloat3("SliderVertexModel", &worldTransform2.translation_.x, -5.0f, 5.0f);
-
-			ImGui::InputFloat3("RotateModel", &worldTransform2.rotation_.x);
-			ImGui::SliderFloat3("SliderRotateModel", &worldTransform2.rotation_.x, -10.0f, 10.0f);
-
-			ImGui::InputFloat3("ScaleModel", &worldTransform2.scale_.x);
-			ImGui::SliderFloat3("SliderScaleModel", &worldTransform2.scale_.x, 0.5f, 5.0f);
-		}
-		ImGui::TreePop();
-	}
-
-
-
-	//if (ImGui::TreeNode("light")) {
-
-	//	ImGui::InputFloat4("Materiallight", *inputMateriallight);
-	//	ImGui::SliderFloat4("SliderMateriallight", *inputMateriallight, 0.0f, 1.0f);
-
-	//	ImGui::InputFloat3("Vertexlight", *inputDirectionLight);
-	//	ImGui::SliderFloat3("SliderVertexlight", *inputDirectionLight, -1.0f, 1.0f);
-
-
-	//	ImGui::InputFloat("intensity", intensity);
-
-	//	ImGui::TreePop();
-	//}
-	for (Sprite* sprite : sprites) {
-		if (ImGui::TreeNode("Sprite")) {
-			ImGui::Checkbox("IsSprite", &IsSprite);
-
-			if (IsSprite) {
-
-				position = sprite->GetPosition();
-				ImGui::InputFloat("SpriteX", &position.x);
-				ImGui::SliderFloat("SliderSpriteX", &position.x, 0.0f, 1000.0f);
-				ImGui::InputFloat("SpriteY", &position.y);
-				ImGui::SliderFloat("SliderSpriteY", &position.y, 0.0f, 600.0f);
-				sprite->SetPosition(position);
-
-				ImGui::DragFloat2("UVTranlate", &position.x, 0.01f, -10.0f, 10.0f);
-
-				size = sprite->GetSize();
-				ImGui::DragFloat2("UVScale", &size.x, 0.1f);
-				sprite->SetSize(size);
-
-				rotation = sprite->GetRotate();
-				ImGui::SliderAngle("UVRotate", &rotation);
-				sprite->SetRotate(rotation);
-
-
-				color = sprite->GetColor();
-				ImGui::SliderFloat4("color", &color.x, 0.0f, 1.0f);
-				sprite->SetColor(color);
-
-			}
-			ImGui::TreePop();
-		}
-	}
-
+	ImGui::End();
 #endif //  USE_IMGUI
 }
 
@@ -325,21 +126,11 @@ void GameScene::Draw() {
 	//スプライト描画処理(背景用)
 	SpriteCommon::GetInstance()->Command();
 
-	for (Sprite* sprite : sprites) {
-		sprite->Draw();
-	}
 
 	//モデル描画処理
 	Object3dCommon::GetInstance()->Command();
 
-	//for (Object3d* object3d : objects) {
-	//	object3d->Draw(worldTransform);
-	//}
-
-
-	objects[0]->Draw(worldTransform);
-	objects[1]->Draw(worldTransform2);
-
+	testClass->Draw();
 
 	//パーティクル描画処理
 	ParticleCommon::GetInstance()->Command();
@@ -350,27 +141,9 @@ void GameScene::Draw() {
 	//スプライト描画処理(UI用)
 	SpriteCommon::GetInstance()->Command();
 
-	spriteUI->Draw();
-
 }
 void GameScene::Finalize() {
-
+	
 	delete camera;
-
-	for (Sprite* sprite : sprites) {
-		delete sprite;
-	}
-	delete spriteUI;
-
-	for (Object3d* object3d : objects) {
-		delete object3d;
-	}
-
-	//delete model;
-
-	delete particle;
-	delete particle2;
-
-	//delete audio;
-	delete audio2;
+	delete testClass;
 }

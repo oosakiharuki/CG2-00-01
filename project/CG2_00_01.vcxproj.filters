@@ -132,6 +132,9 @@
     <ClCompile Include="Engine\MyGame.cpp">
       <Filter>ソース ファイル\Engine</Filter>
     </ClCompile>
+    <ClCompile Include="TestClass.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Engine\2d\Sprite.h">
@@ -238,6 +241,9 @@
     </ClInclude>
     <ClInclude Include="Engine\MyGame.h">
       <Filter>ソース ファイル\Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="TestClass.h">
+      <Filter>ソース ファイル</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

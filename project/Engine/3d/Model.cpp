@@ -10,6 +10,8 @@ void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypat
 
 	modelData = LoadObjFile(directorypath, fileName);
 
+	InitialData = modelData;
+
 	vertexResource = modelCommon->GetDxCommon()->CreateBufferResource(sizeof(VertexData) * modelData.vertices.size());
 
 	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
@@ -37,6 +39,23 @@ void Model::Initialize(ModelCommon* modelCommon, const std::string& directorypat
 }
 
 void Model::Draw() {
+	//objファイルに元々あったテクスチャ
+	modelData = InitialData;
+
+	modelCommon->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
+	modelCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
+	modelCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureFilePath));
+	modelCommon->GetDxCommon()->GetCommandList()->DrawInstanced(UINT(modelData.vertices.size()), 1, 0, 0);
+
+}
+
+void Model::Draw(const std::string& textureFilePath) {
+
+	TextureManager::GetInstance()->LoadTexture(textureFilePath);
+	modelData.material.textureFilePath = textureFilePath;
+	modelData.material.textureIndex = TextureManager::GetInstance()->GetSrvIndex(textureFilePath);
+	
+
 	modelCommon->GetDxCommon()->GetCommandList()->IASetVertexBuffers(0, 1, &vertexBufferView);
 	modelCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootConstantBufferView(0, materialResource->GetGPUVirtualAddress()); //rootParameterの配列の0番目 [0]
 	modelCommon->GetDxCommon()->GetCommandList()->SetGraphicsRootDescriptorTable(2, TextureManager::GetInstance()->GetSrvHandleGPU(modelData.material.textureFilePath));
@@ -48,7 +67,7 @@ void Model::Draw() {
 MaterialData Model::LoadMaterialTemplateFile(const std::string& directoryPath, const std::string& filename) {
 	MaterialData materialData;
 	std::string line;
-	std::ifstream file(directoryPath + "/" + filename);
+	std::ifstream file(directoryPath + "/Object/" + filename);
 	assert(file.is_open());
 
 	//ファイルを開く
@@ -61,7 +80,7 @@ MaterialData Model::LoadMaterialTemplateFile(const std::string& directoryPath, c
 			std::string textureFilename;
 			s >> textureFilename;
 
-			materialData.textureFilePath = directoryPath + "/" + textureFilename;
+			materialData.textureFilePath = directoryPath + "/Sprite/" + textureFilename;
 		}
 	}
 	return materialData;
@@ -78,7 +97,7 @@ ModelData Model::LoadObjFile(const std::string& directoryPath, const std::string
 	//ファイルから読んだ1行を格納する
 	std::string line;
 	//ファイルを読み取る
-	std::ifstream file(directoryPath + "/" + filename);
+	std::ifstream file(directoryPath + "/Object/" + filename + "/" + filename + ".obj");
 	assert(file.is_open());
 
 	//構築
@@ -148,7 +167,7 @@ ModelData Model::LoadObjFile(const std::string& directoryPath, const std::string
 			std::string materialFilename;
 
 			s >> materialFilename;
-			modelData.material = LoadMaterialTemplateFile(directoryPath, materialFilename);
+			modelData.material = LoadMaterialTemplateFile(directoryPath,filename + "/" + materialFilename );
 
 		}
 	}

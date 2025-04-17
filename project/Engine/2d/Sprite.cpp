@@ -7,9 +7,9 @@ using namespace MyMath;
 
 void Sprite::Initialize(std::string textureFilePath) {
 	this->spriteCommon_ = SpriteCommon::GetInstance();
-	filePath = textureFilePath;
+	filePath = "resource/Sprite/" + textureFilePath;
 
-	TextureManager::GetInstance()->LoadTexture(textureFilePath);
+	TextureManager::GetInstance()->LoadTexture(filePath);
 
 	//textureIndex = TextureManager::GetInstance()->GetTextureIndexByFilePath(textureFilePath);
 
