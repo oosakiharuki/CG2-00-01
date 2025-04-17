@@ -18,5 +18,5 @@ private:
 	WorldTransform worldTransform_;
 	Object3d* object_ = nullptr;
 	Camera* camera_ = nullptr;
-	bool damage = false;
+	bool onLight = false;
 };

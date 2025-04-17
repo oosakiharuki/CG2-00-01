@@ -16,18 +16,13 @@ void TestClass::Init() {
 
 	object_ = new Object3d();
 	object_->Initialize();
-	object_->SetModelFile("multiMaterial");
+	object_->SetModelFile("grass01");
 	
 }
 
 void TestClass::Update() {
 
-	if (Input::GetInstance()->PushKey(DIK_S)) {
-		damage = true;
-	}
-	else {
-		damage = false;
-	}
+	onLight = true;
 
 	ImGui::Begin("TestModel");
 
@@ -42,17 +37,12 @@ void TestClass::Update() {
 
 	ImGui::End();
 
-	object_->LightSwitch(damage);
+	object_->LightSwitch(onLight);
 
 	worldTransform_.UpdateMatrix();
 }
 
 
 void TestClass::Draw() {
-	if (damage) {
-		object_->Draw(worldTransform_);
-	}
-	else {
-		object_->Draw(worldTransform_);
-	}
+	object_->Draw(worldTransform_);
 }
